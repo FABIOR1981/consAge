@@ -1,4 +1,3 @@
-// netlify/functions/reservar.js
 const { google } = require('googleapis');
 
 exports.handler = async (event) => {
@@ -26,12 +25,14 @@ exports.handler = async (event) => {
 
         await calendar.events.insert({
             calendarId: 'demariaconsultorios1334@gmail.com',
-            sendUpdates: 'all', // <--- Envía el mail de confirmación
+            sendUpdates: 'all', // Esto fuerza el envío del mail
             resource: {
-                summary: `C${consultorio}: Reserva`,
-                colorId: colorId, // <--- Aplica el color (Girasol, Violeta, etc.)
-                description: `Has reservado el Consultorio ${consultorio}.`,
-                attendees: [{ email: email }], // <--- Añade el evento al calendario del usuario
+                summary: `Consultorio ${consultorio}`,
+                location: 'Montevideo, Uruguay',
+                description: `Reserva confirmada para: ${email}. Puedes gestionar este evento desde tu Google Calendar.`,
+                colorId: colorId,
+                // Agregamos al usuario aquí
+                attendees: [{ email: email }],
                 start: { 
                     dateTime: `${fecha}T${horaInicio}:00:00-03:00`, 
                     timeZone: 'America/Montevideo' 
@@ -45,7 +46,11 @@ exports.handler = async (event) => {
 
         return { statusCode: 200, body: JSON.stringify({ message: 'OK' }) };
     } catch (error) {
-        console.error(error);
-        return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
+        // Si el error persiste por política de Google, intentamos sin attendees pero con descripción clara
+        console.error("Error original:", error.message);
+        return { 
+            statusCode: 500, 
+            body: JSON.stringify({ error: 'Error de permisos', details: error.message }) 
+        };
     }
 };
