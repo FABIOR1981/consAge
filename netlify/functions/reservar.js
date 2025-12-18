@@ -15,18 +15,24 @@ exports.handler = async (event) => {
         // If NETLIFY_SITE_URL is set, verify token by calling Netlify Identity user endpoint
         const netlifySite = process.env.NETLIFY_SITE_URL;
         if (netlifySite) {
-            try {
-                const verifyRes = await fetch(`${netlifySite.replace(/\/$/, '')}/.netlify/identity/user`, { headers: { Authorization: authHeader } });
-                if (!verifyRes.ok) {
-                    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+            // some Node runtimes may not provide global fetch; handle gracefully
+            if (typeof fetch === 'undefined') {
+                console.warn('Global fetch is not available in this runtime; skipping remote token verification. Set Node >=18 or provide a fetch polyfill.');
+            } else {
+                try {
+                    const verifyUrl = `${netlifySite.replace(/\/$/, '')}/.netlify/identity/user`;
+                    const verifyRes = await fetch(verifyUrl, { headers: { Authorization: authHeader } });
+                    if (!verifyRes.ok) {
+                        return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+                    }
+                    const userInfo = await verifyRes.json();
+                    if (userInfo && userInfo.email && email && userInfo.email !== email) {
+                        return { statusCode: 403, body: JSON.stringify({ error: 'Token user mismatch' }) };
+                    }
+                } catch (err) {
+                    console.error('Error verifying token with Netlify Identity:', err && (err.message || err));
+                    return { statusCode: 500, body: JSON.stringify({ error: 'Error verifying token', details: (err && err.message) || String(err) }) };
                 }
-                const userInfo = await verifyRes.json();
-                if (userInfo && userInfo.email && email && userInfo.email !== email) {
-                    return { statusCode: 403, body: JSON.stringify({ error: 'Token user mismatch' }) };
-                }
-            } catch (err) {
-                console.warn('Error verifying token with Netlify Identity:', err.message || err);
-                return { statusCode: 500, body: JSON.stringify({ error: 'Error verifying token' }) };
             }
         } else {
             // Fallback: we only check presence of Authorization header. Recommend setting NETLIFY_SITE_URL in production.
