@@ -35,6 +35,20 @@
         </main>
     </div>
 
+    <!-- Modal para alertas/confirm -->
+    <div id="modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <p id="modal-message"></p>
+            <div class="modal-actions">
+                <button id="modal-ok" class="btn-consultorio">OK</button>
+                <button id="modal-cancel" class="btn-volver" style="display:none;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner -->
+    <div id="spinner" class="spinner-overlay" style="display:none;"><div class="spinner"></div></div>
+
     <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
