@@ -1,0 +1,35 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.status-badge {
+    background: #ffcc00;
+    color: #000;
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+h1 { color: #2c3e50; }
+
+.login-btn {
+    margin-top: 2rem;
+}
