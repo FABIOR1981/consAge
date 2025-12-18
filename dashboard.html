@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel - Gestión de Consultorios</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="nav-bar">
+            <span id="user-email">Cargando usuario...</span>
+            <button id="logout-btn" class="btn-secondary">Cerrar Sesión</button>
+        </nav>
+
+        <main class="content">
+            <h1 id="welcome-msg">Cargando...</h1>
+
+            <section id="admin-section" style="display: none;" class="card admin-card">
+                <h2>📊 Reportes Generales</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">Agendadas: <span id="count-agendadas">0</span></div>
+                    <div class="stat-item">Canceladas: <span id="count-canceladas">0</span></div>
+                    <div class="stat-item">Anuladas: <span id="count-anuladas">0</span></div>
+                </div>
+            </section>
+
+            <section id="agenda-section" class="card">
+                <h2>📅 Gestión de Turnos</h2>
+                <p>Seleccione su consultorio y horario.</p>
+                <div id="calendar-container">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

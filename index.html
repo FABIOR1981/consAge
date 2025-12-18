@@ -26,26 +26,6 @@
         </footer>
     </div>
 
-    <script>
-        // Redirección si el usuario ya está logueado
-        if (window.netlifyIdentity) {
-            window.netlifyIdentity.on("login", user => {
-                console.log("Bienvenido:", user.email);
-                // Por ahora solo mostraremos un mensaje, luego redirigiremos a la agenda
-                alert("Sesión iniciada correctamente.");
-            });
-        }
-    </script>
-    <script>
-        if (window.netlifyIdentity) {
-          window.netlifyIdentity.on("init", user => {
-            if (!user) {
-              window.netlifyIdentity.on("login", () => {
-                document.location.href = "/"; // O la página que desees
-              });
-            }
-          });
-        }
-      </script>
+    <script type="module" src="js/auth.js"></script>
 </body>
 </html>

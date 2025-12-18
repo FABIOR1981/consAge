@@ -1,35 +1,64 @@
+/* style.css */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background-color: #f4f7f6;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
+    color: #333;
 }
 
-.container {
-    text-align: center;
+/* Contenedores */
+.container, .dashboard-container {
+    max-width: 800px;
+    margin: 50px auto;
     background: white;
-    padding: 3rem;
+    padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
-.status-badge {
-    background: #ffcc00;
-    color: #000;
-    display: inline-block;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin-bottom: 20px;
+/* Barra de Navegación */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
 }
 
-h1 { color: #2c3e50; }
+/* Botones */
+button {
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    transition: 0.3s;
+}
 
-.login-btn {
-    margin-top: 2rem;
+.btn-secondary { background: #e74c3c; color: white; }
+.btn-secondary:hover { background: #c0392b; }
+
+.consultorios-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-consultorio {
+    background: #3498db;
+    color: white;
+    padding: 20px;
+    font-size: 1.1rem;
+}
+
+.btn-consultorio:hover { background: #2980b9; }
+
+.card {
+    text-align: left;
+    background: #fafafa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
 }
