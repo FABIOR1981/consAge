@@ -1,38 +1,47 @@
 const { google } = require('googleapis');
 
 exports.handler = async (event) => {
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Método no permitido' };
-    }
+    if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Método no permitido' };
 
     try {
         const { email, consultorio, fecha, hora } = JSON.parse(event.body);
 
+        // Limpieza de clave para evitar el error de DECODER
+        let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+        privateKey = privateKey.replace(/\\n/g, '\n');
+        
+        if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+            privateKey = privateKey.substring(1, privateKey.length - 1);
+        }
+
         const auth = new google.auth.JWT(
             process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
             null,
-            process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+            privateKey,
             ['https://www.googleapis.com/auth/calendar']
         );
 
         const calendar = google.calendar({ version: 'v3', auth });
 
-        const eventResource = {
-            summary: `C${consultorio}: ${email}`,
-            description: `Reserva automática.`,
-            start: {
-                dateTime: `${fecha}T${hora}:00:00-03:00`,
-                timeZone: 'America/Argentina/Buenos_Aires',
-            },
-            end: {
-                dateTime: `${fecha}T${(parseInt(hora) + 1).toString().padStart(2, '0')}:00:00-03:00`,
-                timeZone: 'America/Argentina/Buenos_Aires',
-            },
-        };
+        // Formateo de horas
+        const horaInicio = hora.toString().padStart(2, '0');
+        const horaFin = (parseInt(hora) + 1).toString().padStart(2, '0');
 
         await calendar.events.insert({
             calendarId: 'demariaconsultorios1334@gmail.com',
-            resource: eventResource,
+            resource: {
+                summary: `C${consultorio}: ${email}`,
+                description: "Reserva realizada desde el sistema web.",
+                start: { 
+                    // Se usa -03:00 que es la zona horaria de Uruguay
+                    dateTime: `${fecha}T${horaInicio}:00:00-03:00`, 
+                    timeZone: 'America/Montevideo' 
+                },
+                end: { 
+                    dateTime: `${fecha}T${horaFin}:00:00-03:00`, 
+                    timeZone: 'America/Montevideo' 
+                }
+            },
         });
 
         return {
@@ -40,6 +49,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({ message: 'OK' }),
         };
     } catch (error) {
+        console.error("Error en Montevideo Calendar:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ error: 'Error de Google', details: error.message }),
