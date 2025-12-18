@@ -1,0 +1,14 @@
+{
+    "name": "gestion-consultorios",
+    "version": "1.0.0",
+    "description": "Sistema de turnos con Google Calendar",
+    "main": "index.html",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+      "googleapis": "^126.0.0"
+    },
+    "author": "",
+    "license": "ISC"
+  }
