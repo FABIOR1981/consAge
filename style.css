@@ -62,3 +62,25 @@ button {
     border-radius: 8px;
     margin-bottom: 1rem;
 }
+
+.horarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.btn-horario {
+    background: #2ecc71;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.btn-horario:hover { background: #27ae60; }
+
+.btn-volver {
+    margin-top: 20px;
+    background: #95a5a6;
+    color: white;
+}
