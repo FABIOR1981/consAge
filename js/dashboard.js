@@ -1,21 +1,20 @@
 // js/dashboard.js
 import { APP_CONFIG } from './config.js';
 
-// Función para reservar el turno llamando a la Netlify Function
-const reservarTurno = async (consultorioNum, hora) => {
+let seleccion = {
+    consultorio: null,
+    fecha: null
+};
+
+// PASO 3: Llamar a la función de reserva en Google
+const reservarTurno = async (hora) => {
     const user = netlifyIdentity.currentUser();
     
-    // Confirmación simple
-    const confirmar = confirm(`¿Desea agendar el Consultorio ${consultorioNum} a las ${hora}:00 hs?`);
+    const confirmar = confirm(`¿Reservar Consultorio ${seleccion.consultorio} para el día ${seleccion.fecha} a las ${hora}:00 hs?`);
     if (!confirmar) return;
 
-    // Obtenemos la fecha de hoy en formato YYYY-MM-DD
-    const fechaHoy = new Date().toISOString().split('T')[0];
-
     try {
-        // Mostramos un mensaje de carga
         const container = document.getElementById('calendar-container');
-        const originalContent = container.innerHTML;
         container.innerHTML = "<p>⌛ Procesando reserva en Google Calendar...</p>";
 
         const respuesta = await fetch('/.netlify/functions/reservar', {
@@ -23,8 +22,8 @@ const reservarTurno = async (consultorioNum, hora) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: user.email,
-                consultorio: consultorioNum,
-                fecha: fechaHoy,
+                consultorio: seleccion.consultorio,
+                fecha: seleccion.fecha,
                 hora: hora.toString().padStart(2, '0')
             })
         });
@@ -32,22 +31,22 @@ const reservarTurno = async (consultorioNum, hora) => {
         const resultado = await respuesta.json();
 
         if (respuesta.ok) {
-            alert("✅ ¡Éxito! El turno ha sido agendado en demariaconsultorios1334@gmail.com");
-            cargarBotonesConsultorios(); // Volver al inicio
+            alert("✅ ¡Éxito! El turno ha sido agendado.");
+            cargarBotonesConsultorios(); 
         } else {
-            throw new Error(resultado.error || "Error desconocido");
+            throw new Error(resultado.details || "Error desconocido");
         }
     } catch (err) {
         console.error("Error al reservar:", err);
         alert("❌ No se pudo agendar: " + err.message);
-        cargarBotonesConsultorios(); // Volver para intentar de nuevo
+        mostrarHorarios(); // Volver a los horarios para reintentar
     }
 };
 
-// Función para generar la lista de horarios (de 8 a 20hs según config.js)
-const mostrarHorarios = (consultorioNum) => {
+// PASO 2: Mostrar los horarios para la fecha elegida
+const mostrarHorarios = () => {
     const container = document.getElementById('calendar-container');
-    container.innerHTML = `<h3>Horarios Disponibles - Consultorio ${consultorioNum}</h3>`;
+    container.innerHTML = `<h3>Horarios para el ${seleccion.fecha} (C${seleccion.consultorio})</h3>`;
     
     const listaHorarios = document.createElement('div');
     listaHorarios.className = 'horarios-grid';
@@ -58,28 +57,63 @@ const mostrarHorarios = (consultorioNum) => {
         const slot = document.createElement('button');
         slot.className = 'btn-horario';
         slot.innerText = `${hora.toString().padStart(2, '0')}:00 hs`;
-        
-        slot.onclick = () => reservarTurno(consultorioNum, hora);
-        
+        slot.onclick = () => reservarTurno(hora);
         listaHorarios.appendChild(slot);
     }
 
-    // Botón para volver atrás
+    container.appendChild(listaHorarios);
+
+    const btnVolver = document.createElement('button');
+    btnVolver.innerText = "← Cambiar Fecha";
+    btnVolver.className = "btn-volver";
+    btnVolver.onclick = () => elegirFecha(seleccion.consultorio);
+    container.appendChild(btnVolver);
+};
+
+// PASO 1.5: Selector de Fecha
+const elegirFecha = (num) => {
+    seleccion.consultorio = num;
+    const container = document.getElementById('calendar-container');
+    container.innerHTML = `<h3>Paso 2: Elija el día para Consultorio ${num}</h3>`;
+
+    const inputFecha = document.createElement('input');
+    inputFecha.type = 'date';
+    inputFecha.className = 'input-calendario';
+    
+    // Evitar elegir días pasados
+    const hoy = new Date().toISOString().split('T')[0];
+    inputFecha.min = hoy;
+
+    inputFecha.onchange = (e) => {
+        const fechaVal = e.target.value;
+        const diaSemana = new Date(fechaVal).getUTCDay(); // 0 es Domingo, 6 es Sábado
+
+        // Validar si es fin de semana (0=Dom, 6=Sáb)
+        if (diaSemana === 0 || diaSemana === 6) {
+            alert("Los fines de semana no están disponibles.");
+            e.target.value = "";
+            return;
+        }
+
+        seleccion.fecha = fechaVal;
+        mostrarHorarios();
+    };
+
+    container.appendChild(inputFecha);
+
     const btnVolver = document.createElement('button');
     btnVolver.innerText = "← Volver a Consultorios";
     btnVolver.className = "btn-volver";
     btnVolver.onclick = () => cargarBotonesConsultorios();
-
-    container.appendChild(listaHorarios);
     container.appendChild(btnVolver);
 };
 
-// Función para dibujar los botones de los consultorios [2, 3, 4, 5]
+// PASO 1: Selector de Consultorio
 const cargarBotonesConsultorios = () => {
     const container = document.getElementById('calendar-container');
     if (!container) return;
 
-    container.innerHTML = '<h3>Seleccione un Consultorio:</h3>';
+    container.innerHTML = '<h3>Paso 1: Seleccione un Consultorio</h3>';
     
     const btnGroup = document.createElement('div');
     btnGroup.className = 'consultorios-grid';
@@ -88,53 +122,27 @@ const cargarBotonesConsultorios = () => {
         const btn = document.createElement('button');
         btn.innerText = `Consultorio ${num}`;
         btn.className = 'btn-consultorio';
-        btn.onclick = () => mostrarHorarios(num);
+        btn.onclick = () => elegirFecha(num);
         btnGroup.appendChild(btn);
     });
     container.appendChild(btnGroup);
 };
 
-// Inicialización del Dashboard
+// Inicialización
 const initDashboard = () => {
     const user = netlifyIdentity.currentUser();
-
-    // Seguridad: Si no hay usuario, redirigir al login
     if (!user) {
         window.location.href = "index.html";
         return;
     }
-
-    // Mostrar email del usuario
     document.getElementById('user-email').innerText = user.email;
-    
-    // Lógica de Admin
-    const roles = user.app_metadata ? user.app_metadata.roles : [];
-    const isAdmin = roles && roles.includes("admin");
-
-    if (isAdmin) {
-        document.getElementById('admin-section').style.display = "block";
-        document.getElementById('welcome-msg').innerText = `Admin: ${APP_CONFIG.nombreProyecto}`;
-    } else {
-        document.getElementById('welcome-msg').innerText = "Reserva de Turnos";
-    }
-
     cargarBotonesConsultorios();
-
-    // Botón de Logout
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.onclick = () => netlifyIdentity.logout();
-    }
 };
 
-// Eventos de Netlify Identity
 if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", user => {
         if (!user) window.location.href = "index.html";
         else initDashboard();
     });
-    
-    window.netlifyIdentity.on("logout", () => {
-        window.location.href = "index.html";
-    });
+    window.netlifyIdentity.on("logout", () => window.location.href = "index.html");
 }

@@ -84,3 +84,25 @@ button {
     background: #95a5a6;
     color: white;
 }
+
+.input-calendario {
+    padding: 12px;
+    font-size: 1.1rem;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    margin: 20px 0;
+    width: 250px;
+    font-family: inherit;
+}
+
+.btn-volver {
+    display: block;
+    margin: 20px auto;
+    background: #bdc3c7;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.btn-volver:hover {
+    background: #95a5a6;
+}
