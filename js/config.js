@@ -17,5 +17,6 @@ export const APP_CONFIG = {
     cancelacion: {
         horasAntelacion: 24,
         reglaFinDeSemana: true // Si es lunes, debe cancelar el viernes
-    }
+    },
+    zonaHoraria: 'America/Montevideo'
 };

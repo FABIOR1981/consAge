@@ -100,17 +100,18 @@ exports.handler = async (event) => {
             });
             // Log de todos los eventos recuperados para el día
             console.log('Eventos recuperados:', busySlots.data.items.map(ev => ({ summary: ev.summary, start: ev.start && ev.start.dateTime })));
+            // Obtener la zona horaria desde config.js o usar por defecto
+            const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
             // Filtrar solo eventos del consultorio seleccionado (robusto a espacios y mayúsculas)
             const regexConsultorio = new RegExp(`^C${consultorio}:\\s`, 'i');
             const eventosConsultorio = busySlots.data.items.filter(event => {
                 return event.summary && regexConsultorio.test(event.summary);
             });
-            console.log('Eventos del consultorio filtrados:', eventosConsultorio.map(ev => ({ summary: ev.summary, start: ev.start && ev.start.dateTime })));
             // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
             const userEvents = eventosConsultorio.filter(event => {
                 return event.description && event.description.includes(`Reserva realizada por: ${email}`);
             }).map(event => ({
-                hora: new Date(event.start.dateTime).getHours(),
+                hora: new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours(),
                 eventId: event.id
             }));
             // Generar todas las horas posibles del día
@@ -120,7 +121,7 @@ exports.handler = async (event) => {
             // Horas ocupadas por cualquier persona en ese consultorio
             const ocupadasTodas = eventosConsultorio.map(event => {
                 if (event.start && event.start.dateTime) {
-                    return new Date(event.start.dateTime).getHours();
+                    return new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours();
                 }
                 return null;
             }).filter(h => h !== null);
