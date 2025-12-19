@@ -53,25 +53,32 @@ exports.handler = async (event) => {
         // Verificar disponibilidad del consultorio antes de crear el evento
         const busySlots = await calendar.events.list({
             calendarId,
-            timeMin: `${fecha}T${horaInicio}:00:00-03:00`,
-            timeMax: `${fecha}T${horaFin}:00:00-03:00`,
+            timeMin: `${fecha}T00:00:00-03:00`,
+            timeMax: `${fecha}T23:59:59-03:00`,
             timeZone: 'America/Montevideo',
         });
 
-        if (busySlots.data.items && busySlots.data.items.length > 0) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.' }) };
-        }
+        const userEvents = busySlots.data.items.filter(event => {
+            const isUserEvent = event.description && event.description.includes(`Reserva realizada por: ${email}`);
+            return isUserEvent || !event.start || !event.end; // Mostrar eventos del usuario o espacios libres
+        });
 
-        // Intentamos crear el evento con attendees (sin envío de confirmaciones)
-        try {
-            const eventRes = await calendar.events.insert(insertOpts);
-            console.log('Created event:', eventRes.data && eventRes.data.id);
+        // Permitir cancelación de reservas si están fuera del rango de 24 horas antes del evento
+        const cancelReservation = async (eventId) => {
+            const event = await calendar.events.get({ calendarId, eventId });
+            const eventStart = new Date(event.data.start.dateTime);
+            const now = new Date();
 
-            return { statusCode: 200, body: JSON.stringify({ message: 'Reserva creada correctamente', eventId: eventRes.data.id }) };
-        } catch (err) {
-            console.error('Error creating event:', err && (err.message || err));
-            return { statusCode: 500, body: JSON.stringify({ error: 'Error creando el evento', details: (err && err.message) || String(err) }) };
-        }
+            const hoursUntilEvent = (eventStart - now) / (1000 * 60 * 60);
+            if (hoursUntilEvent <= 24) {
+                return { statusCode: 400, body: JSON.stringify({ error: 'No puedes cancelar reservas dentro de las 24 horas antes del evento.' }) };
+            }
+
+            await calendar.events.delete({ calendarId, eventId });
+            return { statusCode: 200, body: JSON.stringify({ message: 'Reserva cancelada correctamente.' }) };
+        };
+
+        return { statusCode: 200, body: JSON.stringify({ events: userEvents }) };
     } catch (error) {
         console.error("Error:", error.message);
         return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
