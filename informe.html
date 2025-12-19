@@ -33,7 +33,8 @@
             color: #333;
             min-width: 170px;
         }
-        .informe-form input,
+        .informe-form input[type="text"],
+        .informe-form input[type="date"],
         .informe-form select {
             margin-top: 0.3em;
             padding: 0.6em 0.8em;
@@ -47,6 +48,12 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
+        }
+        .informe-form input[type="radio"] {
+            margin: 0 0.3em 0 0;
+            width: auto;
+            height: auto;
+            accent-color: #1976d2;
         }
         .informe-form select {
             padding-right: 2em;
@@ -155,9 +162,9 @@
                 <label for="input-busqueda" style="margin-bottom:0;">Búsqueda:</label>
                 <input type="text" name="busqueda" id="input-busqueda" placeholder="Ingrese valor a buscar" style="flex:1; min-width:120px;">
                 <div style="display:flex; flex-direction:row; align-items:center; gap:0.5em; margin-bottom:0;">
-                    <label style="margin:0 0.5em 0 0;"><input type="radio" name="tipoBusqueda" value="usuario" checked> Usuario</label>
-                    <label style="margin:0 0.5em 0 0;"><input type="radio" name="tipoBusqueda" value="nombre"> Nombre</label>
-                    <label style="margin:0;"><input type="radio" name="tipoBusqueda" value="apellido"> Apellido</label>
+                    <label style="margin:0 0.5em 0 0; font-weight:400;"><input type="radio" name="tipoBusqueda" value="usuario" checked> Usuario</label>
+                    <label style="margin:0 0.5em 0 0; font-weight:400;"><input type="radio" name="tipoBusqueda" value="nombre"> Nombre</label>
+                    <label style="margin:0; font-weight:400;"><input type="radio" name="tipoBusqueda" value="apellido"> Apellido</label>
                 </div>
             </div>
             <button type="submit">Buscar</button>
