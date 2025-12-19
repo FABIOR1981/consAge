@@ -34,7 +34,7 @@ exports.handler = async (event) => {
         const insertOpts = {
             calendarId,
             resource: {
-                summary: `C${consultorio} (${email})`,
+                summary: `C${consultorio}: Reserva confirmada (${email})`,
                 colorId: colorId,
                 description: `Reserva realizada por: ${email}\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
                 start: {
