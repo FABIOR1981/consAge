@@ -21,8 +21,9 @@
         .informe-form {
             display: flex;
             flex-wrap: wrap;
-            gap: 1em;
+            gap: 1.2em 2em;
             justify-content: center;
+            align-items: flex-end;
             margin-bottom: 2em;
         }
         .informe-form label {
@@ -30,26 +31,47 @@
             flex-direction: column;
             font-weight: 500;
             color: #333;
+            min-width: 170px;
         }
-        .informe-form input {
+        .informe-form input,
+        .informe-form select {
             margin-top: 0.3em;
-            padding: 0.5em 0.7em;
+            padding: 0.6em 0.8em;
             border-radius: 6px;
             border: 1px solid #bdbdbd;
-            font-size: 1em;
+            font-size: 1.05em;
+            min-width: 150px;
+            box-sizing: border-box;
         }
         .informe-form button {
             background: #1976d2;
             color: #fff;
             border: none;
             border-radius: 6px;
-            padding: 0.7em 1.5em;
-            font-size: 1em;
+            padding: 0.8em 2.2em;
+            font-size: 1.1em;
             font-weight: 600;
+            height: 48px;
+            align-self: flex-end;
             transition: background 0.2s;
+            margin-left: 1em;
         }
         .informe-form button:hover {
             background: #125ea7;
+        }
+        @media (max-width: 700px) {
+            .informe-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .informe-form label, .informe-form button {
+                min-width: 0;
+                width: 100%;
+                margin-left: 0;
+            }
+            .informe-form button {
+                margin-top: 1em;
+            }
         }
         #total-horas-informe {
             font-size: 1.1em;
