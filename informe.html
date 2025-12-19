@@ -4,19 +4,127 @@
     <meta charset="UTF-8">
     <title>Informe de Reservas</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .informe-container {
+            max-width: 950px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 2.5em 2em 2em 2em;
+        }
+        .informe-titulo {
+            text-align: center;
+            color: #1976d2;
+            margin-bottom: 1.5em;
+        }
+        .informe-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1em;
+            justify-content: center;
+            margin-bottom: 2em;
+        }
+        .informe-form label {
+            display: flex;
+            flex-direction: column;
+            font-weight: 500;
+            color: #333;
+        }
+        .informe-form input {
+            margin-top: 0.3em;
+            padding: 0.5em 0.7em;
+            border-radius: 6px;
+            border: 1px solid #bdbdbd;
+            font-size: 1em;
+        }
+        .informe-form button {
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.7em 1.5em;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .informe-form button:hover {
+            background: #125ea7;
+        }
+        #total-horas-informe {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #388e3c;
+            margin-bottom: 1em;
+            text-align: right;
+        }
+        #tabla-informe {
+            border-collapse: collapse;
+            width: 100%;
+            background: #fafbfc;
+            margin-top: 1em;
+        }
+        #tabla-informe th, #tabla-informe td {
+            border: 1px solid #e0e0e0;
+            padding: 0.7em 0.5em;
+            text-align: left;
+        }
+        #tabla-informe th {
+            background: #1976d2;
+            color: #fff;
+            font-weight: 700;
+        }
+        #tabla-informe tr:nth-child(even) {
+            background: #f1f7fa;
+        }
+        @media print {
+            body, html {
+                background: #fff !important;
+            }
+            .informe-container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .informe-form, button, input, select {
+                display: none !important;
+            }
+            #total-horas-informe {
+                color: #000 !important;
+                text-align: left !important;
+                margin-bottom: 0.5em !important;
+            }
+            #tabla-informe th {
+                background: #eee !important;
+                color: #000 !important;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Informe de Reservas</h2>
-    <form id="form-informe">
-        <label>Fecha inicio: <input type="date" name="fechaInicio" required></label>
-        <label>Fecha fin: <input type="date" name="fechaFin" required></label>
-        <label>Consultorio: <input type="number" name="consultorio" min="1" max="20" placeholder="(opcional)"></label>
-        <label>Usuario (email): <input type="text" name="usuario" placeholder="(opcional)"></label>
-        <button type="submit">Buscar</button>
-    </form>
-    <table id="tabla-informe" border="1" style="margin-top:1em;width:100%;max-width:900px">
-        <tr><td colspan="5">Complete los filtros y presione Buscar</td></tr>
-    </table>
+    <div class="informe-container">
+        <h2 class="informe-titulo">Informe de Reservas</h2>
+        <form id="form-informe" class="informe-form">
+            <label>Fecha inicio:
+                <input type="date" name="fechaInicio" required>
+            </label>
+            <label>Fecha fin:
+                <input type="date" name="fechaFin" required>
+            </label>
+            <label>Consultorio:
+                <input type="number" name="consultorio" min="1" max="20" placeholder="(opcional)">
+            </label>
+            <label>Usuario (email):
+                <input type="text" name="usuario" placeholder="(opcional)">
+            </label>
+            <button type="submit">Buscar</button>
+        </form>
+        <div id="total-horas-informe"></div>
+        <table id="tabla-informe">
+            <tr><td colspan="5">Complete los filtros y presione Buscar</td></tr>
+        </table>
+    </div>
     <script type="module" src="js/informe.js"></script>
 </body>
 </html>
