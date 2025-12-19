@@ -94,16 +94,15 @@ const mostrarHorarios = async () => {
         const btn = document.createElement('button');
         btn.className = 'btn-horario';
         btn.innerText = `${h.toString().padStart(2, '0')}:00`;
-        if (!horasDisponibles.includes(h)) {
+        if (ocupadasPorUsuario.includes(h)) {
+            btn.classList.add('ocupado-usuario');
+            btn.innerText += ' (Tuyo)';
+            btn.onclick = () => cancelarReserva(h);
+        } else if (!horasDisponibles.includes(h)) {
             btn.disabled = true;
-            btn.classList.add('ocupado');
-            if (ocupadasPorUsuario.includes(h)) {
-                btn.innerText += ' (Tuyo)';
-                btn.disabled = false;
-                btn.classList.add('tuyo');
-                btn.onclick = () => cancelarReserva(h);
-            }
+            btn.classList.add('ocupado-otro');
         } else {
+            btn.classList.add('libre');
             btn.onclick = () => reservarTurno(h);
         }
         grid.appendChild(btn);
