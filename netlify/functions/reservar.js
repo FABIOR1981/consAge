@@ -78,6 +78,20 @@ exports.handler = async (event) => {
             return { statusCode: 200, body: JSON.stringify({ message: 'Reserva cancelada correctamente.' }) };
         };
 
+        // Intentamos crear el evento después de verificar la disponibilidad
+        if (userEvents.some(event => event.start && event.end)) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.' }) };
+        }
+
+        try {
+            const eventRes = await calendar.events.insert(insertOpts);
+            console.log('Created event:', eventRes.data && eventRes.data.id);
+            return { statusCode: 200, body: JSON.stringify({ message: 'Reserva creada correctamente', eventId: eventRes.data.id }) };
+        } catch (err) {
+            console.error('Error creating event:', err && (err.message || err));
+            return { statusCode: 500, body: JSON.stringify({ error: 'Error creando el evento', details: (err && err.message) || String(err) }) };
+        }
+
         return { statusCode: 200, body: JSON.stringify({ events: userEvents }) };
     } catch (error) {
         console.error("Error:", error.message);
