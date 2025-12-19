@@ -77,7 +77,7 @@ const mostrarHorarios = async () => {
     let userEvents = [];
     envIdPorHora = {};
     try {
-        const resp = await fetch(`/.netlify/functions/reservar?email=${encodeURIComponent(user.email)}&fecha=${seleccion.fecha}`);
+        const resp = await fetch(`/.netlify/functions/reservar?email=${encodeURIComponent(user.email)}&fecha=${seleccion.fecha}&consultorio=${seleccion.consultorio}`);
         const data = await resp.json();
         horasDisponibles = data.horasDisponibles;
         ocupadasPorUsuario = data.ocupadasPorUsuario;
