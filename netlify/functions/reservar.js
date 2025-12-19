@@ -98,9 +98,9 @@ exports.handler = async (event) => {
                 timeMax: `${fecha}T23:59:59-03:00`,
                 timeZone: 'America/Montevideo',
             });
-            // Filtrar solo eventos del consultorio seleccionado
+            // Filtrar solo eventos del consultorio seleccionado (aceptar con o sin espacio tras los dos puntos)
             const eventosConsultorio = busySlots.data.items.filter(event => {
-                return event.summary && event.summary.startsWith(`C${consultorio}:`);
+                return event.summary && (event.summary.startsWith(`C${consultorio}:`) || event.summary.startsWith(`C${consultorio}: `));
             });
             // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
             const userEvents = eventosConsultorio.filter(event => {
