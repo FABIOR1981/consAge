@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Informe de Reservas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Informe de Reservas</h2>
+    <form id="form-informe">
+        <label>Fecha inicio: <input type="date" name="fechaInicio" required></label>
+        <label>Fecha fin: <input type="date" name="fechaFin" required></label>
+        <label>Consultorio: <input type="number" name="consultorio" min="1" max="20" placeholder="(opcional)"></label>
+        <label>Usuario (email): <input type="text" name="usuario" placeholder="(opcional)"></label>
+        <button type="submit">Buscar</button>
+    </form>
+    <table id="tabla-informe" border="1" style="margin-top:1em;width:100%;max-width:900px">
+        <tr><td colspan="5">Complete los filtros y presione Buscar</td></tr>
+    </table>
+    <script type="module" src="js/informe.js"></script>
+</body>
+</html>
