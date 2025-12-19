@@ -143,7 +143,8 @@ const cargarBotonesConsultorios = () => {
     container.innerHTML = '<h3>Paso 1: Elija un Consultorio</h3>';
     const grid = document.createElement('div');
     grid.className = 'consultorios-grid';
-    APP_CONFIG.consultorios.forEach(num => {
+        // Solo mostrar consultorios distintos de 1 para reservar
+        APP_CONFIG.consultorios.filter(num => num !== 1).forEach(num => {
         const btn = document.createElement('button');
         btn.innerText = `Consultorio ${num}`;
         btn.className = 'btn-consultorio';

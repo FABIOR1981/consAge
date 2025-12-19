@@ -151,8 +151,13 @@
                     <option value="0">Todos</option>
                 </select>
             </label>
-            <label>Usuario (email):
-                <input type="text" name="usuario" placeholder="(opcional)">
+            <label>Búsqueda:
+                <input type="text" name="busqueda" id="input-busqueda" placeholder="Ingrese valor a buscar">
+                <div style="margin-top:0.5em; font-size:0.98em;">
+                    <label style="margin-right:1em;"><input type="radio" name="tipoBusqueda" value="usuario" checked> Usuario (email)</label>
+                    <label style="margin-right:1em;"><input type="radio" name="tipoBusqueda" value="nombre"> Nombre</label>
+                    <label><input type="radio" name="tipoBusqueda" value="apellido"> Apellido</label>
+                </div>
             </label>
             <button type="submit">Buscar</button>
         </form>

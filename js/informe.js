@@ -29,10 +29,11 @@ window.addEventListener('DOMContentLoaded', () => {
         const fechaInicio = form.fechaInicio.value;
         const fechaFin = form.fechaFin.value;
         const consultorio = comboConsultorio ? comboConsultorio.value : form.consultorio.value;
-        const usuario = form.usuario.value;
+        const busqueda = form.busqueda.value.trim();
+        const tipoBusqueda = form.tipoBusqueda.value;
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
         if (consultorio && consultorio !== '0') url += `&consultorio=${consultorio}`;
-        if (usuario) url += `&usuario=${encodeURIComponent(usuario)}`;
+        if (busqueda) url += `&busqueda=${encodeURIComponent(busqueda)}&tipoBusqueda=${encodeURIComponent(tipoBusqueda)}`;
         try {
             const resp = await fetch(url);
             const data = await resp.json();
