@@ -34,7 +34,7 @@ exports.handler = async (event) => {
         const insertOpts = {
             calendarId,
             resource: {
-                summary: `C${consultorio}: Reserva confirmada`,
+                summary: `C${consultorio} (${email})`,
                 colorId: colorId,
                 description: `Reserva realizada por: ${email}\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
                 start: {
@@ -45,7 +45,6 @@ exports.handler = async (event) => {
                     dateTime: `${fecha}T${horaFin}:00:00-03:00`,
                     timeZone: 'America/Montevideo'
                 }
-                // Eliminamos la propiedad attendees
             }
         };
         if (sendUpdates) insertOpts.sendUpdates = 'all';
