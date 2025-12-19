@@ -78,7 +78,6 @@ exports.handler = async (event) => {
                 console.error('Datos faltantes en GET:', { email, fecha });
                 return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
             }
-
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
             if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
                 privateKey = privateKey.substring(1, privateKey.length - 1);
@@ -99,11 +98,28 @@ exports.handler = async (event) => {
                 timeMax: `${fecha}T23:59:59-03:00`,
                 timeZone: 'America/Montevideo',
             });
+            // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
             const userEvents = busySlots.data.items.filter(event => {
-                const isUserEvent = event.description && event.description.includes(`Reserva realizada por: ${email}`);
-                return isUserEvent;
-            });
-            return { statusCode: 200, body: JSON.stringify({ events: busySlots.data.items, userEvents }) };
+                return event.description && event.description.includes(`Reserva realizada por: ${email}`);
+            }).map(event => ({
+                hora: new Date(event.start.dateTime).getHours(),
+                eventId: event.id
+            }));
+            // Generar todas las horas posibles del día
+            const horas = Array.from({length: 24}, (_, i) => i);
+            // Marcar como ocupadas solo las del usuario
+            const ocupadasPorUsuario = userEvents.map(e => e.hora);
+            // Horas libres: las que no están ocupadas por nadie
+            const ocupadasTodas = busySlots.data.items.map(event => {
+                if (event.start && event.start.dateTime) {
+                    return new Date(event.start.dateTime).getHours();
+                }
+                return null;
+            }).filter(h => h !== null);
+            const libres = horas.filter(h => !ocupadasTodas.includes(h));
+            // Respuesta: solo horas libres o tomadas por el usuario
+            const resultado = horas.filter(h => libres.includes(h) || ocupadasPorUsuario.includes(h));
+            return { statusCode: 200, body: JSON.stringify({ horasDisponibles: resultado, ocupadasPorUsuario, userEvents }) };
         } catch (error) {
             console.error("Error:", error.message);
             return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
