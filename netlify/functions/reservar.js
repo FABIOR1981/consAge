@@ -24,74 +24,6 @@ exports.handler = async (event) => {
 
         const calendar = google.calendar({ version: 'v3', auth });
 
-        // Helper: send email via SendGrid if configured
-        const sendConfirmationEmail = async (to, subject, htmlBody, textBody) => {
-            const apiKey = process.env.SENDGRID_API_KEY;
-            const from = process.env.SENDGRID_FROM || process.env.FROM_EMAIL;
-            if (!apiKey || !from) {
-                console.warn('SendGrid not configured (missing SENDGRID_API_KEY or SENDGRID_FROM). Skipping email.');
-                return false;
-            }
-
-            const payload = {
-                personalizations: [{ to: [{ email: to }] }],
-                from: { email: from },
-                subject: subject,
-                content: [
-                    { type: 'text/plain', value: textBody || '' },
-                    { type: 'text/html', value: htmlBody || '' }
-                ]
-            };
-
-            try {
-                if (typeof fetch !== 'undefined') {
-                    const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${apiKey}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!res.ok) {
-                        const txt = await res.text();
-                        console.warn('SendGrid response not ok:', res.status, txt);
-                        return false;
-                    }
-                    return true;
-                } else {
-                    // Fallback using native https
-                    const https = require('https');
-                    const opts = {
-                        hostname: 'api.sendgrid.com',
-                        path: '/v3/mail/send',
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${apiKey}`,
-                            'Content-Type': 'application/json'
-                        }
-                    };
-                    await new Promise((resolve, reject) => {
-                        const req = https.request(opts, (res) => {
-                            let data = '';
-                            res.on('data', (chunk) => data += chunk);
-                            res.on('end', () => {
-                                if (res.statusCode >= 200 && res.statusCode < 300) resolve();
-                                else reject(new Error(`SendGrid error ${res.statusCode}: ${data}`));
-                            });
-                        });
-                        req.on('error', reject);
-                        req.write(JSON.stringify(payload));
-                        req.end();
-                    });
-                    return true;
-                }
-            } catch (err) {
-                console.error('SendGrid send failed:', err && (err.message || err));
-                return false;
-            }
-        };
-
         const horaInicio = hora.toString().padStart(2, '0');
         const horaFin = (parseInt(hora) + 1).toString().padStart(2, '0');
 
@@ -131,68 +63,16 @@ exports.handler = async (event) => {
             return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.' }) };
         }
 
-        // Intentamos crear el evento con attendees (envío de invitaciones si es posible).
+        // Intentamos crear el evento con attendees (sin envío de confirmaciones)
         try {
             const eventRes = await calendar.events.insert(insertOpts);
             console.log('Created event:', eventRes.data && eventRes.data.id);
 
-                    // Verificar si se envió la invitación
-                    const invitationSent = !!sendUpdates;
-
-                    if (!invitationSent) {
-                        console.warn('No se enviaron invitaciones desde Google Calendar. Intentando enviar correo de confirmación.');
-                        const htmlLink = eventRes.data && eventRes.data.htmlLink;
-                        const subject = `Reserva confirmada - Consultorio ${consultorio} - ${fecha} ${horaInicio}:00`;
-                        const htmlBody = `<p>Tu reserva fue confirmada.</p><p><strong>Consultorio:</strong> ${consultorio}<br><strong>Fecha:</strong> ${fecha} ${horaInicio}:00<br><a href="${htmlLink}">Ver en Google Calendar</a></p>`;
-                        const textBody = `Tu reserva fue confirmada. Consultorio: ${consultorio}\nFecha: ${fecha} ${horaInicio}:00\nEnlace: ${htmlLink || '—'}`;
-                        try {
-                            const sent = await sendConfirmationEmail(email, subject, htmlBody, textBody);
-                            if (sent) {
-                                console.log('Correo de confirmación enviado correctamente.');
-                            } else {
-                                console.warn('No se pudo enviar el correo de confirmación.');
-                            }
-                        } catch (e) {
-                            console.error('Error al enviar el correo de confirmación:', e.message);
-                        }
-                    }
-
-                } catch (err) {
-                    console.warn('Error creating event with attendees:', err && (err.message || err));
-
-                    // Caso común: "Service accounts cannot invite attendees without Domain-Wide Delegation of Authority." 
-                    // En ese caso hacemos fallback creando el evento SIN attendees ni sendUpdates para garantizar la reserva.
-                    const fallbackMessage = (err && err.message && err.message.includes('Service accounts cannot invite attendees')) || (err && err.errors && err.errors.some(e => (e.message || '').includes('Service accounts cannot invite attendees')));
-                    if (fallbackMessage) {
-                        try {
-                            const fallbackOpts = JSON.parse(JSON.stringify(insertOpts));
-                            delete fallbackOpts.resource.attendees;
-                            delete fallbackOpts.sendUpdates;
-                            const fallbackRes = await calendar.events.insert(fallbackOpts);
-                            console.log('Created event (fallback, no attendees):', fallbackRes.data && fallbackRes.data.id);
-
-                            // Send fallback email to the user if SendGrid is configured
-                            const htmlLink = fallbackRes.data && fallbackRes.data.htmlLink;
-                            const subject = `Reserva confirmada - Consultorio ${consultorio} - ${fecha} ${horaInicio}:00`;
-                            const htmlBody = `<p>Tu reserva fue confirmada (nota: no se enviaron invitaciones desde Google).</p><p><strong>Consultorio:</strong> ${consultorio}<br><strong>Fecha:</strong> ${fecha} ${horaInicio}:00<br><a href="${htmlLink}">Ver en Google Calendar</a></p>`;
-                            const textBody = `Tu reserva fue confirmada (no se enviaron invitaciones desde Google). Consultorio: ${consultorio}\nFecha: ${fecha} ${horaInicio}:00\nEnlace: ${htmlLink || '—'}`;
-                            try {
-                                const sent = await sendConfirmationEmail(email, subject, htmlBody, textBody);
-                                console.log('Fallback email sent:', sent);
-                            } catch (e) {
-                                console.warn('Fallback email failed:', e && (e.message || e));
-                            }
-
-                            return { statusCode: 200, body: JSON.stringify({ message: 'OK (no invitations sent)', eventId: fallbackRes.data.id, invitationSent: false, htmlLink }) };
-                        } catch (err2) {
-                            console.error('Fallback event creation failed:', err2 && (err2.message || err2));
-                            return { statusCode: 500, body: JSON.stringify({ error: 'Error creating event', details: (err2 && err2.message) || String(err2) }) };
-                        }
-                    }
-
-                    console.error('Event creation error:', err && (err.message || err));
-                    return { statusCode: 500, body: JSON.stringify({ error: 'Error creating event', details: (err && err.message) || String(err) }) };
-                }
+            return { statusCode: 200, body: JSON.stringify({ message: 'Reserva creada correctamente', eventId: eventRes.data.id }) };
+        } catch (err) {
+            console.error('Error creating event:', err && (err.message || err));
+            return { statusCode: 500, body: JSON.stringify({ error: 'Error creando el evento', details: (err && err.message) || String(err) }) };
+        }
     } catch (error) {
         console.error("Error:", error.message);
         return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
