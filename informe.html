@@ -113,7 +113,9 @@
                 <input type="date" name="fechaFin" required>
             </label>
             <label>Consultorio:
-                <input type="number" name="consultorio" min="1" max="20" placeholder="(opcional)">
+                <select name="consultorio" id="combo-consultorio">
+                    <option value="0">Todos</option>
+                </select>
             </label>
             <label>Usuario (email):
                 <input type="text" name="usuario" placeholder="(opcional)">

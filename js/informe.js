@@ -1,6 +1,18 @@
 import { APP_CONFIG } from './config.js';
 
 window.addEventListener('DOMContentLoaded', () => {
+        // Llenar combo de consultorios desde config.js
+        const comboConsultorio = document.getElementById('combo-consultorio');
+        if (comboConsultorio && APP_CONFIG.consultorios) {
+            // Eliminar opciones extra si las hubiera (dejamos solo "Todos")
+            while (comboConsultorio.options.length > 1) comboConsultorio.remove(1);
+            APP_CONFIG.consultorios.forEach(num => {
+                const opt = document.createElement('option');
+                opt.value = num;
+                opt.textContent = `Consultorio ${num}`;
+                comboConsultorio.appendChild(opt);
+            });
+        }
     const form = document.getElementById('form-informe');
     const tabla = document.getElementById('tabla-informe');
     // Crear o buscar el elemento para mostrar el total de horas
@@ -16,10 +28,10 @@ window.addEventListener('DOMContentLoaded', () => {
         tabla.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
         const fechaInicio = form.fechaInicio.value;
         const fechaFin = form.fechaFin.value;
-        const consultorio = form.consultorio.value;
+        const consultorio = comboConsultorio ? comboConsultorio.value : form.consultorio.value;
         const usuario = form.usuario.value;
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
-        if (consultorio) url += `&consultorio=${consultorio}`;
+        if (consultorio && consultorio !== '0') url += `&consultorio=${consultorio}`;
         if (usuario) url += `&usuario=${encodeURIComponent(usuario)}`;
         try {
             const resp = await fetch(url);
