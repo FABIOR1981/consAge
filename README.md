@@ -9,7 +9,9 @@ Notas sobre invitaciones y visibilidad en Google Calendar
   4. **Si usas G Suite / Google Workspace** es posible configurar **Domain-Wide Delegation (DWD)** y proporcionar un `GOOGLE_IMPERSONATE_EMAIL` (email del usuario a impersonar, por ejemplo el propietario del calendario). Con DWD el servicio podrá crear eventos en nombre del usuario y enviar invitaciones.
   5. Si no tienes DWD y recibes el error "Service accounts cannot invite attendees without Domain-Wide Delegation of Authority", la función aplicará un **fallback**: creará la reserva en el calendario **sin** enviar invitaciones (se devolverá `invitationSent: false` en la respuesta). Como alternativa, puedes:
      - habilitar DWD y establecer `GOOGLE_IMPERSONATE_EMAIL`, o
-     - configurar un servicio de envío de emails (SMTP, SendGrid) para notificar al usuario por correo cuando la reserva se crea.
+     - configurar un servicio de envío de emails (SMTP, SendGrid) para notificar al usuario por correo cuando la reserva se crea. Si eliges SendGrid, añade las env vars `SENDGRID_API_KEY` y `SENDGRID_FROM`.
+
+
   6. Verifica que los correos de invitación no estén llegando a la carpeta SPAM y que el usuario acepte la invitación si su configuración de calendario lo requiere.
 
 Pruebas sugeridas:
