@@ -1,6 +1,6 @@
 export const APP_CONFIG = {
     nombreProyecto: "Agenda de Consultorios",
-    consultorios: [2, 3, 4, 5],
+    consultorios: [1, 2, 3, 4, 5],
     // Asignamos un colorId de Google a cada consultorio
     coloresConsultorios: {
         "2": "6",  // Girasol (Amarillo intenso)
