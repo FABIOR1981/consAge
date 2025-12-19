@@ -23,26 +23,34 @@ exports.handler = async (event) => {
         const horaInicio = hora.toString().padStart(2, '0');
         const horaFin = (parseInt(hora) + 1).toString().padStart(2, '0');
 
-        await calendar.events.insert({
-            calendarId: 'demariaconsultorios1334@gmail.com',
-            // Quitamos 'sendUpdates' porque sin attendees puede dar error en algunas cuentas
+        // Use configured calendar id and optionally send updates/invitations
+        const calendarId = process.env.CALENDAR_ID || 'demariaconsultorios1334@gmail.com';
+        const sendUpdates = process.env.SEND_UPDATES === 'true';
+
+        const insertOpts = {
+            calendarId,
             resource: {
                 summary: `C${consultorio}: Reserva confirmada`,
-                colorId: colorId, 
-                // Ponemos el email del usuario en la descripción para que tú sepas quién es
+                colorId: colorId,
+                // Ponemos el email del usuario en la descripción y como attendee para que reciba invitación
                 description: `Reserva para: ${email}\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
-                start: { 
-                    dateTime: `${fecha}T${horaInicio}:00:00-03:00`, 
-                    timeZone: 'America/Montevideo' 
+                start: {
+                    dateTime: `${fecha}T${horaInicio}:00:00-03:00`,
+                    timeZone: 'America/Montevideo'
                 },
-                end: { 
-                    dateTime: `${fecha}T${horaFin}:00:00-03:00`, 
-                    timeZone: 'America/Montevideo' 
-                }
-            },
-        });
+                end: {
+                    dateTime: `${fecha}T${horaFin}:00:00-03:00`,
+                    timeZone: 'America/Montevideo'
+                },
+                attendees: [{ email }]
+            }
+        };
+        if (sendUpdates) insertOpts.sendUpdates = 'all';
 
-        return { statusCode: 200, body: JSON.stringify({ message: 'OK' }) };
+        const eventRes = await calendar.events.insert(insertOpts);
+        console.log('Created event:', eventRes.data && eventRes.data.id);
+
+        return { statusCode: 200, body: JSON.stringify({ message: 'OK', eventId: eventRes.data.id }) };
     } catch (error) {
         console.error("Error:", error.message);
         return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };

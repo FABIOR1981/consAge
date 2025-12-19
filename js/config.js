@@ -4,7 +4,7 @@ export const APP_CONFIG = {
     // Asignamos un colorId de Google a cada consultorio
     coloresConsultorios: {
         "2": "6",  // Girasol (Amarillo intenso)
-        "3": "9",  // Violeta
+        "3": "9",  // Violeta  UVA
         "4": "1",  // Azul (Lavanda)
         "5": "10"  // Verde (Albahaca)
     },
