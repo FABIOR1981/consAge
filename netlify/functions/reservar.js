@@ -1,9 +1,17 @@
 const { google } = require('googleapis');
 
 exports.handler = async (event) => {
+    console.log('Método:', event.httpMethod);
+    console.log('Body:', event.body);
+    console.log('Query:', event.queryStringParameters);
+
     if (event.httpMethod === 'POST') {
         try {
             const { email, consultorio, fecha, hora, colorId } = JSON.parse(event.body);
+            if (!email || !consultorio || !fecha || !hora || !colorId) {
+                console.error('Datos faltantes:', { email, consultorio, fecha, hora, colorId });
+                return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
+            }
 
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
             if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
@@ -63,10 +71,14 @@ exports.handler = async (event) => {
         }
     }
 
-    // GET: Listar eventos del usuario (horas libres y ocupadas)
     if (event.httpMethod === 'GET') {
         try {
-            const { email, fecha } = event.queryStringParameters;
+            const { email, fecha } = event.queryStringParameters || {};
+            if (!email || !fecha) {
+                console.error('Datos faltantes en GET:', { email, fecha });
+                return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
+            }
+
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
             if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
                 privateKey = privateKey.substring(1, privateKey.length - 1);
@@ -98,10 +110,14 @@ exports.handler = async (event) => {
         }
     }
 
-    // DELETE: Cancelar reserva (solo si faltan más de 24 horas)
     if (event.httpMethod === 'DELETE') {
         try {
             const { eventId, email } = JSON.parse(event.body);
+            if (!eventId || !email) {
+                console.error('Datos faltantes en DELETE:', { eventId, email });
+                return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
+            }
+
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
             if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
                 privateKey = privateKey.substring(1, privateKey.length - 1);
