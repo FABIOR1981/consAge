@@ -119,23 +119,41 @@ exports.handler = async (event) => {
         };
         if (sendUpdates) insertOpts.sendUpdates = 'all';
 
+        // Verificar disponibilidad del consultorio antes de crear el evento
+        const busySlots = await calendar.events.list({
+            calendarId,
+            timeMin: `${fecha}T${horaInicio}:00:00-03:00`,
+            timeMax: `${fecha}T${horaFin}:00:00-03:00`,
+            timeZone: 'America/Montevideo',
+        });
+
+        if (busySlots.data.items && busySlots.data.items.length > 0) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.' }) };
+        }
+
         // Intentamos crear el evento con attendees (envío de invitaciones si es posible).
         try {
             const eventRes = await calendar.events.insert(insertOpts);
             console.log('Created event:', eventRes.data && eventRes.data.id);
 
+                    // Verificar si se envió la invitación
                     const invitationSent = !!sendUpdates;
-                    // If invitations were NOT sent by Google, try SendGrid (if configured)
+
                     if (!invitationSent) {
+                        console.warn('No se enviaron invitaciones desde Google Calendar. Intentando enviar correo de confirmación.');
                         const htmlLink = eventRes.data && eventRes.data.htmlLink;
                         const subject = `Reserva confirmada - Consultorio ${consultorio} - ${fecha} ${horaInicio}:00`;
                         const htmlBody = `<p>Tu reserva fue confirmada.</p><p><strong>Consultorio:</strong> ${consultorio}<br><strong>Fecha:</strong> ${fecha} ${horaInicio}:00<br><a href="${htmlLink}">Ver en Google Calendar</a></p>`;
                         const textBody = `Tu reserva fue confirmada. Consultorio: ${consultorio}\nFecha: ${fecha} ${horaInicio}:00\nEnlace: ${htmlLink || '—'}`;
                         try {
                             const sent = await sendConfirmationEmail(email, subject, htmlBody, textBody);
-                            console.log('Fallback email sent:', sent);
+                            if (sent) {
+                                console.log('Correo de confirmación enviado correctamente.');
+                            } else {
+                                console.warn('No se pudo enviar el correo de confirmación.');
+                            }
                         } catch (e) {
-                            console.warn('Fallback email failed:', e && (e.message || e));
+                            console.error('Error al enviar el correo de confirmación:', e.message);
                         }
                     }
 
