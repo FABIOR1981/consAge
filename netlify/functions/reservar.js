@@ -36,8 +36,7 @@ exports.handler = async (event) => {
             resource: {
                 summary: `C${consultorio}: Reserva confirmada`,
                 colorId: colorId,
-                // Ponemos el email del usuario en la descripción y como attendee para que reciba invitación
-                description: `Reserva para: ${email}\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
+                description: `Reserva realizada por: ${email}\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
                 start: {
                     dateTime: `${fecha}T${horaInicio}:00:00-03:00`,
                     timeZone: 'America/Montevideo'
@@ -45,8 +44,8 @@ exports.handler = async (event) => {
                 end: {
                     dateTime: `${fecha}T${horaFin}:00:00-03:00`,
                     timeZone: 'America/Montevideo'
-                },
-                attendees: [{ email }]
+                }
+                // Eliminamos la propiedad attendees
             }
         };
         if (sendUpdates) insertOpts.sendUpdates = 'all';
