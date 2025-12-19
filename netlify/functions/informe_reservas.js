@@ -50,7 +50,20 @@ exports.handler = async (event) => {
             description: ev.description,
             id: ev.id
         }));
-        return { statusCode: 200, body: JSON.stringify({ reservas: resultado }) };
+
+        // Calcular suma total de horas reservadas
+        let totalHoras = 0;
+        resultado.forEach(ev => {
+            if (ev.start && ev.end) {
+                const inicio = new Date(ev.start);
+                const fin = new Date(ev.end);
+                const diffMs = fin - inicio;
+                const diffHoras = diffMs / (1000 * 60 * 60);
+                totalHoras += diffHoras;
+            }
+        });
+
+        return { statusCode: 200, body: JSON.stringify({ reservas: resultado, totalHoras }) };
     } catch (error) {
         console.error('Error informe_reservas:', error.message);
         return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
