@@ -73,9 +73,9 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === 'GET') {
         try {
-            const { email, fecha } = event.queryStringParameters || {};
-            if (!email || !fecha) {
-                console.error('Datos faltantes en GET:', { email, fecha });
+            const { email, fecha, consultorio } = event.queryStringParameters || {};
+            if (!email || !fecha || !consultorio) {
+                console.error('Datos faltantes en GET:', { email, fecha, consultorio });
                 return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
             }
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
@@ -98,8 +98,12 @@ exports.handler = async (event) => {
                 timeMax: `${fecha}T23:59:59-03:00`,
                 timeZone: 'America/Montevideo',
             });
+            // Filtrar solo eventos del consultorio seleccionado
+            const eventosConsultorio = busySlots.data.items.filter(event => {
+                return event.summary && event.summary.startsWith(`C${consultorio}:`);
+            });
             // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
-            const userEvents = busySlots.data.items.filter(event => {
+            const userEvents = eventosConsultorio.filter(event => {
                 return event.description && event.description.includes(`Reserva realizada por: ${email}`);
             }).map(event => ({
                 hora: new Date(event.start.dateTime).getHours(),
@@ -109,8 +113,8 @@ exports.handler = async (event) => {
             const horas = Array.from({length: 24}, (_, i) => i);
             // Marcar como ocupadas solo las del usuario
             const ocupadasPorUsuario = userEvents.map(e => e.hora);
-            // Horas libres: las que no están ocupadas por nadie
-            const ocupadasTodas = busySlots.data.items.map(event => {
+            // Horas ocupadas por cualquier persona en ese consultorio
+            const ocupadasTodas = eventosConsultorio.map(event => {
                 if (event.start && event.start.dateTime) {
                     return new Date(event.start.dateTime).getHours();
                 }
