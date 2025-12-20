@@ -158,6 +158,11 @@ const initDashboard = () => {
     const user = netlifyIdentity.currentUser();
     if (!user) { window.location.href = "index.html"; return; }
     document.getElementById('user-email').innerText = user.email;
+    // Actualizar mensaje de bienvenida con texto agradable
+    const welcomeMsg = document.getElementById('welcome-msg');
+    if (welcomeMsg) {
+        welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
+    }
     cargarBotonesConsultorios();
 };
 
