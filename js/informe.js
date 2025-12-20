@@ -26,11 +26,11 @@ window.addEventListener('DOMContentLoaded', () => {
     form.onsubmit = async (e) => {
         e.preventDefault();
         tabla.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
-        const fechaInicio = form.fechaInicio.value;
-        const fechaFin = form.fechaFin.value;
-        const consultorio = comboConsultorio ? comboConsultorio.value : form.consultorio.value;
-        const busqueda = form.busqueda.value.trim();
-        const tipoBusqueda = form.tipoBusqueda.value;
+        const fechaInicio = form.elements['fechaInicio'] ? form.elements['fechaInicio'].value : '';
+        const fechaFin = form.elements['fechaFin'] ? form.elements['fechaFin'].value : '';
+        const consultorio = form.elements['consultorio'] ? form.elements['consultorio'].value : '';
+        const busqueda = form.elements['busqueda'] ? form.elements['busqueda'].value.trim() : '';
+        const tipoBusqueda = form.elements['tipoBusqueda'] ? form.elements['tipoBusqueda'].value : '';
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
         if (consultorio && consultorio !== '0') url += `&consultorio=${consultorio}`;
         if (busqueda) url += `&busqueda=${encodeURIComponent(busqueda)}&tipoBusqueda=${encodeURIComponent(tipoBusqueda)}`;
