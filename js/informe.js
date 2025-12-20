@@ -6,6 +6,8 @@ export async function initInforme() {
     if (window.__informeInitDone) return;
 
     const comboConsultorio = document.getElementById('combo-consultorio');
+    const comboUsuario = document.getElementById('combo-usuario');
+    const labelUsuario = document.getElementById('label-usuario');
     const form = document.getElementById('form-informe');
     const tabla = document.getElementById('tabla-informe');
     let totalHorasDiv = document.getElementById('total-horas-informe');
@@ -15,6 +17,32 @@ export async function initInforme() {
     }
 
     window.__informeInitDone = true;
+
+    // Mostrar y poblar combo de usuarios sólo para admin
+    try {
+        const currentUser = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
+        const isAdmin = currentUser && currentUser.app_metadata && currentUser.app_metadata.roles && currentUser.app_metadata.roles.includes('admin');
+        if (isAdmin && comboUsuario && labelUsuario) {
+            labelUsuario.style.display = '';
+            // Pedir lista de usuarios al servidor usando un rango amplio (últimos 90 días)
+            const hoy = new Date();
+            const fechaFinDefault = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
+            const fechaInicioDefault = new Date(hoy.getTime() - (90 * 24 * 60 * 60 * 1000));
+            const fInicio = fechaInicioDefault.toISOString().slice(0,10);
+            const fFin = fechaFinDefault.toISOString().slice(0,10);
+            try {
+                const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
+                const js = await resp.json();
+                if (js && Array.isArray(js.users)) {
+                    comboUsuario.innerHTML = '<option value="">Todos</option>' + js.users.map(u => `<option value="${u}">${u}</option>`).join('');
+                }
+            } catch (e) {
+                console.warn('No se pudo cargar lista de usuarios:', e.message);
+            }
+        }
+    } catch (e) {
+        console.warn('Error comprobando rol admin:', e.message);
+    }
 
     // Poblar combo
     comboConsultorio.innerHTML = '<option value="">-- Todos --</option>';
@@ -42,7 +70,13 @@ export async function initInforme() {
         const fechaInicio = form.elements['fechaInicio'] ? form.elements['fechaInicio'].value : '';
         const fechaFin = form.elements['fechaFin'] ? form.elements['fechaFin'].value : '';
         const consultorio = form.elements['consultorio'] ? form.elements['consultorio'].value : '';
-        const usuario = form.elements['busqueda'] ? form.elements['busqueda'].value.trim() : '';
+        // Si el admin seleccionó un usuario en el combo, usarlo; si no, usar el campo de búsqueda
+        let usuario = '';
+        if (form.elements['usuarioSelect'] && form.elements['usuarioSelect'].value) {
+            usuario = form.elements['usuarioSelect'].value.trim();
+        } else if (form.elements['busqueda'] && form.elements['busqueda'].value) {
+            usuario = form.elements['busqueda'].value.trim();
+        }
 
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
         if (consultorio) url += `&consultorio=${encodeURIComponent(consultorio)}`;
