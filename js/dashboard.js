@@ -228,16 +228,27 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         container.appendChild(formFiltro);
         const combo = formFiltro.querySelector('#combo-usuario');
         combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
-        // Selecciona el primer usuario si no hay filtro
-        combo.value = emailFiltro || usuariosLista[0].email;
+        // Selecciona el usuario actual si está en la lista, si no el primero
+        let defaultEmail = user.email;
+        if (!usuariosLista.some(u => u.email === defaultEmail)) {
+            defaultEmail = usuariosLista[0].email;
+        }
+        combo.value = emailFiltro || defaultEmail;
         combo.addEventListener('change', (e) => {
-            mostrarMisReservas(e.target.value, usuariosLista);
+            if (e.target.value) {
+                mostrarMisReservas(e.target.value, usuariosLista);
+            }
         });
         filtroEmail = combo.value;
     } else if (!isAdmin) {
         filtroEmail = user.email;
     }
-    await mostrarMisReservasAdmin(filtroEmail, isAdmin, usuariosLista);
+    // Nunca llamar si filtroEmail es vacío o nulo
+    if (filtroEmail) {
+        await mostrarMisReservasAdmin(filtroEmail, isAdmin, usuariosLista);
+    } else {
+        container.innerHTML += '<p style="color:red">No hay usuarios disponibles para mostrar reservas.</p>';
+    }
 }
 
 // Nueva función para mostrar reservas de un usuario (o todas si email vacío)
