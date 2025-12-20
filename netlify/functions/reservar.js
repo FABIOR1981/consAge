@@ -8,9 +8,15 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'POST') {
         try {
             const { email, consultorio, fecha, hora, colorId } = JSON.parse(event.body);
-            if (!email || !consultorio || !fecha || !hora || !colorId) {
+            const missing = [];
+            if (!email) missing.push('email');
+            if (!consultorio) missing.push('consultorio');
+            if (!fecha) missing.push('fecha');
+            if (!hora && hora !== 0) missing.push('hora');
+            if (!colorId) missing.push('colorId');
+            if (missing.length) {
                 console.error('Datos faltantes:', { email, consultorio, fecha, hora, colorId });
-                return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
+                return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos', missing, received: { email, consultorio, fecha, hora, colorId } }) };
             }
 
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
@@ -59,7 +65,7 @@ exports.handler = async (event) => {
                 timeZone: 'America/Montevideo',
             });
             if (busySlots.data.items && busySlots.data.items.length > 0) {
-                return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.' }) };
+                return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.', ocupados: busySlots.data.items.map(i => ({ id: i.id, summary: i.summary })) }) };
             }
 
             // Crear el evento
