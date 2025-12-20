@@ -38,12 +38,41 @@ window.addEventListener('DOMContentLoaded', () => {
             const resp = await fetch(url);
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || data.details || 'Error desconocido');
-            // Mostrar total de horas
-            if (typeof data.totalHoras === 'number') {
-                totalHorasDiv.textContent = `Total de horas reservadas: ${data.totalHoras.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            } else {
-                totalHorasDiv.textContent = '';
+            // Calcular totales de horas reservadas y canceladas
+            let totalHorasReservadas = 0;
+            let totalHorasCanceladas = 0;
+            let totalHorasUsadas = 0;
+            let totalHorasPorUsar = 0;
+            const ahora = new Date();
+            if (data.reservas && data.reservas.length) {
+                data.reservas.forEach(ev => {
+                    const esCancelada = ev.summary && ev.summary.startsWith('Cancelada');
+                    // Calcular duración en horas
+                    let horas = 0;
+                    let inicio = null;
+                    if (ev.start && ev.end) {
+                        inicio = new Date(ev.start);
+                        const fin = new Date(ev.end);
+                        horas = (fin - inicio) / (1000 * 60 * 60);
+                    }
+                    if (esCancelada) {
+                        totalHorasCanceladas += horas;
+                    } else {
+                        totalHorasReservadas += horas;
+                        if (inicio && inicio < ahora) {
+                            totalHorasUsadas += horas;
+                        } else if (inicio && inicio >= ahora) {
+                            totalHorasPorUsar += horas;
+                        }
+                    }
+                });
             }
+            // Mostrar totalizadores
+            totalHorasDiv.innerHTML = '';
+            totalHorasDiv.innerHTML += `<div>Total de horas reservadas: <strong>${totalHorasReservadas.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>`;
+            totalHorasDiv.innerHTML += `<div style='margin-left:1em;'>• Usadas: <strong>${totalHorasUsadas.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>`;
+            totalHorasDiv.innerHTML += `<div style='margin-left:1em;'>• Por usar: <strong>${totalHorasPorUsar.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>`;
+            totalHorasDiv.innerHTML += `<div style='color:#888'>Total de horas canceladas: <strong>${totalHorasCanceladas.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>`;
             if (!data.reservas.length) {
                 tabla.innerHTML = '<tr><td colspan="5">Sin resultados</td></tr>';
                 return;
