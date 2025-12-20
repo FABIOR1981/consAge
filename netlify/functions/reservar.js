@@ -74,9 +74,9 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'GET') {
         try {
             const { email, fecha, consultorio } = event.queryStringParameters || {};
-            if (!email || !fecha || !consultorio) {
-                console.error('Datos faltantes en GET:', { email, fecha, consultorio });
-                return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
+            if (!email) {
+                console.error('Falta email en GET:', { email });
+                return { statusCode: 400, body: JSON.stringify({ error: 'Debes indicar el email' }) };
             }
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
             if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
@@ -92,43 +92,85 @@ exports.handler = async (event) => {
             );
             const calendar = google.calendar({ version: 'v3', auth });
             const calendarId = process.env.CALENDAR_ID || 'demariaconsultorios1334@gmail.com';
-            const busySlots = await calendar.events.list({
-                calendarId,
-                timeMin: `${fecha}T00:00:00-03:00`,
-                timeMax: `${fecha}T23:59:59-03:00`,
-                timeZone: 'America/Montevideo',
-            });
-            // Log de todos los eventos recuperados para el día
-            console.log('Eventos recuperados:', busySlots.data.items.map(ev => ({ summary: ev.summary, start: ev.start && ev.start.dateTime })));
-            // Obtener la zona horaria desde config.js o usar por defecto
-            const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
-            // Filtrar solo eventos del consultorio seleccionado (robusto a espacios y mayúsculas)
-            const regexConsultorio = new RegExp(`^C${consultorio}:\\s`, 'i');
-            const eventosConsultorio = busySlots.data.items.filter(event => {
-                return event.summary && regexConsultorio.test(event.summary);
-            });
-            // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
-            const userEvents = eventosConsultorio.filter(event => {
-                return event.description && event.description.includes(`Reserva realizada por: ${email}`);
-            }).map(event => ({
-                hora: new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours(),
-                eventId: event.id
-            }));
-            // Generar todas las horas posibles del día
-            const horas = Array.from({length: 24}, (_, i) => i);
-            // Marcar como ocupadas solo las del usuario
-            const ocupadasPorUsuario = userEvents.map(e => e.hora);
-            // Horas ocupadas por cualquier persona en ese consultorio
-            const ocupadasTodas = eventosConsultorio.map(event => {
-                if (event.start && event.start.dateTime) {
-                    return new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours();
-                }
-                return null;
-            }).filter(h => h !== null);
-            const libres = horas.filter(h => !ocupadasTodas.includes(h));
-            // Respuesta: solo horas libres o tomadas por el usuario
-            const resultado = horas.filter(h => libres.includes(h) || ocupadasPorUsuario.includes(h));
-            return { statusCode: 200, body: JSON.stringify({ horasDisponibles: resultado, ocupadasPorUsuario, userEvents }) };
+            // Si se pasa fecha y consultorio, mantener lógica anterior
+            if (fecha && consultorio) {
+                const busySlots = await calendar.events.list({
+                    calendarId,
+                    timeMin: `${fecha}T00:00:00-03:00`,
+                    timeMax: `${fecha}T23:59:59-03:00`,
+                    timeZone: 'America/Montevideo',
+                });
+                // Log de todos los eventos recuperados para el día
+                console.log('Eventos recuperados:', busySlots.data.items.map(ev => ({ summary: ev.summary, start: ev.start && ev.start.dateTime })));
+                // Obtener la zona horaria desde config.js o usar por defecto
+                const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
+                // Filtrar solo eventos del consultorio seleccionado (robusto a espacios y mayúsculas)
+                const regexConsultorio = new RegExp(`^C${consultorio}:\\s`, 'i');
+                const eventosConsultorio = busySlots.data.items.filter(event => {
+                    return event.summary && regexConsultorio.test(event.summary);
+                });
+                // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
+                const userEvents = eventosConsultorio.filter(event => {
+                    return event.description && event.description.includes(`Reserva realizada por: ${email}`);
+                }).map(event => ({
+                    hora: new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours(),
+                    eventId: event.id,
+                    fecha,
+                    consultorio
+                }));
+                // Generar todas las horas posibles del día
+                const horas = Array.from({length: 24}, (_, i) => i);
+                // Marcar como ocupadas solo las del usuario
+                const ocupadasPorUsuario = userEvents.map(e => e.hora);
+                // Horas ocupadas por cualquier persona en ese consultorio
+                const ocupadasTodas = eventosConsultorio.map(event => {
+                    if (event.start && event.start.dateTime) {
+                        return new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours();
+                    }
+                    return null;
+                }).filter(h => h !== null);
+                const libres = horas.filter(h => !ocupadasTodas.includes(h));
+                // Respuesta: solo horas libres o tomadas por el usuario
+                const resultado = horas.filter(h => libres.includes(h) || ocupadasPorUsuario.includes(h));
+                return { statusCode: 200, body: JSON.stringify({ horasDisponibles: resultado, ocupadasPorUsuario, userEvents }) };
+            } else {
+                // Si solo se pasa email, devolver todas las reservas activas del usuario
+                const now = new Date();
+                const busySlots = await calendar.events.list({
+                    calendarId,
+                    timeMin: now.toISOString(),
+                    maxResults: 2500,
+                    singleEvents: true,
+                    orderBy: 'startTime',
+                    timeZone: 'America/Montevideo',
+                });
+                const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
+                // Filtrar eventos del usuario
+                const userEvents = busySlots.data.items.filter(event => {
+                    return event.description && event.description.includes(`Reserva realizada por: ${email}`);
+                }).map(event => {
+                    // Extraer consultorio, fecha y hora
+                    let consultorio = '';
+                    let fecha = '';
+                    let hora = '';
+                    if (event.summary) {
+                        const match = event.summary.match(/^C(\d+):/);
+                        if (match) consultorio = match[1];
+                    }
+                    if (event.start && event.start.dateTime) {
+                        const dt = new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria }));
+                        fecha = dt.toISOString().slice(0,10);
+                        hora = dt.getHours();
+                    }
+                    return {
+                        eventId: event.id,
+                        consultorio,
+                        fecha,
+                        hora
+                    };
+                });
+                return { statusCode: 200, body: JSON.stringify({ userEvents }) };
+            }
         } catch (error) {
             console.error("Error:", error.message);
             return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
