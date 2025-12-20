@@ -30,7 +30,11 @@ export async function initInforme() {
     if (!totalHorasDiv) {
         totalHorasDiv = document.createElement('div');
         totalHorasDiv.id = 'total-horas-informe';
+        totalHorasDiv.style.margin = '0.5em 0';
+        totalHorasDiv.style.textAlign = 'right';
         tabla.parentNode.insertBefore(totalHorasDiv, tabla);
+    } else {
+        totalHorasDiv.style.textAlign = 'right';
     }
 
     form.addEventListener('submit', async (e) => {
@@ -62,7 +66,8 @@ export async function initInforme() {
                 rows += `<tr><td>${i+1}</td><td>${r.consultorio||''}</td><td>${r.fecha||''}</td><td>${r.hora||''}</td><td>${r.usuario||''}</td><td>${r.estado||''}</td></tr>`;
             });
             tabla.innerHTML = rows;
-            totalHorasDiv.innerText = `Total: ${data.length}`;
+            totalHorasDiv.style.textAlign = 'right';
+            totalHorasDiv.innerHTML = `<div class="total-main">Total de filas: <strong>${data.length}</strong></div>`;
         } catch (err) {
             tabla.innerHTML = `<tr><td colspan="6">Error al obtener datos: ${err.message}</td></tr>`;
             totalHorasDiv.innerText = '';
@@ -95,10 +100,11 @@ export async function initInforme() {
             }
         });
         totalDiv.innerHTML = '';
-        totalDiv.innerHTML += `<div>Total de horas reservadas: <strong>${totalHorasReservadas.toFixed(2)}</strong></div>`;
-        totalDiv.innerHTML += `<div style='margin-left:1em;'>• Usadas: <strong>${totalHorasUsadas.toFixed(2)}</strong></div>`;
-        totalDiv.innerHTML += `<div style='margin-left:1em;'>• Por usar: <strong>${totalHorasPorUsar.toFixed(2)}</strong></div>`;
-        totalDiv.innerHTML += `<div style='color:#888'>Total de horas canceladas: <strong>${totalHorasCanceladas.toFixed(2)}</strong></div>`;
+        totalDiv.style.textAlign = 'right';
+        totalDiv.innerHTML += `<div class="total-main">Total de horas reservadas: <strong>${totalHorasReservadas.toFixed(2)}</strong></div>`;
+        totalDiv.innerHTML += `<div class="total-sub">• Usadas: <strong>${totalHorasUsadas.toFixed(2)}</strong></div>`;
+        totalDiv.innerHTML += `<div class="total-sub">• Por usar: <strong>${totalHorasPorUsar.toFixed(2)}</strong></div>`;
+        totalDiv.innerHTML += `<div class="total-cancel">Total de horas canceladas: <strong>${totalHorasCanceladas.toFixed(2)}</strong></div>`;
 
         if (!reservas.length) {
             tablaEl.innerHTML = '<tr><td colspan="6">Sin resultados</td></tr>';
