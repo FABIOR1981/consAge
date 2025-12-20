@@ -47,7 +47,21 @@ exports.handler = async (event) => {
                 // Si la búsqueda es un email (contiene @), buscar por substring en la línea 'Reserva realizada por: ...'
                 if (busqueda.includes('@')) {
                     const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
-                    return match && match[1].trim().toLowerCase().includes(busqueda);
+                    if (match) {
+                        const email = match[1].trim().toLowerCase();
+                        // Log para depuración
+                        // console.log('Comparando email:', email, 'con búsqueda:', busqueda);
+                        return email.includes(busqueda);
+                    }
+                    return false;
+                }
+                // Si la búsqueda NO es un email, buscar solo en el usuario antes del @
+                const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
+                if (match) {
+                    const email = match[1].trim().toLowerCase();
+                    const usuarioEmail = email.split('@')[0];
+                    if (usuarioEmail === busqueda) return true;
+                    if (usuarioEmail.startsWith(busqueda)) return true;
                 }
                 // Buscar por nombre/apellido en user_metadata si existiera (coincidencia exacta en palabras)
                 if (ev.user_metadata && ev.user_metadata.name) {
