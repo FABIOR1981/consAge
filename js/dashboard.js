@@ -15,6 +15,11 @@ const reservarTurno = async (hora) => {
     container.innerHTML = "<p>⌛ Procesando reserva y enviando invitaciones...</p>";
 
     try {
+        // asegurar que enviamos un colorId válido (fallback si no está definido)
+        const colorLookup = APP_CONFIG.coloresConsultorios || {};
+        const defaultColor = Object.values(colorLookup)[0] || '1';
+        const colorIdToSend = colorLookup[seleccion.consultorio] || defaultColor;
+
         const respuesta = await fetch('/.netlify/functions/reservar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -23,7 +28,7 @@ const reservarTurno = async (hora) => {
                 consultorio: seleccion.consultorio,
                 fecha: seleccion.fecha,
                 hora: hora,
-                colorId: APP_CONFIG.coloresConsultorios[seleccion.consultorio]
+                colorId: colorIdToSend
             })
         });
 
@@ -33,7 +38,13 @@ const reservarTurno = async (hora) => {
             alert("✅ ¡Éxito! Turno agendado. Revisa tu email y calendario.");
             cargarBotonesConsultorios();
         } else {
-            throw new Error(datos.details || "Error desconocido");
+            // mostrar la respuesta completa para depuración (missing fields o ocupados)
+            console.error('Error reservar:', datos);
+            const msg = datos && (datos.error || datos.details) ? `${datos.error || ''} ${datos.details || ''}` : 'Error desconocido';
+            const extras = datos && datos.missing ? `\nCampos faltantes: ${datos.missing.join(', ')}` : '';
+            const ocup = datos && datos.ocupados ? `\nOcupados: ${JSON.stringify(datos.ocupados)}` : '';
+            alert(`❌ No se pudo reservar:\n${msg}${extras}${ocup}`);
+            throw new Error(msg);
         }
     } catch (err) {
         alert("❌ Error: " + err.message);
