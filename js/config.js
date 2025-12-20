@@ -4,10 +4,28 @@ export const APP_CONFIG = {
     // Asignamos un colorId de Google a cada consultorio
     coloresConsultorios: {
         "1": "2",  // Flamenco
-        "2": "1",  // Banana
-        "3": "2",  // UVA
+        "2": "5",  // Banana
+        "3": "3",  // UVA
         "4": "7",  // Turquesa
         "5": "10"  // Albahaca
+
+/*
+1: Lavanda — #a4bdfc
+2: Salvia — #7ae7bf
+3: Uva — #dbadff
+4: Flamenco — #ff887c
+5: Banana — #fbd75b
+6: Mandarina — #ffb878
+7: Turquesa — #46d6db
+8: Gris claro — #e1e1e1
+9: Azul intenso — #5484ed
+10: Verde intenso — #51b749
+11: Tomate — #dc2127
+
+*/
+
+
+
     },
     horarios: {
         inicio: 8, // 08:00
