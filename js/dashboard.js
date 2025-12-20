@@ -164,4 +164,13 @@ const initDashboard = () => {
 if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", user => { if(user) initDashboard(); else window.location.href="index.html"; });
     window.netlifyIdentity.on("logout", () => window.location.href = "index.html");
+    // Agregar evento al botón de logout
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                window.netlifyIdentity.logout();
+            });
+        }
+    });
 }
