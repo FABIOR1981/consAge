@@ -177,5 +177,69 @@ if (window.netlifyIdentity) {
                 window.netlifyIdentity.logout();
             });
         }
+        // Evento para mostrar reservas del usuario
+        const misReservasBtn = document.getElementById('mis-reservas-btn');
+        if (misReservasBtn) {
+            misReservasBtn.addEventListener('click', async () => {
+                const user = netlifyIdentity.currentUser();
+                if (!user) return;
+                const container = document.getElementById('calendar-container');
+                container.innerHTML = '<h3>Mis Reservas</h3><p>Consultando tus reservas...</p>';
+                try {
+                    // Consultar reservas del usuario (ajustar endpoint si es necesario)
+                    const resp = await fetch(`/.netlify/functions/reservar?email=${encodeURIComponent(user.email)}`);
+                    const data = await resp.json();
+                    const reservas = data.userEvents || [];
+                    if (reservas.length === 0) {
+                        container.innerHTML += '<p>No tienes reservas activas.</p>';
+                        return;
+                    }
+                    const lista = document.createElement('ul');
+                    lista.className = 'reservas-lista';
+                    reservas.forEach(reserva => {
+                        const li = document.createElement('li');
+                        const fechaHora = `${reserva.fecha} ${reserva.hora}:00 hs`;
+                        // Calcular si se puede cancelar (más de 24h)
+                        const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
+                        const ahora = new Date();
+                        const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
+                        li.innerHTML = `<strong>Consultorio ${reserva.consultorio}</strong> - ${fechaHora}`;
+                        if (diffHoras > 24) {
+                            const btnCancelar = document.createElement('button');
+                            btnCancelar.innerText = 'Cancelar';
+                            btnCancelar.className = 'btn-cancelar';
+                            btnCancelar.onclick = async () => {
+                                if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+                                // Llamar a cancelarReserva con el eventId
+                                try {
+                                    const resp = await fetch('/.netlify/functions/reservar', {
+                                        method: 'DELETE',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ eventId: reserva.eventId, email: user.email })
+                                    });
+                                    const result = await resp.json();
+                                    if (resp.ok) {
+                                        alert('Reserva cancelada correctamente.');
+                                        li.remove();
+                                    } else {
+                                        alert('No se pudo cancelar: ' + (result.error || result.details || 'Error desconocido'));
+                                    }
+                                } catch (e) {
+                                    alert('Error al cancelar: ' + e.message);
+                                }
+                            };
+                            li.appendChild(btnCancelar);
+                        } else {
+                            li.innerHTML += ' <span style="color:gray">(No se puede cancelar: menos de 24h)</span>';
+                        }
+                        lista.appendChild(li);
+                    });
+                    container.innerHTML = '<h3>Mis Reservas</h3>';
+                    container.appendChild(lista);
+                } catch (e) {
+                    container.innerHTML += `<p style='color:red'>Error al consultar reservas: ${e.message}</p>`;
+                }
+            });
+        }
     });
 }
