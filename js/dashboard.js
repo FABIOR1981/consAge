@@ -210,9 +210,12 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             const fFin = fechaFinDefault.toISOString().slice(0,10);
             const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
             const js = await resp.json();
-            if (js && Array.isArray(js.users)) {
-                return mostrarMisReservas(emailFiltro, js.users);
+            let lista = Array.isArray(js.users) ? js.users : [];
+            // Si el usuario actual no está en la lista, agregarlo
+            if (!lista.some(u => u.email === user.email)) {
+                lista.unshift({ nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email, email: user.email });
             }
+            return mostrarMisReservas(emailFiltro, lista);
         } catch (e) {
             container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
             return;
@@ -243,7 +246,17 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     } else if (!isAdmin) {
         filtroEmail = user.email;
     }
-    // Nunca llamar si filtroEmail es vacío o nulo
+    // Siempre mostrar el combo para admin, aunque solo haya un usuario
+    if (isAdmin && usuariosLista && usuariosLista.length === 1) {
+        const formFiltro = document.createElement('form');
+        formFiltro.id = 'form-filtro-usuario';
+        formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
+        container.appendChild(formFiltro);
+        const combo = formFiltro.querySelector('#combo-usuario');
+        combo.innerHTML = `<option value="${usuariosLista[0].email}">${usuariosLista[0].nombre}</option>`;
+        combo.value = usuariosLista[0].email;
+        combo.disabled = true;
+    }
     if (filtroEmail) {
         await mostrarMisReservasAdmin(filtroEmail, isAdmin, usuariosLista);
     } else {
