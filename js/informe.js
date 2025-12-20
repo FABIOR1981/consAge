@@ -52,7 +52,9 @@ window.addEventListener('DOMContentLoaded', () => {
             data.reservas.forEach(ev => {
                 const consultorio = ev.summary ? ev.summary.split(':')[0] : '';
                 const usuario = (ev.description && ev.description.match(/Reserva realizada por: ([^\n]+)/)) ? RegExp.$1 : '';
-                tabla.innerHTML += `<tr><td>${consultorio}</td><td>${usuario}</td><td>${ev.start ? ev.start.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.end ? ev.end.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.description || ''}</td></tr>`;
+                const esCancelada = ev.summary && ev.summary.startsWith('Cancelada');
+                const estiloCancelada = esCancelada ? "background:#f0f0f0;color:#888;" : "";
+                tabla.innerHTML += `<tr style='${estiloCancelada}'><td>${consultorio}</td><td>${usuario}</td><td>${ev.start ? ev.start.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.end ? ev.end.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.description || ''}${esCancelada ? ' <span style=\'color:#888\'>(Cancelada)</span>' : ''}</td></tr>`;
             });
         } catch (err) {
             tabla.innerHTML = `<tr><td colspan="5" style="color:red">${err.message}</td></tr>`;

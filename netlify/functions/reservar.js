@@ -210,8 +210,17 @@ exports.handler = async (event) => {
             if (!eventRes.data.description || !eventRes.data.description.includes(email)) {
                 return { statusCode: 403, body: JSON.stringify({ error: 'No autorizado para cancelar esta reserva.' }) };
             }
-            await calendar.events.delete({ calendarId, eventId });
-            return { statusCode: 200, body: JSON.stringify({ message: 'Reserva cancelada correctamente.' }) };
+            // Actualizar el evento: anteponer 'Cancelada' y cambiar color a gris (colorId: 8)
+            const nuevoTitulo = eventRes.data.summary.startsWith('Cancelada') ? eventRes.data.summary : `Cancelada - ${eventRes.data.summary}`;
+            await calendar.events.patch({
+                calendarId,
+                eventId,
+                resource: {
+                    summary: nuevoTitulo,
+                    colorId: '8', // gris
+                }
+            });
+            return { statusCode: 200, body: JSON.stringify({ message: 'Reserva marcada como cancelada.' }) };
         } catch (error) {
             console.error("Error:", error.message);
             return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };

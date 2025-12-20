@@ -203,6 +203,12 @@ if (window.netlifyIdentity) {
                         const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
                         const ahora = new Date();
                         const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
+                        // Detectar si está cancelada por el título
+                        const esCancelada = reserva.summary && reserva.summary.startsWith('Cancelada');
+                        if (esCancelada) {
+                            // No mostrar reservas canceladas en 'Mis Reservas'
+                            return;
+                        }
                         li.innerHTML = `<strong>Consultorio ${reserva.consultorio}</strong> - ${fechaHora}`;
                         if (diffHoras > 24) {
                             const btnCancelar = document.createElement('button');
