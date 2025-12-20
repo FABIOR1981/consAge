@@ -252,7 +252,10 @@ async function renderInformeEnDashboard() {
         container.innerHTML = '<h3>Informe de Reservas</h3>' + (bodyMatch ? bodyMatch[1] : html);
         // Cargar e inicializar el script del informe (dinámicamente) para que el combo y el formulario funcionen
         try {
-            const mod = await import('./informe.js');
+            // Esperar un frame para que el HTML inyectado se procese por el navegador
+            await new Promise(r => requestAnimationFrame(r));
+            // Import dinámico resuelto respecto al módulo actual (más robusto que un string relativo)
+            const mod = await import(new URL('./informe.js', import.meta.url));
             if (mod && typeof mod.initInforme === 'function') mod.initInforme();
         } catch (impErr) {
             console.error('No se pudo inicializar informe.js:', impErr);
