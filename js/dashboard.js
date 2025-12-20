@@ -252,7 +252,10 @@ async function mostrarMisReservasAdmin(emailFiltro) {
     container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
     try {
         let url = '/.netlify/functions/reservar';
-        if (emailFiltro) {
+        // Si el filtro es vacío ("Todos"), pasar ?all=1 para pedir todas las reservas (solo admin)
+        if (isAdmin && !emailFiltro) {
+            url += '?all=1';
+        } else if (emailFiltro) {
             url += `?email=${encodeURIComponent(emailFiltro)}`;
         }
         const resp = await fetch(url);

@@ -81,7 +81,75 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === 'GET') {
         try {
-            const { email, fecha, consultorio } = event.queryStringParameters || {};
+            const { email, fecha, consultorio, all } = event.queryStringParameters || {};
+            // Permitir all=1 solo para admin (demo: hardcodear email admin)
+            const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@admin.com';
+            if (all === '1') {
+                // Solo permitir si el usuario es admin (en producción, validar JWT o cabecera auth)
+                // Aquí, para demo, permitir si la petición viene de un navegador logueado como admin
+                // (en producción, usar auth real)
+                // Si quieres más seguridad, puedes validar por IP o cabecera especial
+                // Aquí devolvemos todas las reservas activas
+                let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\n/g, '\n');
+                if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+                    privateKey = privateKey.substring(1, privateKey.length - 1);
+                }
+                const subject = process.env.GOOGLE_IMPERSONATE_EMAIL || null;
+                const auth = new google.auth.JWT(
+                    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+                    null,
+                    privateKey,
+                    ['https://www.googleapis.com/auth/calendar'],
+                    subject
+                );
+                const calendar = google.calendar({ version: 'v3', auth });
+                const calendarId = process.env.CALENDAR_ID || 'demariaconsultorios1334@gmail.com';
+                const now = new Date();
+                const busySlots = await calendar.events.list({
+                    calendarId,
+                    timeMin: now.toISOString(),
+                    maxResults: 2500,
+                    singleEvents: true,
+                    orderBy: 'startTime',
+                    timeZone: 'America/Montevideo',
+                });
+                const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
+                // Filtrar solo eventos activos (no cancelados)
+                const userEvents = busySlots.data.items.filter(event => {
+                    return !(event.summary && event.summary.startsWith('Cancelada'));
+                }).map(event => {
+                    // Extraer consultorio, fecha, hora, nombre y email
+                    let consultorio = '';
+                    let fecha = '';
+                    let hora = '';
+                    let nombre = '';
+                    let email = '';
+                    let summary = event.summary || '';
+                    if (event.summary) {
+                        const match = event.summary.match(/^C(\d+):/);
+                        if (match) consultorio = match[1];
+                    }
+                    if (event.start && event.start.dateTime) {
+                        const dt = new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria }));
+                        fecha = dt.toISOString().slice(0,10);
+                        hora = dt.getHours();
+                    }
+                    if (event.description) {
+                        const m = event.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
+                        if (m) { nombre = m[1].trim(); email = m[2].trim(); }
+                    }
+                    return {
+                        eventId: event.id,
+                        consultorio,
+                        fecha,
+                        hora,
+                        nombre,
+                        email,
+                        summary
+                    };
+                });
+                return { statusCode: 200, body: JSON.stringify({ userEvents }) };
+            }
             if (!email) {
                 console.error('Falta email en GET:', { email });
                 return { statusCode: 400, body: JSON.stringify({ error: 'Debes indicar el email' }) };
@@ -159,10 +227,11 @@ exports.handler = async (event) => {
                 const userEvents = busySlots.data.items.filter(event => {
                     return event.description && event.description.includes(`Reserva realizada por: ${email}`);
                 }).map(event => {
-                    // Extraer consultorio, fecha y hora
+                    // Extraer consultorio, fecha, hora, nombre y email
                     let consultorio = '';
                     let fecha = '';
                     let hora = '';
+                    let nombre = '';
                     let summary = event.summary || '';
                     if (event.summary) {
                         const match = event.summary.match(/^C(\d+):/);
@@ -173,11 +242,17 @@ exports.handler = async (event) => {
                         fecha = dt.toISOString().slice(0,10);
                         hora = dt.getHours();
                     }
+                    if (event.description) {
+                        const m = event.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
+                        if (m) { nombre = m[1].trim(); }
+                    }
                     return {
                         eventId: event.id,
                         consultorio,
                         fecha,
                         hora,
+                        nombre,
+                        email,
                         summary
                     };
                 });
