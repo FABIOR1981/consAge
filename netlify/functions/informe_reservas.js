@@ -40,16 +40,23 @@ exports.handler = async (event) => {
         }
         // Filtrar por usuario si se indica
         if (usuario) {
-            // Buscar por email, nombre o apellido (en user_metadata o en la descripción)
+            // Buscar por email, nombre o apellido (coincidencia exacta en palabras)
             const busqueda = usuario.trim().toLowerCase();
             eventos = eventos.filter(ev => {
                 if (!ev.description) return false;
-                // Buscar por email exacto
-                if (ev.description.toLowerCase().includes(busqueda)) return true;
-                // Buscar por nombre/apellido en user_metadata si existiera
-                if (ev.user_metadata && ev.user_metadata.name && ev.user_metadata.name.toLowerCase().includes(busqueda)) return true;
-                // Buscar en summary por si se guarda allí
-                if (ev.summary && ev.summary.toLowerCase().includes(busqueda)) return true;
+                // Buscar por email exacto en la línea 'Reserva realizada por: ...'
+                const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
+                if (match && match[1].trim().toLowerCase() === busqueda) return true;
+                // Buscar por nombre/apellido en user_metadata si existiera (coincidencia exacta en palabras)
+                if (ev.user_metadata && ev.user_metadata.name) {
+                    const nombre = ev.user_metadata.name.trim().toLowerCase();
+                    if (nombre.split(/\s+/).includes(busqueda)) return true;
+                }
+                // Buscar en summary por si se guarda allí (coincidencia exacta en palabras)
+                if (ev.summary) {
+                    const palabras = ev.summary.toLowerCase().split(/\s+/);
+                    if (palabras.includes(busqueda)) return true;
+                }
                 return false;
             });
         }
