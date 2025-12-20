@@ -160,12 +160,8 @@
             </label>
             <div style="display:flex; flex-direction:row; align-items:center; min-width:320px; gap:0.7em;">
                 <label for="input-busqueda" style="margin-bottom:0;">Búsqueda:</label>
-                <input type="text" name="busqueda" id="input-busqueda" placeholder="Ingrese valor a buscar" style="flex:1; min-width:120px;">
-                <div style="display:flex; flex-direction:row; align-items:center; gap:0.5em; margin-bottom:0;">
-                    <label style="margin:0 0.5em 0 0; font-weight:400;"><input type="radio" name="tipoBusqueda" value="usuario" checked> Usuario</label>
-                    <label style="margin:0 0.5em 0 0; font-weight:400;"><input type="radio" name="tipoBusqueda" value="nombre"> Nombre</label>
-                    <label style="margin:0; font-weight:400;"><input type="radio" name="tipoBusqueda" value="apellido"> Apellido</label>
-                </div>
+                <input type="text" name="busqueda" id="input-busqueda" placeholder="Ingrese nombre, apellido o email" style="flex:1; min-width:180px;">
+                <span style="font-size:0.95em; color:#666; margin-left:0.7em;">(usuario, nombre u apellido)</span>
             </div>
             <button type="submit">Buscar</button>
         </form>

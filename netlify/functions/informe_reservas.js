@@ -40,11 +40,17 @@ exports.handler = async (event) => {
         }
         // Filtrar por usuario si se indica
         if (usuario) {
-            // Filtrar por coincidencia exacta en la línea 'Reserva realizada por: ...'
+            // Buscar por email, nombre o apellido (en user_metadata o en la descripción)
+            const busqueda = usuario.trim().toLowerCase();
             eventos = eventos.filter(ev => {
                 if (!ev.description) return false;
-                const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
-                return match && match[1].trim().toLowerCase() === usuario.trim().toLowerCase();
+                // Buscar por email exacto
+                if (ev.description.toLowerCase().includes(busqueda)) return true;
+                // Buscar por nombre/apellido en user_metadata si existiera
+                if (ev.user_metadata && ev.user_metadata.name && ev.user_metadata.name.toLowerCase().includes(busqueda)) return true;
+                // Buscar en summary por si se guarda allí
+                if (ev.summary && ev.summary.toLowerCase().includes(busqueda)) return true;
+                return false;
             });
         }
         // Mapear a formato simple
