@@ -30,11 +30,10 @@ export async function initInforme() {
     if (!totalHorasDiv) {
         totalHorasDiv = document.createElement('div');
         totalHorasDiv.id = 'total-horas-informe';
-        totalHorasDiv.style.margin = '0.5em 0';
-        totalHorasDiv.style.textAlign = 'right';
+        totalHorasDiv.className = 'total-horas-informe';
         tabla.parentNode.insertBefore(totalHorasDiv, tabla);
     } else {
-        totalHorasDiv.style.textAlign = 'right';
+        totalHorasDiv.classList.add('total-horas-informe');
     }
 
     form.addEventListener('submit', async (e) => {
@@ -66,7 +65,7 @@ export async function initInforme() {
                 rows += `<tr><td>${i+1}</td><td>${r.consultorio||''}</td><td>${r.fecha||''}</td><td>${r.hora||''}</td><td>${r.usuario||''}</td><td>${r.estado||''}</td></tr>`;
             });
             tabla.innerHTML = rows;
-            totalHorasDiv.style.textAlign = 'right';
+            totalHorasDiv.classList.add('total-horas-informe');
             totalHorasDiv.innerHTML = `<div class="total-main">Total de filas: <strong>${data.length}</strong></div>`;
         } catch (err) {
             tabla.innerHTML = `<tr><td colspan="6">Error al obtener datos: ${err.message}</td></tr>`;
@@ -100,14 +99,8 @@ export async function initInforme() {
             }
         });
         totalDiv.innerHTML = '';
-        totalDiv.style.textAlign = 'right';
-            const colorMain = '#2e7d32';
-            const colorSub = '#2e7d32';
-            const colorCancel = '#888888';
-            totalDiv.innerHTML += `<div style="color:${colorMain}; font-weight:700;">Total de horas reservadas: <strong>${totalHorasReservadas.toFixed(2)}</strong></div>`;
-            totalDiv.innerHTML += `<div style="color:${colorSub}; margin-left:0.8em; font-weight:600;">• Usadas: <strong>${totalHorasUsadas.toFixed(2)}</strong></div>`;
-            totalDiv.innerHTML += `<div style="color:${colorSub}; margin-left:0.8em; font-weight:600;">• Por usar: <strong>${totalHorasPorUsar.toFixed(2)}</strong></div>`;
-            totalDiv.innerHTML += `<div style="color:${colorCancel}; font-weight:600; margin-top:0.25em;">Total de horas canceladas: <strong>${totalHorasCanceladas.toFixed(2)}</strong></div>`;
+        totalDiv.classList.add('total-horas-informe');
+        totalDiv.innerHTML += `<div class="total-main">Total de horas reservadas: <strong>${totalHorasReservadas.toFixed(2)}</strong></div>`;
         totalDiv.innerHTML += `<div class="total-sub">• Usadas: <strong>${totalHorasUsadas.toFixed(2)}</strong></div>`;
         totalDiv.innerHTML += `<div class="total-sub">• Por usar: <strong>${totalHorasPorUsar.toFixed(2)}</strong></div>`;
         totalDiv.innerHTML += `<div class="total-cancel">Total de horas canceladas: <strong>${totalHorasCanceladas.toFixed(2)}</strong></div>`;
@@ -121,8 +114,8 @@ export async function initInforme() {
             const consultorio = ev.summary ? ev.summary.split(':')[0] : '';
             const usuario = (ev.description && ev.description.match(/Reserva realizada por: ([^\n]+)/)) ? RegExp.$1 : '';
             const esCancelada = ev.summary && ev.summary.startsWith('Cancelada');
-            const estiloCancelada = esCancelada ? "background:#f0f0f0;color:#888;" : "";
-            tablaEl.innerHTML += `<tr style='${estiloCancelada}'><td>${idx + 1}</td><td>${consultorio}</td><td>${usuario}</td><td>${ev.start ? ev.start.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.end ? ev.end.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.description || ''}${esCancelada ? ' <span style=\'color:#888\'>(Cancelada)</span>' : ''}</td></tr>`;
+            const rowClass = esCancelada ? 'fila-cancelada' : '';
+            tablaEl.innerHTML += `<tr class='${rowClass}'><td>${idx + 1}</td><td>${consultorio}</td><td>${usuario}</td><td>${ev.start ? ev.start.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.end ? ev.end.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.description || ''}${esCancelada ? ' <span class="cancel-label">(Cancelada)</span>' : ''}</td></tr>`;
         });
     }
 }

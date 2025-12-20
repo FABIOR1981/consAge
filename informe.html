@@ -4,159 +4,7 @@
     <meta charset="UTF-8">
     <title>Informe de Reservas</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .informe-container {
-            max-width: 950px;
-            margin: 40px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            padding: 2.5em 2em 2em 2em;
-        }
-        .informe-titulo {
-            text-align: center;
-            color: #1976d2;
-            margin-bottom: 1.5em;
-        }
-        .informe-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.2em 2em;
-            justify-content: center;
-            align-items: flex-end;
-            margin-bottom: 2em;
-        }
-        .informe-form label {
-            display: flex;
-            flex-direction: column;
-            font-weight: 500;
-            color: #333;
-            min-width: 170px;
-        }
-        .informe-form input[type="text"],
-        .informe-form input[type="date"],
-        .informe-form select {
-            margin-top: 0.3em;
-            padding: 0.6em 0.8em;
-            border-radius: 6px;
-            border: 1px solid #bdbdbd;
-            font-size: 1.05em;
-            min-width: 150px;
-            box-sizing: border-box;
-            height: 48px;
-            background: #fff;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-        }
-        .informe-form input[type="radio"] {
-            margin: 0 0.3em 0 0;
-            width: auto;
-            height: auto;
-            accent-color: #1976d2;
-        }
-        .informe-form select {
-            padding-right: 2em;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 0.7em center;
-            background-size: 1.2em;
-        }
-        .informe-form button {
-            background: #1976d2;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 0.8em 2.2em;
-            font-size: 1.1em;
-            font-weight: 600;
-            height: 48px;
-            align-self: flex-end;
-            transition: background 0.2s;
-            margin-left: 1em;
-        }
-        .informe-form button:hover {
-            background: #125ea7;
-        }
-        @media (max-width: 700px) {
-            .informe-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .informe-form label, .informe-form button {
-                min-width: 0;
-                width: 100%;
-                margin-left: 0;
-            }
-            .informe-form button {
-                margin-top: 1em;
-            }
-        }
-        #total-horas-informe {
-            font-size: 1.05em;
-            margin-bottom: 1em;
-            text-align: right;
-            color: #2e7d32;
-        }
-        #total-horas-informe .total-main {
-            color: #2e7d32;
-            font-weight: 700;
-            margin-bottom: 0.25em;
-        }
-        #total-horas-informe .total-sub {
-            margin-left: 0.8em;
-            color: #2e7d32;
-            font-weight: 600;
-            margin-bottom: 0.15em;
-        }
-        #total-horas-informe .total-cancel {
-            color: #666;
-            font-weight: 600;
-            margin-top: 0.25em;
-        }
-        #tabla-informe {
-            border-collapse: collapse;
-            width: 100%;
-            background: #fafbfc;
-            margin-top: 1em;
-        }
-        #tabla-informe th, #tabla-informe td {
-            border: 1px solid #e0e0e0;
-            padding: 0.7em 0.5em;
-            text-align: left;
-        }
-        #tabla-informe th {
-            background: #1976d2;
-            color: #fff;
-            font-weight: 700;
-        }
-        #tabla-informe tr:nth-child(even) {
-            background: #f1f7fa;
-        }
-        @media print {
-            body, html {
-                background: #fff !important;
-            }
-            .informe-container {
-                box-shadow: none !important;
-                border-radius: 0 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .informe-form, button, input, select {
-                display: none !important;
-            }
-            #total-horas-informe {
-                color: #000 !important;
-                text-align: left !important;
-                margin-bottom: 0.5em !important;
-            }
-            #tabla-informe th {
-                background: #eee !important;
-                color: #000 !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/informe.css">
 </head>
 <body>
     <div class="informe-container">
@@ -173,10 +21,10 @@
                     <option value="0">Todos</option>
                 </select>
             </label>
-            <div style="display:flex; flex-direction:row; align-items:center; min-width:320px; gap:0.7em;">
-                <label for="input-busqueda" style="margin-bottom:0;">Búsqueda:</label>
-                <input type="text" name="busqueda" id="input-busqueda" placeholder="Ingrese nombre, apellido o email" style="flex:1; min-width:180px;">
-                <span style="font-size:0.95em; color:#666; margin-left:0.7em;">(usuario, nombre u apellido)</span>
+            <div class="search-row">
+                <label for="input-busqueda" class="search-label">Búsqueda:</label>
+                <input type="text" name="busqueda" id="input-busqueda" class="search-input" placeholder="Ingrese nombre, apellido o email">
+                <span class="search-note">(usuario, nombre u apellido)</span>
             </div>
             <button type="submit">Buscar</button>
         </form>
