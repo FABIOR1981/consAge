@@ -250,6 +250,13 @@ async function renderInformeEnDashboard() {
         let html = await resp.text();
             const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
         container.innerHTML = '<h3>Informe de Reservas</h3>' + (bodyMatch ? bodyMatch[1] : html);
+        // Cargar e inicializar el script del informe (dinámicamente) para que el combo y el formulario funcionen
+        try {
+            const mod = await import('./informe.js');
+            if (mod && typeof mod.initInforme === 'function') mod.initInforme();
+        } catch (impErr) {
+            console.error('No se pudo inicializar informe.js:', impErr);
+        }
     } catch (e) {
         container.innerHTML += `<p style='color:red'>Error al cargar informe: ${e.message}</p>`;
     }
