@@ -222,7 +222,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         }
     }
 
-    // Renderizar combo si es admin
+    // Renderizar combo solo una vez para admin
     let filtroEmail = emailFiltro;
     if (isAdmin && usuariosLista && usuariosLista.length > 0) {
         const formFiltro = document.createElement('form');
@@ -237,6 +237,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             defaultEmail = usuariosLista[0].email;
         }
         combo.value = emailFiltro || defaultEmail;
+        combo.disabled = usuariosLista.length === 1;
         combo.addEventListener('change', (e) => {
             if (e.target.value) {
                 mostrarMisReservas(e.target.value, usuariosLista);
@@ -245,17 +246,6 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         filtroEmail = combo.value;
     } else if (!isAdmin) {
         filtroEmail = user.email;
-    }
-    // Siempre mostrar el combo para admin, aunque solo haya un usuario
-    if (isAdmin && usuariosLista && usuariosLista.length === 1) {
-        const formFiltro = document.createElement('form');
-        formFiltro.id = 'form-filtro-usuario';
-        formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
-        container.appendChild(formFiltro);
-        const combo = formFiltro.querySelector('#combo-usuario');
-        combo.innerHTML = `<option value="${usuariosLista[0].email}">${usuariosLista[0].nombre}</option>`;
-        combo.value = usuariosLista[0].email;
-        combo.disabled = true;
     }
     if (filtroEmail) {
         await mostrarMisReservasAdmin(filtroEmail, isAdmin, usuariosLista);
