@@ -368,4 +368,3 @@ if (window.netlifyIdentity) {
             });
         }
     });
-}
