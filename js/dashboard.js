@@ -230,8 +230,8 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
         // Selecciona el primer usuario si no hay filtro
         combo.value = emailFiltro || usuariosLista[0].email;
-        combo.addEventListener('change', () => {
-            mostrarMisReservas(combo.value, usuariosLista);
+        combo.addEventListener('change', (e) => {
+            mostrarMisReservas(e.target.value, usuariosLista);
         });
         filtroEmail = combo.value;
     } else if (!isAdmin) {
