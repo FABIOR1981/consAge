@@ -3,11 +3,11 @@ export const APP_CONFIG = {
     consultorios: [1, 2, 3, 4, 5],
     // Asignamos un colorId de Google a cada consultorio
     coloresConsultorios: {
-        "1": "2",  // Rojo (Coral)
-        "2": "6",  // Girasol (Amarillo intenso)
-        "3": "9",  // Violeta  UVA
-        "4": "1",  // Azul (Lavanda)
-        "5": "10"  // Verde (Albahaca)
+        "1": "2",  // Flamenco
+        "2": "1",  // Banana
+        "3": "2",  // UVA
+        "4": "7",  // Turquesa
+        "5": "10"  // Albahaca
     },
     horarios: {
         inicio: 8, // 08:00
