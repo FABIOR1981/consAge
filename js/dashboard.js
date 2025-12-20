@@ -228,8 +228,8 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         container.appendChild(formFiltro);
         const combo = formFiltro.querySelector('#combo-usuario');
         combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
-        combo.insertAdjacentHTML('afterbegin', '<option value="">Todos</option>');
-        combo.value = emailFiltro || '';
+        // Selecciona el primer usuario si no hay filtro
+        combo.value = emailFiltro || usuariosLista[0].email;
         combo.addEventListener('change', () => {
             mostrarMisReservas(combo.value, usuariosLista);
         });
