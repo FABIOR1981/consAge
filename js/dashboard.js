@@ -163,7 +163,120 @@ const initDashboard = () => {
     if (welcomeMsg) {
         welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
     }
+    renderDashboardButtons(user);
     cargarBotonesConsultorios();
+};
+
+function renderDashboardButtons(user) {
+    const btnsDiv = document.getElementById('dashboard-btns');
+    if (!btnsDiv) return;
+    btnsDiv.innerHTML = '';
+    // Botón Agenda
+    const btnAgenda = document.createElement('button');
+    btnAgenda.id = 'agenda-btn';
+    btnAgenda.className = 'btn-secondary';
+    btnAgenda.innerText = 'Agenda';
+    btnAgenda.onclick = cargarBotonesConsultorios;
+    btnsDiv.appendChild(btnAgenda);
+    // Botón Mis Reservas
+    const btnMisReservas = document.createElement('button');
+    btnMisReservas.id = 'mis-reservas-btn';
+    btnMisReservas.className = 'btn-primary';
+    btnMisReservas.innerText = 'Mis Reservas';
+    btnMisReservas.onclick = mostrarMisReservas;
+    btnsDiv.appendChild(btnMisReservas);
+    // Botón Informe solo para admin
+    if (user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin')) {
+        const btnInforme = document.createElement('button');
+        btnInforme.id = 'informe-btn';
+        btnInforme.className = 'btn-secondary';
+        btnInforme.innerText = 'Informe';
+        btnInforme.onclick = renderInformeEnDashboard;
+        btnsDiv.appendChild(btnInforme);
+    }
+}
+
+async function mostrarMisReservas() {
+    const user = netlifyIdentity.currentUser();
+    if (!user) return;
+    const container = document.getElementById('calendar-container');
+    container.innerHTML = '<h3>Mis Reservas</h3><p>Consultando tus reservas...</p>';
+    try {
+        const resp = await fetch(`/.netlify/functions/reservar?email=${encodeURIComponent(user.email)}`);
+        const data = await resp.json();
+        const reservas = data.userEvents || [];
+        if (reservas.length === 0) {
+            container.innerHTML += '<p>No tienes reservas activas.</p>';
+        } else {
+            const lista = document.createElement('ul');
+            lista.className = 'reservas-lista';
+            reservas.forEach(reserva => {
+                const li = document.createElement('li');
+                const fechaHora = `${reserva.fecha} ${reserva.hora}:00 hs`;
+                const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
+                const ahora = new Date();
+                const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
+                const esCancelada = reserva.summary && reserva.summary.startsWith('Cancelada');
+                if (esCancelada) return;
+                li.innerHTML = `<strong>Consultorio ${reserva.consultorio}</strong> - ${fechaHora}`;
+                if (diffHoras > 24) {
+                    const btnCancelar = document.createElement('button');
+                    btnCancelar.innerText = 'Cancelar';
+                    btnCancelar.className = 'btn-cancelar';
+                    btnCancelar.onclick = async () => {
+                        if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+                        try {
+                            const resp = await fetch('/.netlify/functions/reservar', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ eventId: reserva.eventId, email: user.email })
+                            });
+                            const result = await resp.json();
+                            if (resp.ok) {
+                                alert('Reserva cancelada correctamente.');
+                                li.remove();
+                            } else {
+                                alert('No se pudo cancelar: ' + (result.error || result.details || 'Error desconocido'));
+                            }
+                        } catch (e) {
+                            alert('Error al cancelar: ' + e.message);
+                        }
+                    };
+                    li.appendChild(btnCancelar);
+                } else {
+                    li.innerHTML += ' <span style="color:gray">(No se puede cancelar: menos de 24h)</span>';
+                }
+                lista.appendChild(li);
+            });
+            container.innerHTML = '<h3>Mis Reservas</h3>';
+            container.appendChild(lista);
+        }
+        // Botón para volver a la agenda
+        const btnVolver = document.createElement('button');
+        btnVolver.innerText = 'Volver a Agenda';
+        btnVolver.className = 'btn-volver';
+        btnVolver.style.marginTop = '1.5em';
+        btnVolver.onclick = cargarBotonesConsultorios;
+        container.appendChild(btnVolver);
+    } catch (e) {
+        container.innerHTML += `<p style='color:red'>Error al consultar reservas: ${e.message}</p>`;
+    }
+}
+
+async function renderInformeEnDashboard() {
+    const container = document.getElementById('calendar-container');
+    container.innerHTML = '<h3>Informe de Reservas</h3><p>Cargando informe...</p>';
+    try {
+        // Cargar el HTML del informe y renderizarlo en el div
+        const resp = await fetch('informe.html');
+        let html = await resp.text();
+        // Extraer solo el contenido relevante del body
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        container.innerHTML = '<h3>Informe de Reservas</h3>' + (bodyMatch ? bodyMatch[1] : html);
+    } catch (e) {
+        container.innerHTML += `<p style='color:red'>Error al cargar informe: ${e.message}</p>`;
+    }
+}
 };
 
 if (window.netlifyIdentity) {
