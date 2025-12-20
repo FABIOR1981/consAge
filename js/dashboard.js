@@ -249,7 +249,10 @@ async function renderInformeEnDashboard() {
         const resp = await fetch('informe.html');
         let html = await resp.text();
             const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-        container.innerHTML = '<h3>Informe de Reservas</h3>' + (bodyMatch ? bodyMatch[1] : html);
+            let fragment = bodyMatch ? bodyMatch[1] : html;
+            // Eliminar tags <script> que carguen el propio informe.js para evitar doble carga
+            fragment = fragment.replace(/<script[^>]+src=["']?[^"'>]*informe\.js[^"'>]*["']?[^>]*>[\s\S]*?<\/script>/gi, '');
+            container.innerHTML = '<h3>Informe de Reservas</h3>' + fragment;
         // Cargar e inicializar el script del informe (dinámicamente) para que el combo y el formulario funcionen
         try {
             // Esperar un frame para que el HTML inyectado se procese por el navegador
