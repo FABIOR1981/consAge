@@ -74,16 +74,16 @@ window.addEventListener('DOMContentLoaded', () => {
             totalHorasDiv.innerHTML += `<div style='margin-left:1em;'>• Por usar: <strong>${totalHorasPorUsar.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>`;
             totalHorasDiv.innerHTML += `<div style='color:#888'>Total de horas canceladas: <strong>${totalHorasCanceladas.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></div>`;
             if (!data.reservas.length) {
-                tabla.innerHTML = '<tr><td colspan="5">Sin resultados</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="6">Sin resultados</td></tr>';
                 return;
             }
-            tabla.innerHTML = `<tr><th>Consultorio</th><th>Usuario</th><th>Inicio</th><th>Fin</th><th>Descripción</th></tr>`;
-            data.reservas.forEach(ev => {
+            tabla.innerHTML = `<tr><th>Num</th><th>Consultorio</th><th>Usuario</th><th>Inicio</th><th>Fin</th><th>Descripción</th></tr>`;
+            data.reservas.forEach((ev, idx) => {
                 const consultorio = ev.summary ? ev.summary.split(':')[0] : '';
                 const usuario = (ev.description && ev.description.match(/Reserva realizada por: ([^\n]+)/)) ? RegExp.$1 : '';
                 const esCancelada = ev.summary && ev.summary.startsWith('Cancelada');
                 const estiloCancelada = esCancelada ? "background:#f0f0f0;color:#888;" : "";
-                tabla.innerHTML += `<tr style='${estiloCancelada}'><td>${consultorio}</td><td>${usuario}</td><td>${ev.start ? ev.start.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.end ? ev.end.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.description || ''}${esCancelada ? ' <span style=\'color:#888\'>(Cancelada)</span>' : ''}</td></tr>`;
+                tabla.innerHTML += `<tr style='${estiloCancelada}'><td>${idx + 1}</td><td>${consultorio}</td><td>${usuario}</td><td>${ev.start ? ev.start.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.end ? ev.end.replace('T', ' ').slice(0,16) : ''}</td><td>${ev.description || ''}${esCancelada ? ' <span style=\'color:#888\'>(Cancelada)</span>' : ''}</td></tr>`;
             });
         } catch (err) {
             tabla.innerHTML = `<tr><td colspan="5" style="color:red">${err.message}</td></tr>`;

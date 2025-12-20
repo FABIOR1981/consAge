@@ -40,7 +40,12 @@ exports.handler = async (event) => {
         }
         // Filtrar por usuario si se indica
         if (usuario) {
-            eventos = eventos.filter(ev => ev.description && ev.description.includes(usuario));
+            // Filtrar por coincidencia exacta en la línea 'Reserva realizada por: ...'
+            eventos = eventos.filter(ev => {
+                if (!ev.description) return false;
+                const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
+                return match && match[1].trim().toLowerCase() === usuario.trim().toLowerCase();
+            });
         }
         // Mapear a formato simple
         const resultado = eventos.map(ev => ({

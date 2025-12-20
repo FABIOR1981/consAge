@@ -153,6 +153,7 @@ exports.handler = async (event) => {
                     let consultorio = '';
                     let fecha = '';
                     let hora = '';
+                    let summary = event.summary || '';
                     if (event.summary) {
                         const match = event.summary.match(/^C(\d+):/);
                         if (match) consultorio = match[1];
@@ -166,7 +167,8 @@ exports.handler = async (event) => {
                         eventId: event.id,
                         consultorio,
                         fecha,
-                        hora
+                        hora,
+                        summary
                     };
                 });
                 return { statusCode: 200, body: JSON.stringify({ userEvents }) };
