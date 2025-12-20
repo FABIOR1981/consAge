@@ -176,7 +176,11 @@ function renderDashboardButtons(user) {
     const btnMisReservas = document.createElement('button');
     btnMisReservas.id = 'mis-reservas-btn';
     btnMisReservas.className = 'btn-primary';
-    btnMisReservas.innerText = 'Mis Reservas';
+    if (user && user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin')) {
+        btnMisReservas.innerText = 'Reservas';
+    } else {
+        btnMisReservas.innerText = 'Mis Reservas';
+    }
     btnMisReservas.onclick = mostrarMisReservas;
     btnsDiv.appendChild(btnMisReservas);
     if (user && user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin')) {
@@ -192,14 +196,70 @@ function renderDashboardButtons(user) {
 async function mostrarMisReservas() {
     const user = netlifyIdentity.currentUser();
     if (!user) return;
+    const isAdmin = user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin');
     const container = document.getElementById('calendar-container');
-    container.innerHTML = '<h3>Mis Reservas</h3><p>Consultando tus reservas...</p>';
+    container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
+
+    let usuarioSeleccionado = user.email;
+    let usuariosLista = [];
+    if (isAdmin) {
+        // Obtener lista de usuarios (nombres y emails) desde el backend
+        try {
+            const hoy = new Date();
+            const fechaFinDefault = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
+            const fechaInicioDefault = new Date(hoy.getTime() - (90 * 24 * 60 * 60 * 1000));
+            const fInicio = fechaInicioDefault.toISOString().slice(0,10);
+            const fFin = fechaFinDefault.toISOString().slice(0,10);
+            const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
+            const js = await resp.json();
+            if (js && Array.isArray(js.users)) {
+                usuariosLista = js.users;
+            }
+        } catch (e) {
+            container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
+        }
+    }
+
+    // Renderizar combo si es admin
+    if (isAdmin && usuariosLista.length > 0) {
+        const formFiltro = document.createElement('form');
+        formFiltro.id = 'form-filtro-usuario';
+        formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
+        container.appendChild(formFiltro);
+        const combo = formFiltro.querySelector('#combo-usuario');
+        combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
+        // Por defecto, mostrar todos
+        combo.insertAdjacentHTML('afterbegin', '<option value="">Todos</option>');
+        combo.value = '';
+        usuarioSeleccionado = '';
+        combo.addEventListener('change', () => {
+            mostrarMisReservasAdmin(combo.value);
+        });
+        // Mostrar todas las reservas al inicio
+        await mostrarMisReservasAdmin(combo.value);
+        return;
+    }
+
+    // Usuario normal: mostrar solo sus reservas
+    await mostrarMisReservasAdmin(user.email);
+}
+
+// Nueva función para mostrar reservas de un usuario (o todas si email vacío)
+async function mostrarMisReservasAdmin(emailFiltro) {
+    const user = netlifyIdentity.currentUser();
+    const isAdmin = user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin');
+    const container = document.getElementById('calendar-container');
+    container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
     try {
-        const resp = await fetch(`/.netlify/functions/reservar?email=${encodeURIComponent(user.email)}`);
+        let url = '/.netlify/functions/reservar';
+        if (emailFiltro) {
+            url += `?email=${encodeURIComponent(emailFiltro)}`;
+        }
+        const resp = await fetch(url);
         const data = await resp.json();
         const reservas = data.userEvents || [];
         if (reservas.length === 0) {
-            container.innerHTML += '<p>No tienes reservas activas.</p>';
+            container.innerHTML += '<p>No hay reservas activas.</p>';
             return;
         }
         const lista = document.createElement('ul');
@@ -212,7 +272,7 @@ async function mostrarMisReservas() {
             const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
             const esCancelada = reserva.summary && reserva.summary.startsWith('Cancelada');
             if (esCancelada) return;
-            li.innerHTML = `<strong>Consultorio ${reserva.consultorio}</strong> - ${fechaHora}`;
+            li.innerHTML = `<strong>Consultorio ${reserva.consultorio}</strong> - ${fechaHora} - <span>${reserva.nombre || reserva.email}</span>`;
             if (diffHoras > 24) {
                 const btnCancelar = document.createElement('button');
                 btnCancelar.innerText = 'Cancelar';
@@ -223,7 +283,7 @@ async function mostrarMisReservas() {
                         const resp = await fetch('/.netlify/functions/reservar', {
                             method: 'DELETE',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ eventId: reserva.eventId, email: user.email })
+                            body: JSON.stringify({ eventId: reserva.eventId, email: reserva.email })
                         });
                         const result = await resp.json();
                         if (resp.ok) {
@@ -242,7 +302,35 @@ async function mostrarMisReservas() {
             }
             lista.appendChild(li);
         });
-        container.innerHTML = '<h3>Mis Reservas</h3>';
+        container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3>`;
+        if (isAdmin) {
+            // Mantener el combo de usuario arriba
+            const formFiltro = document.createElement('form');
+            formFiltro.id = 'form-filtro-usuario';
+            formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
+            container.appendChild(formFiltro);
+            const combo = formFiltro.querySelector('#combo-usuario');
+            // Repoblar combo con la última lista
+            let usuariosLista = [];
+            try {
+                const hoy = new Date();
+                const fechaFinDefault = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
+                const fechaInicioDefault = new Date(hoy.getTime() - (90 * 24 * 60 * 60 * 1000));
+                const fInicio = fechaInicioDefault.toISOString().slice(0,10);
+                const fFin = fechaFinDefault.toISOString().slice(0,10);
+                const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
+                const js = await resp.json();
+                if (js && Array.isArray(js.users)) {
+                    usuariosLista = js.users;
+                }
+            } catch {}
+            combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
+            combo.insertAdjacentHTML('afterbegin', '<option value="">Todos</option>');
+            combo.value = emailFiltro || '';
+            combo.addEventListener('change', () => {
+                mostrarMisReservasAdmin(combo.value);
+            });
+        }
         container.appendChild(lista);
         const btnVolver = document.createElement('button');
         btnVolver.innerText = 'Volver a Agenda';

@@ -38,15 +38,20 @@ exports.handler = async (event) => {
             const regexConsultorio = new RegExp(`^C${consultorio}:\\s`, 'i');
             eventos = eventos.filter(ev => ev.summary && regexConsultorio.test(ev.summary));
         }
-        // Si solicitan sólo la lista de usuarios, extraer emails desde las descripciones
+        // Si solicitan sólo la lista de usuarios, extraer nombre y email desde las descripciones
         if (params.listUsers) {
-            const usersSet = new Set();
+            const usersMap = new Map();
             eventos.forEach(ev => {
                 if (!ev.description) return;
-                const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
-                if (match) usersSet.add(match[1].trim());
+                // Formato: Reserva realizada por: NOMBRE <email>
+                const match = ev.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
+                if (match) {
+                    const nombre = match[1].trim();
+                    const email = match[2].trim();
+                    if (!usersMap.has(email)) usersMap.set(email, { nombre, email });
+                }
             });
-            const users = Array.from(usersSet).sort();
+            const users = Array.from(usersMap.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
             return { statusCode: 200, body: JSON.stringify({ users }) };
         }
         // Filtrar por usuario si se indica
