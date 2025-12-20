@@ -193,17 +193,15 @@ function renderDashboardButtons(user) {
     }
 }
 
-async function mostrarMisReservas() {
+async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     const user = netlifyIdentity.currentUser();
     if (!user) return;
     const isAdmin = user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin');
     const container = document.getElementById('calendar-container');
     container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
 
-    let usuarioSeleccionado = user.email;
-    let usuariosLista = [];
-    if (isAdmin) {
-        // Obtener lista de usuarios (nombres y emails) desde el backend
+    // Si es admin y no hay lista de usuarios, obtenerla y re-llamar la función
+    if (isAdmin && !usuariosLista) {
         try {
             const hoy = new Date();
             const fechaFinDefault = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
@@ -213,46 +211,41 @@ async function mostrarMisReservas() {
             const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
             const js = await resp.json();
             if (js && Array.isArray(js.users)) {
-                usuariosLista = js.users;
+                return mostrarMisReservas(emailFiltro, js.users);
             }
         } catch (e) {
             container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
+            return;
         }
     }
 
     // Renderizar combo si es admin
-    if (isAdmin && usuariosLista.length > 0) {
+    let filtroEmail = emailFiltro;
+    if (isAdmin && usuariosLista && usuariosLista.length > 0) {
         const formFiltro = document.createElement('form');
         formFiltro.id = 'form-filtro-usuario';
         formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
         container.appendChild(formFiltro);
         const combo = formFiltro.querySelector('#combo-usuario');
         combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
-        // Por defecto, mostrar todos
         combo.insertAdjacentHTML('afterbegin', '<option value="">Todos</option>');
-        combo.value = '';
-        usuarioSeleccionado = '';
+        combo.value = emailFiltro || '';
         combo.addEventListener('change', () => {
-            mostrarMisReservasAdmin(combo.value);
+            mostrarMisReservas(combo.value, usuariosLista);
         });
-        // Mostrar todas las reservas al inicio
-        await mostrarMisReservasAdmin(combo.value);
-        return;
+        filtroEmail = combo.value;
+    } else if (!isAdmin) {
+        filtroEmail = user.email;
     }
-
-    // Usuario normal: mostrar solo sus reservas
-    await mostrarMisReservasAdmin(user.email);
+    await mostrarMisReservasAdmin(filtroEmail, isAdmin, usuariosLista);
 }
 
 // Nueva función para mostrar reservas de un usuario (o todas si email vacío)
-async function mostrarMisReservasAdmin(emailFiltro) {
+async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
     const user = netlifyIdentity.currentUser();
-    const isAdmin = user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin');
     const container = document.getElementById('calendar-container');
-    container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
     try {
         let url = '/.netlify/functions/reservar';
-        // Si el filtro es vacío ("Todos"), pasar ?all=1 para pedir todas las reservas (solo admin)
         if (isAdmin && !emailFiltro) {
             url += '?all=1';
         } else if (emailFiltro) {
@@ -305,35 +298,6 @@ async function mostrarMisReservasAdmin(emailFiltro) {
             }
             lista.appendChild(li);
         });
-        container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3>`;
-        if (isAdmin) {
-            // Mantener el combo de usuario arriba
-            const formFiltro = document.createElement('form');
-            formFiltro.id = 'form-filtro-usuario';
-            formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
-            container.appendChild(formFiltro);
-            const combo = formFiltro.querySelector('#combo-usuario');
-            // Repoblar combo con la última lista
-            let usuariosLista = [];
-            try {
-                const hoy = new Date();
-                const fechaFinDefault = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
-                const fechaInicioDefault = new Date(hoy.getTime() - (90 * 24 * 60 * 60 * 1000));
-                const fInicio = fechaInicioDefault.toISOString().slice(0,10);
-                const fFin = fechaFinDefault.toISOString().slice(0,10);
-                const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
-                const js = await resp.json();
-                if (js && Array.isArray(js.users)) {
-                    usuariosLista = js.users;
-                }
-            } catch {}
-            combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
-            combo.insertAdjacentHTML('afterbegin', '<option value="">Todos</option>');
-            combo.value = emailFiltro || '';
-            combo.addEventListener('change', () => {
-                mostrarMisReservasAdmin(combo.value);
-            });
-        }
         container.appendChild(lista);
         const btnVolver = document.createElement('button');
         btnVolver.innerText = 'Volver a Agenda';
