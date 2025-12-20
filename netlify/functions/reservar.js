@@ -7,7 +7,7 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === 'POST') {
         try {
-            const { email, consultorio, fecha, hora, colorId } = JSON.parse(event.body);
+            const { email, nombre, consultorio, fecha, hora, colorId } = JSON.parse(event.body);
             const missing = [];
             if (!email) missing.push('email');
             if (!consultorio) missing.push('consultorio');
@@ -42,9 +42,9 @@ exports.handler = async (event) => {
             const insertOpts = {
                 calendarId,
                 resource: {
-                    summary: `C${consultorio}: Reserva confirmada (${email})`,
+                    summary: `C${consultorio}: ${nombre || email}`,
                     colorId: colorId,
-                    description: `Reserva realizada por: ${email}\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
+                    description: `Reserva realizada por: ${nombre || email} <${email}>\nConsultorio: ${consultorio}\nFecha: ${fecha}\nHora: ${horaInicio}:00 hs.`,
                     start: {
                         dateTime: `${fecha}T${horaInicio}:00:00-03:00`,
                         timeZone: 'America/Montevideo'

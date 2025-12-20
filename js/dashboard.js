@@ -20,11 +20,13 @@ const reservarTurno = async (hora) => {
         const defaultColor = Object.values(colorLookup)[0] || '1';
         const colorIdToSend = colorLookup[seleccion.consultorio] || defaultColor;
 
+        const displayName = (user && (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))) || (user && user.name) || user.email;
         const respuesta = await fetch('/.netlify/functions/reservar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: user.email,
+                nombre: displayName,
                 consultorio: seleccion.consultorio,
                 fecha: seleccion.fecha,
                 hora: hora,
