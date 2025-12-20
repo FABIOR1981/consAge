@@ -64,8 +64,10 @@ exports.handler = async (event) => {
                 timeMax: `${fecha}T${horaFin}:00:00-03:00`,
                 timeZone: 'America/Montevideo',
             });
-            if (busySlots.data.items && busySlots.data.items.length > 0) {
-                return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.', ocupados: busySlots.data.items.map(i => ({ id: i.id, summary: i.summary })) }) };
+            // Ignorar eventos que fueron marcados como 'Cancelada' (se mantienen para informes)
+            const ocupantes = (busySlots.data.items || []).filter(ev => !(ev.summary && ev.summary.startsWith('Cancelada')));
+            if (ocupantes.length > 0) {
+                return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.', ocupados: ocupantes.map(i => ({ id: i.id, summary: i.summary })) }) };
             }
 
             // Crear el evento
@@ -112,12 +114,14 @@ exports.handler = async (event) => {
                 const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
                 // Filtrar solo eventos del consultorio seleccionado (robusto a espacios y mayúsculas)
                 const regexConsultorio = new RegExp(`^C${consultorio}:\\s`, 'i');
-                const eventosConsultorio = busySlots.data.items.filter(event => {
+                const eventosConsultorioAll = busySlots.data.items.filter(event => {
                     return event.summary && regexConsultorio.test(event.summary);
                 });
-                // Filtrar solo eventos ocupados por el usuario y mapear hora y eventId
-                const userEvents = eventosConsultorio.filter(event => {
-                    return event.description && event.description.includes(`Reserva realizada por: ${email}`);
+                // Separar eventos activos (no cancelados) de los cancelados
+                const eventosConsultorioActivos = eventosConsultorioAll.filter(ev => !(ev.summary && ev.summary.startsWith('Cancelada')));
+                // Filtrar solo eventos ocupados por el usuario (activos) y mapear hora y eventId
+                const userEvents = eventosConsultorioAll.filter(event => {
+                    return event.description && event.description.includes(`Reserva realizada por: ${email}`) && !(event.summary && event.summary.startsWith('Cancelada'));
                 }).map(event => ({
                     hora: new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours(),
                     eventId: event.id,
@@ -126,10 +130,10 @@ exports.handler = async (event) => {
                 }));
                 // Generar todas las horas posibles del día
                 const horas = Array.from({length: 24}, (_, i) => i);
-                // Marcar como ocupadas solo las del usuario
+                // Marcar como ocupadas solo las del usuario (activas)
                 const ocupadasPorUsuario = userEvents.map(e => e.hora);
-                // Horas ocupadas por cualquier persona en ese consultorio
-                const ocupadasTodas = eventosConsultorio.map(event => {
+                // Horas ocupadas por cualquier persona en ese consultorio (solo activos)
+                const ocupadasTodas = eventosConsultorioActivos.map(event => {
                     if (event.start && event.start.dateTime) {
                         return new Date(new Date(event.start.dateTime).toLocaleString('en-US', { timeZone: zonaHoraria })).getHours();
                     }
