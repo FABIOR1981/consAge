@@ -43,12 +43,26 @@ exports.handler = async (event) => {
             const usersMap = new Map();
             eventos.forEach(ev => {
                 if (!ev.description) return;
-                // Formato: Reserva realizada por: NOMBRE <email>
-                const match = ev.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
+                // 1. Formato: Reserva realizada por: NOMBRE <email>
+                let match = ev.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
                 if (match) {
                     const nombre = match[1].trim();
                     const email = match[2].trim();
                     if (!usersMap.has(email)) usersMap.set(email, { nombre, email });
+                    return;
+                }
+                // 2. Formato: Reserva realizada por: email
+                match = ev.description.match(/Reserva realizada por: ([^\n@]+@[^\n]+)/);
+                if (match) {
+                    const email = match[1].trim();
+                    if (!usersMap.has(email)) usersMap.set(email, { nombre: email, email });
+                    return;
+                }
+                // 3. Formato: Reserva realizada por: Nombre (sin email)
+                match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
+                if (match) {
+                    const nombre = match[1].trim();
+                    if (!usersMap.has(nombre)) usersMap.set(nombre, { nombre, email: nombre });
                 }
             });
             const users = Array.from(usersMap.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
