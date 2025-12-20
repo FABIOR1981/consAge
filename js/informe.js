@@ -101,7 +101,13 @@ export async function initInforme() {
         });
         totalDiv.innerHTML = '';
         totalDiv.style.textAlign = 'right';
-        totalDiv.innerHTML += `<div class="total-main">Total de horas reservadas: <strong>${totalHorasReservadas.toFixed(2)}</strong></div>`;
+            const colorMain = '#2e7d32';
+            const colorSub = '#2e7d32';
+            const colorCancel = '#888888';
+            totalDiv.innerHTML += `<div style="color:${colorMain}; font-weight:700;">Total de horas reservadas: <strong>${totalHorasReservadas.toFixed(2)}</strong></div>`;
+            totalDiv.innerHTML += `<div style="color:${colorSub}; margin-left:0.8em; font-weight:600;">• Usadas: <strong>${totalHorasUsadas.toFixed(2)}</strong></div>`;
+            totalDiv.innerHTML += `<div style="color:${colorSub}; margin-left:0.8em; font-weight:600;">• Por usar: <strong>${totalHorasPorUsar.toFixed(2)}</strong></div>`;
+            totalDiv.innerHTML += `<div style="color:${colorCancel}; font-weight:600; margin-top:0.25em;">Total de horas canceladas: <strong>${totalHorasCanceladas.toFixed(2)}</strong></div>`;
         totalDiv.innerHTML += `<div class="total-sub">• Usadas: <strong>${totalHorasUsadas.toFixed(2)}</strong></div>`;
         totalDiv.innerHTML += `<div class="total-sub">• Por usar: <strong>${totalHorasPorUsar.toFixed(2)}</strong></div>`;
         totalDiv.innerHTML += `<div class="total-cancel">Total de horas canceladas: <strong>${totalHorasCanceladas.toFixed(2)}</strong></div>`;
