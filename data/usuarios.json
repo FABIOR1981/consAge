@@ -11,4 +11,10 @@
     "rol": "admin",
     "activo": true
   }
+  {
+    "email": "jorgeroberto1956@gmail.com",
+    "nombre": "Jorge Roberto",
+    "rol": "usuario",
+    "activo": true
+  }
 ]
