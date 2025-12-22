@@ -3,7 +3,38 @@ const path = require('path');
 
 const USUARIOS_PATH = path.join(__dirname, 'usuarios.json');
 
+
 const fetch = require('node-fetch');
+
+async function getUsuariosDesdeGitHub() {
+  try {
+    const repo = process.env.GITHUB_REPO || 'FABIOR1981/consAge';
+    const branch = process.env.GITHUB_BRANCH || 'main';
+    const filePath = 'netlify/functions/usuarios.json';
+    const githubToken = process.env.GITHUB_TOKEN;
+    if (!githubToken) return [];
+    const fileUrl = `https://api.github.com/repos/${repo}/contents/${filePath}?ref=${branch}`;
+    const fileResponse = await fetch(fileUrl, {
+      headers: {
+        Authorization: `token ${githubToken}`,
+        Accept: 'application/vnd.github.v3.raw',
+      },
+    });
+    if (!fileResponse.ok) return [];
+    const text = await fileResponse.text();
+    return JSON.parse(text);
+  } catch {
+    return [];
+  }
+}
+
+function mergeUsuarios(local, remoto) {
+  const map = new Map();
+  [...(Array.isArray(remoto) ? remoto : []), ...(Array.isArray(local) ? local : [])].forEach(u => {
+    if (u && u.email) map.set(u.email, { ...u });
+  });
+  return Array.from(map.values());
+}
 
 async function syncUsuariosConGitHub(usuarios) {
   // Llama a la función serverless update-usuarios.js para sincronizar con GitHub
@@ -30,11 +61,15 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Leer usuarios actuales
-  let usuarios = [];
+  // Leer usuarios locales
+  let usuariosLocales = [];
   if (fs.existsSync(USUARIOS_PATH)) {
-    usuarios = JSON.parse(fs.readFileSync(USUARIOS_PATH, 'utf8'));
+    usuariosLocales = JSON.parse(fs.readFileSync(USUARIOS_PATH, 'utf8'));
   }
+  // Leer usuarios remotos (GitHub)
+  let usuariosRemotos = await getUsuariosDesdeGitHub();
+  // Merge seguro
+  let usuarios = mergeUsuarios(usuariosLocales, usuariosRemotos);
 
   // Validar si el usuario que realiza la acción es admin
   const esAdmin = body.solicitante && body.solicitante.rol === 'admin';
