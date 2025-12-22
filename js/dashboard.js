@@ -169,14 +169,23 @@ async function renderDashboardButtons(user) {
     btnAgenda.id = 'agenda-btn';
     btnAgenda.className = 'btn-secondary';
     btnAgenda.innerText = 'Agenda';
-    btnAgenda.onclick = cargarBotonesConsultorios;
+    btnAgenda.onclick = () => {
+        // Limpiar y mostrar solo la agenda
+        const container = document.getElementById('calendar-container');
+        container.innerHTML = '';
+        cargarBotonesConsultorios();
+    };
     btnsDiv.appendChild(btnAgenda);
     const btnMisReservas = document.createElement('button');
     btnMisReservas.id = 'mis-reservas-btn';
     btnMisReservas.className = 'btn-primary';
-    // Por defecto, texto para usuario normal
     btnMisReservas.innerText = 'Mis Reservas';
-    btnMisReservas.onclick = mostrarMisReservas;
+    btnMisReservas.onclick = () => {
+        // Limpiar y mostrar solo la sección de reservas
+        const container = document.getElementById('calendar-container');
+        container.innerHTML = '';
+        mostrarMisReservas();
+    };
     btnsDiv.appendChild(btnMisReservas);
 
     // Consultar al backend el rol real del usuario
@@ -214,15 +223,12 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             if (actual && actual.rol === 'admin') esAdmin = true;
         }
     } catch {}
-    // ...bloque de depuración eliminado...
-    // Limpiar solo la sección de reservas, no toda la agenda
+    // Limpiar solo la sección de reservas
     container.innerHTML = '';
     const titulo = document.createElement('h3');
-    titulo.textContent = esAdmin ? 'Reservas' : 'Mis Reservas';
+    titulo.textContent = esAdmin ? 'Reservas realizadas' : 'Mis Reservas';
+    titulo.style.marginBottom = '0.5em';
     container.appendChild(titulo);
-    const p = document.createElement('p');
-    p.textContent = 'Consultando reservas...';
-    container.appendChild(p);
 
     // Solo admin puede ver reservas de otros
     if (esAdmin) {
@@ -246,8 +252,8 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             const formFiltro = document.createElement('form');
             formFiltro.id = 'form-filtro-usuario';
             formFiltro.innerHTML = `
-                <label>Buscar usuario: <input type="text" id="filtro-nombre-usuario" placeholder="Ingrese parte del nombre..." autocomplete="off" style="margin-right:1em;"></label>
-                <label>Usuario: <select id="combo-usuario"><option value="">Seleccione un usuario</option></select></label>
+                <label style="font-weight:500;">Buscar usuario: <input type="text" id="filtro-nombre-usuario" placeholder="Ingrese parte del nombre..." autocomplete="off" style="margin-right:1em;"></label>
+                <label style="font-weight:500;">Usuario: <select id="combo-usuario"><option value="">Seleccione un usuario</option></select></label>
             `;
             container.appendChild(formFiltro);
             const inputFiltro = formFiltro.querySelector('#filtro-nombre-usuario');
@@ -264,6 +270,9 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
                 renderCombo(e.target.value);
             });
             combo.addEventListener('change', (e) => {
+                // Al seleccionar un usuario, limpiar la lista de reservas y mostrar solo las de ese usuario
+                const reservasDiv = document.querySelector('.reservas-lista');
+                if (reservasDiv) reservasDiv.remove();
                 if (e.target.value) {
                     mostrarMisReservas(e.target.value, usuariosLista);
                 }
