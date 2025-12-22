@@ -1,0 +1,134 @@
+/* Estilos modernos para tablas e informes de reservas */
+
+.informe-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 2em 2.5em 2em 2.5em;
+  margin: 2em auto;
+  max-width: 900px;
+}
+
+.informe-titulo {
+  text-align: center;
+  color: #223366;
+  font-size: 2.1em;
+  font-weight: 700;
+  margin-bottom: 1.2em;
+}
+
+#tabla-informe {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #f9fafb;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  margin-top: 1.5em;
+}
+
+#tabla-informe th, #tabla-informe td {
+  padding: 0.7em 1em;
+  text-align: left;
+}
+
+#tabla-informe th {
+  background: #e6eaf3;
+  color: #223366;
+  font-weight: 600;
+  border-bottom: 2px solid #d1d7e6;
+}
+
+#tabla-informe tr:nth-child(even) {
+  background: #f1f4fa;
+}
+
+#tabla-informe tr:nth-child(odd) {
+  background: #fff;
+}
+
+#tabla-informe td {
+  border-bottom: 1px solid #e6eaf3;
+  font-size: 1em;
+}
+
+#tabla-informe tr:last-child td {
+  border-bottom: none;
+}
+
+.btn-cancelar-reserva {
+  background: linear-gradient(90deg, #e74c3c 60%, #c0392b 100%);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 1px 4px rgba(231,76,60,0.08);
+}
+
+.btn-cancelar-reserva:hover {
+  background: linear-gradient(90deg, #c0392b 60%, #e74c3c 100%);
+}
+
+/* Estados visuales */
+#tabla-informe td.estado-cancelada {
+  color: #e74c3c;
+  font-weight: 600;
+}
+#tabla-informe td.estado-usada {
+  color: #16a085;
+  font-weight: 600;
+}
+#tabla-informe td.estado-reservada {
+  color: #2980b9;
+  font-weight: 600;
+}
+
+/* Filtros y combos */
+.informe-form label, .informe-form select, .informe-form input[type="date"] {
+  margin-right: 1.2em;
+  font-size: 1em;
+}
+.informe-form input[type="date"], .informe-form select {
+  border: 1px solid #d1d7e6;
+  border-radius: 4px;
+  padding: 0.3em 0.7em;
+  background: #f9fafb;
+  color: #223366;
+}
+.informe-form button {
+  background: #223366;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1.5em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.informe-form button:hover {
+  background: #1a2540;
+}
+
+.total-horas-informe {
+  color: #218c3a;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 1.2em 0 0.5em 0;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .informe-container {
+    padding: 1em 0.5em;
+  }
+  #tabla-informe th, #tabla-informe td {
+    padding: 0.5em 0.3em;
+    font-size: 0.95em;
+  }
+}
