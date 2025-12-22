@@ -1,10 +1,20 @@
 body {
-    background-color: var(--bg-light);
     font-family: var(--font-main);
+    background-color: var(--bg-light);
     margin: 0;
     padding: 15px;
+    color: var(--text-dark);
 }
 
 @media (min-width: 768px) {
     body { padding: 40px; }
+}
+
+.container, .informe-container, .dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto 30px auto;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
