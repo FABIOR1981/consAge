@@ -102,7 +102,7 @@ exports.handler = async function(event, context) {
   if (event.headers['x-netlify-event'] === 'signup') {
     const { email, user_metadata, auto_signup } = body;
     const nombre = user_metadata && user_metadata.full_name ? user_metadata.full_name : '';
-    const rol = user_metadata && user_metadata.role ? user_metadata.role : '';
+    const rol = user_metadata && (user_metadata.role || user_metadata.roles) ? (user_metadata.role || user_metadata.roles) : '';
     // Verifica si ya existe
     const existe = usuarios.find(u => u.email === email);
     let usuarioAgregado = false;
