@@ -1,3 +1,49 @@
+// Mostrar reservas futuras del usuario logueado (o seleccionado si admin)
+export async function renderMisReservasFuturas(container) {
+    container.innerHTML = `<div class="informe-container">
+        <h2 class="informe-titulo">Mis Reservas Futuras</h2>
+        <div id="total-horas-informe"></div>
+        <table id="tabla-informe">
+            <tr><td colspan="5">Buscando reservas futuras...</td></tr>
+        </table>
+    </div>`;
+    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+    if (!user) return;
+    let esAdmin = false;
+    let usuariosLista = [];
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+            usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        }
+    } catch {}
+    // Fechas: hoy a 90 días
+    const hoy = new Date();
+    const fechaInicio = hoy.toISOString().split('T')[0];
+    const fechaFin = new Date(hoy.getTime() + 90*24*60*60*1000).toISOString().split('T')[0];
+    let usuarioFiltro = user.email;
+    if (esAdmin) {
+        // Si es admin, permitir buscar por usuario
+        // (opcional: podrías agregar un combo aquí si lo deseas)
+        usuarioFiltro = '';
+    }
+    let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
+    if (usuarioFiltro) url += `&usuario=${encodeURIComponent(usuarioFiltro)}`;
+    try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        let reservas = Array.isArray(data) ? data : (data.reservas || []);
+        // Filtrar solo reservas futuras
+        const ahora = new Date();
+        reservas = reservas.filter(r => r.start && new Date(r.start) > ahora);
+        renderReservasTable(reservas, container.querySelector('#tabla-informe'), container.querySelector('#total-horas-informe'));
+    } catch (err) {
+        container.querySelector('#tabla-informe').innerHTML = `<tr><td colspan="5">Error: ${err.message}</td></tr>`;
+    }
+}
 import { APP_CONFIG } from './config.js';
 
 let __informeInitDone = false;

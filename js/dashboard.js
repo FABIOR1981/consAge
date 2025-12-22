@@ -175,14 +175,16 @@ async function renderDashboardButtons(user) {
         mostrarSeccion('agenda');
     };
     btnsDiv.appendChild(btnAgenda);
-        const btnReservas = document.createElement('button');
-        btnReservas.id = 'mis-reservas-btn';
-        btnReservas.className = 'btn-primary';
-        btnReservas.innerText = 'Reservas';
-        btnReservas.onclick = () => {
-            renderReservas(document.getElementById('reservas-container'));
-        };
-        btnsDiv.appendChild(btnReservas);
+
+    // Botón de reservas futuras (nuevo, basado en informe)
+    const btnMisReservasFuturas = document.createElement('button');
+    btnMisReservasFuturas.id = 'mis-reservas-futuras-btn';
+    btnMisReservasFuturas.className = 'btn-primary';
+    btnMisReservasFuturas.innerText = 'Mis Reservas Futuras';
+    btnMisReservasFuturas.onclick = () => {
+        mostrarSeccion('mis-reservas-futuras');
+    };
+    btnsDiv.appendChild(btnMisReservasFuturas);
 
     // Consultar al backend el rol real del usuario
     let esAdmin = false;
@@ -209,10 +211,23 @@ function mostrarSeccion(seccion) {
     document.getElementById('agenda-section').style.display = 'none';
     document.getElementById('reservas-section').style.display = 'none';
     document.getElementById('informe-section').style.display = 'none';
+    let misReservasSection = document.getElementById('mis-reservas-futuras-section');
+    if (misReservasSection) misReservasSection.style.display = 'none';
     // Mostrar la sección seleccionada y cargar su contenido
     if (seccion === 'agenda') {
         document.getElementById('agenda-section').style.display = '';
         renderAgenda(document.getElementById('agenda-container'));
+    } else if (seccion === 'mis-reservas-futuras') {
+        if (!misReservasSection) {
+            misReservasSection = document.createElement('section');
+            misReservasSection.id = 'mis-reservas-futuras-section';
+            misReservasSection.className = 'card';
+            document.querySelector('main.content').appendChild(misReservasSection);
+        }
+        misReservasSection.style.display = '';
+        import('./informe_modular.js').then(mod => {
+            mod.renderMisReservasFuturas(misReservasSection);
+        });
     } else if (seccion === 'reservas') {
         document.getElementById('reservas-section').style.display = '';
         renderReservas(document.getElementById('reservas-container'));
