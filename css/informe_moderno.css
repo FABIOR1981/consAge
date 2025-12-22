@@ -1,4 +1,4 @@
-/* Estilos modernos para tablas e informes de reservas */
+/* CSS combinado y modernizado para informes y reservas */
 
 .informe-container {
   background: #fff;
@@ -17,6 +17,72 @@
   margin-bottom: 1.2em;
 }
 
+.informe-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em 2em;
+  align-items: flex-end;
+  margin-bottom: 1.5em;
+}
+.informe-form label, .informe-form select, .informe-form input[type="date"] {
+  margin-right: 1.2em;
+  font-size: 1em;
+}
+.informe-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #223366;
+  font-size: 1em;
+}
+.informe-form input[type="date"], .informe-form select, .informe-form input[type="text"] {
+  margin-top: 0.3em;
+  padding: 0.4em 0.7em;
+  border: 1px solid #d1d7e6;
+  border-radius: 4px;
+  font-size: 1em;
+  background: #f9fafb;
+  color: #223366;
+}
+.informe-form button, .informe-form button[type="submit"] {
+  background: #223366;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5em 1.5em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 0.5em;
+}
+.informe-form button:hover, .informe-form button[type="submit"]:hover {
+  background: #1a2540;
+}
+
+.search-row {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 200px;
+}
+.search-label {
+  font-weight: 500;
+  margin-bottom: 0.2em;
+}
+.search-input {
+  padding: 0.4em 0.7em;
+  border: 1px solid #d1d7e6;
+  border-radius: 4px;
+  font-size: 1em;
+  background: #f9fafb;
+  color: #223366;
+}
+.search-note {
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 0.2em;
+}
+
 #tabla-informe {
   width: 100%;
   border-collapse: separate;
@@ -27,34 +93,29 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   margin-top: 1.5em;
 }
-
 #tabla-informe th, #tabla-informe td {
   padding: 0.7em 1em;
   text-align: left;
+  border-bottom: 1px solid #e6eaf3;
+  font-size: 1em;
 }
-
 #tabla-informe th {
   background: #e6eaf3;
   color: #223366;
   font-weight: 600;
   border-bottom: 2px solid #d1d7e6;
 }
-
 #tabla-informe tr:nth-child(even) {
   background: #f1f4fa;
 }
-
 #tabla-informe tr:nth-child(odd) {
   background: #fff;
 }
-
-#tabla-informe td {
-  border-bottom: 1px solid #e6eaf3;
-  font-size: 1em;
-}
-
 #tabla-informe tr:last-child td {
   border-bottom: none;
+}
+#tabla-informe tr:hover {
+  background: #eaf1fa;
 }
 
 .btn-cancelar-reserva {
@@ -69,7 +130,6 @@
   transition: background 0.2s;
   box-shadow: 0 1px 4px rgba(231,76,60,0.08);
 }
-
 .btn-cancelar-reserva:hover {
   background: linear-gradient(90deg, #c0392b 60%, #e74c3c 100%);
 }
@@ -88,33 +148,6 @@
   font-weight: 600;
 }
 
-/* Filtros y combos */
-.informe-form label, .informe-form select, .informe-form input[type="date"] {
-  margin-right: 1.2em;
-  font-size: 1em;
-}
-.informe-form input[type="date"], .informe-form select {
-  border: 1px solid #d1d7e6;
-  border-radius: 4px;
-  padding: 0.3em 0.7em;
-  background: #f9fafb;
-  color: #223366;
-}
-.informe-form button {
-  background: #223366;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5em 1.5em;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.informe-form button:hover {
-  background: #1a2540;
-}
-
 .total-horas-informe {
   color: #218c3a;
   font-size: 1.1em;
@@ -126,6 +159,10 @@
 @media (max-width: 700px) {
   .informe-container {
     padding: 1em 0.5em;
+  }
+  .informe-form {
+    flex-direction: column;
+    gap: 0.7em 0;
   }
   #tabla-informe th, #tabla-informe td {
     padding: 0.5em 0.3em;
