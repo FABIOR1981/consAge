@@ -424,3 +424,5 @@ if (window.netlifyIdentity) {
         if (logoutBtn) logoutBtn.addEventListener('click', () => window.netlifyIdentity.logout());
 
         // ...existing code...
+    });
+}
