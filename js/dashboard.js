@@ -163,7 +163,7 @@ const cargarBotonesConsultorios = () => {
     container.appendChild(grid);
 };
 
-function renderDashboardButtons(user) {
+async function renderDashboardButtons(user) {
     const btnsDiv = document.getElementById('dashboard-btns');
     if (!btnsDiv) return;
     btnsDiv.innerHTML = '';
@@ -176,14 +176,23 @@ function renderDashboardButtons(user) {
     const btnMisReservas = document.createElement('button');
     btnMisReservas.id = 'mis-reservas-btn';
     btnMisReservas.className = 'btn-primary';
-    if (user && user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin')) {
-        btnMisReservas.innerText = 'Reservas';
-    } else {
-        btnMisReservas.innerText = 'Mis Reservas';
-    }
+    // Por defecto, texto para usuario normal
+    btnMisReservas.innerText = 'Mis Reservas';
     btnMisReservas.onclick = mostrarMisReservas;
     btnsDiv.appendChild(btnMisReservas);
-    if (user && user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin')) {
+
+    // Consultar al backend el rol real del usuario
+    let esAdmin = false;
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+        }
+    } catch {}
+    if (esAdmin) {
+        btnMisReservas.innerText = 'Reservas';
         const btnInforme = document.createElement('button');
         btnInforme.id = 'informe-btn';
         btnInforme.className = 'btn-secondary';
@@ -349,13 +358,13 @@ async function renderInformeEnDashboard() {
     }
 }
 
-const initDashboard = () => {
+const initDashboard = async () => {
     const user = netlifyIdentity.currentUser();
     if (!user) { window.location.href = "index.html"; return; }
     document.getElementById('user-email').innerText = user.email;
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
-    renderDashboardButtons(user);
+    await renderDashboardButtons(user);
     cargarBotonesConsultorios();
 };
 
@@ -365,7 +374,6 @@ if (window.netlifyIdentity) {
     document.addEventListener('DOMContentLoaded', () => {
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) logoutBtn.addEventListener('click', () => window.netlifyIdentity.logout());
-        const misReservasBtn = document.getElementById('mis-reservas-btn');
-        if (misReservasBtn) misReservasBtn.addEventListener('click', () => mostrarMisReservas());
+        // El botón mis-reservas se crea dinámicamente, así que no se puede agregar aquí
     });
 }
