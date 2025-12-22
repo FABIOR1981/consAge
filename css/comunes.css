@@ -145,3 +145,39 @@ body {
     min-width: 150px;
     padding: 12px 20px;
 }
+
+/* Contenedor de la botonera principal */
+.menu-nav {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.menu-nav .btn {
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse !important;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background-color: #2c3e50;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+/* EFECTO ZEBRA VISIBLE */
+.table tbody tr:nth-child(even) {
+    background-color: #f2f4f7 !important;
+}
+
+.table tbody tr:hover {
+    background-color: #e3f2fd !important;
+}
