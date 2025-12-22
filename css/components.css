@@ -1,3 +1,79 @@
+/* --- TABLAS MODERNAS --- */
+
+/* Contenedor para hacerla responsive en móviles */
+.table-container {
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    background: var(--white);
+    margin: 20px 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Evita que se aplaste mucho en pantallas pequeñas */
+}
+
+/* Encabezados */
+.table thead th {
+    background-color: var(--primary-color);
+    color: var(--white);
+    text-align: left;
+    padding: 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Celdas del cuerpo */
+.table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+/* Efecto Zebra (filas alternas) para guiar el ojo */
+.table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Efecto Hover (resaltar fila al pasar el mouse) */
+.table tbody tr:hover {
+    background-color: #e2e6ea;
+    transition: background-color 0.2s ease;
+}
+
+/* --- BADGES (Etiquetas de Estado) --- */
+.status {
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Colores según el estado */
+.status.reservada {
+    background-color: #e3f2fd; /* Fondo azul claro */
+    color: #1976d2;            /* Texto azul fuerte */
+}
+
+.status.usada {
+    background-color: #e8f5e9; /* Fondo verde claro */
+    color: #2e7d32;            /* Texto verde fuerte */
+}
+
+.status.cancelada {
+    background-color: #ffebee; /* Fondo rojo claro */
+    color: #c62828;            /* Texto rojo fuerte */
+}
 /* Contenedor General */
 .container {
     max-width: 1200px;

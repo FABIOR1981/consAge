@@ -213,7 +213,9 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
     // Detectar si es la vista de Reservas Futuras (no Mis Reservas Futuras)
     const esReservasFuturas = tabla.closest('.informe-container') && tabla.closest('.informe-container').querySelector('h2')?.textContent?.includes('Reservas Futuras');
     const esMisReservas = tabla.closest('.informe-container') && tabla.closest('.informe-container').querySelector('h2')?.textContent?.includes('Mis Reservas Futuras');
-    tabla.innerHTML = `<tr><th>#</th><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th>${(esMisReservas || esReservasFuturas) ? '<th></th>' : ''}</tr>`;
+    // Estructura moderna: tabla dentro de .table-container y clases modernas
+    const colAccion = (esMisReservas || esReservasFuturas) ? '<th></th>' : '';
+    let html = `<div class="table-container"><table class="table"><thead><tr><th>#</th><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th>${colAccion}</tr></thead><tbody>`;
     reservas.forEach((r, idx) => {
         // Extraer fecha y hora desde r.start
         let fecha = '';
@@ -273,9 +275,17 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
                 btnCancelar = `<button class="btn-cancelar-reserva" data-id="${r.id}" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:0.3em 1em;cursor:pointer;">Cancelar</button>`;
             }
         }
-        tabla.innerHTML += `<tr><td>${idx + 1}</td><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${estado}</td>${(esMisReservas || esReservasFuturas) ? `<td>${btnCancelar}</td>` : ''}</tr>`;
+        // Badge de estado
+        let estadoClass = '';
+        if (estado === APP_CONFIG.estadosReserva.RESERVADA) estadoClass = 'reservada';
+        else if (estado === APP_CONFIG.estadosReserva.USADA) estadoClass = 'usada';
+        else if (estado === APP_CONFIG.estadosReserva.CANCELADA) estadoClass = 'cancelada';
+        const badgeEstado = `<span class="status ${estadoClass}">${estado}</span>`;
+        html += `<tr><td>${idx + 1}</td><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${badgeEstado}</td>${(esMisReservas || esReservasFuturas) ? `<td>${btnCancelar}</td>` : ''}</tr>`;
         total++;
     });
+    html += '</tbody></table></div>';
+    tabla.innerHTML = html;
     // Solo mostrar los contadores en el informe general, no en Reservas Futuras
     if (!esReservasFuturas) {
         totalHorasDiv.innerText = `Total de reservas: ${total} | Usadas: ${totalUsadas} | Canceladas: ${totalCanceladas}`;
