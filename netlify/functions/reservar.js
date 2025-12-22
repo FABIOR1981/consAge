@@ -1,9 +1,6 @@
 const { google } = require('googleapis');
 
 exports.handler = async (event) => {
-    console.log('Método:', event.httpMethod);
-    console.log('Body:', event.body);
-    console.log('Query:', event.queryStringParameters);
 
     if (event.httpMethod === 'POST') {
         try {
@@ -15,7 +12,6 @@ exports.handler = async (event) => {
             if (!hora && hora !== 0) missing.push('hora');
             if (!colorId) missing.push('colorId');
             if (missing.length) {
-                console.error('Datos faltantes:', { email, consultorio, fecha, hora, colorId });
                 return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos', missing, received: { email, consultorio, fecha, hora, colorId } }) };
             }
 
@@ -74,7 +70,6 @@ exports.handler = async (event) => {
             const eventRes = await calendar.events.insert(insertOpts);
             return { statusCode: 200, body: JSON.stringify({ message: 'Reserva creada correctamente', eventId: eventRes.data.id }) };
         } catch (error) {
-            console.error("Error:", error.message);
             return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
         }
     }
@@ -151,7 +146,6 @@ exports.handler = async (event) => {
                 return { statusCode: 200, body: JSON.stringify({ userEvents }) };
             }
             if (!email) {
-                console.error('Falta email en GET:', { email });
                 return { statusCode: 400, body: JSON.stringify({ error: 'Debes indicar el email' }) };
             }
             let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
@@ -177,7 +171,6 @@ exports.handler = async (event) => {
                     timeZone: 'America/Montevideo',
                 });
                 // Log de todos los eventos recuperados para el día
-                console.log('Eventos recuperados:', busySlots.data.items.map(ev => ({ summary: ev.summary, start: ev.start && ev.start.dateTime })));
                 // Obtener la zona horaria desde config.js o usar por defecto
                 const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
                 // Filtrar solo eventos del consultorio seleccionado (robusto a espacios y mayúsculas)
@@ -259,7 +252,6 @@ exports.handler = async (event) => {
                 return { statusCode: 200, body: JSON.stringify({ userEvents }) };
             }
         } catch (error) {
-            console.error("Error:", error.message);
             return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
         }
     }
@@ -268,7 +260,6 @@ exports.handler = async (event) => {
         try {
             const { eventId, email } = JSON.parse(event.body);
             if (!eventId || !email) {
-                console.error('Datos faltantes en DELETE:', { eventId, email });
                 return { statusCode: 400, body: JSON.stringify({ error: 'Datos faltantes o inválidos' }) };
             }
 
@@ -309,7 +300,6 @@ exports.handler = async (event) => {
             });
             return { statusCode: 200, body: JSON.stringify({ message: 'Reserva marcada como cancelada.' }) };
         } catch (error) {
-            console.error("Error:", error.message);
             return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
         }
     }
