@@ -241,6 +241,7 @@ exports.handler = async (event) => {
                     let fecha = '';
                     let hora = '';
                     let nombre = '';
+                    let emailEvento = '';
                     let summary = event.summary || '';
                     if (event.summary) {
                         const match = event.summary.match(/^C(\d+):/);
@@ -256,19 +257,19 @@ exports.handler = async (event) => {
                         const m = event.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
                         if (m) {
                             nombre = m[1].trim();
-                            email = m[2].trim();
+                            emailEvento = m[2].trim();
                         } else {
                             // Si solo hay email
                             const m2 = event.description.match(/Reserva realizada por: ([^@\s]+@[^\s]+)/);
                             if (m2) {
                                 nombre = '';
-                                email = m2[1].trim();
+                                emailEvento = m2[1].trim();
                             } else {
                                 // Si solo hay nombre
                                 const m3 = event.description.match(/Reserva realizada por: (.+)/);
                                 if (m3) {
                                     nombre = m3[1].trim();
-                                    email = '';
+                                    emailEvento = '';
                                 }
                             }
                         }
@@ -279,7 +280,7 @@ exports.handler = async (event) => {
                         fecha,
                         hora,
                         nombre,
-                        email,
+                        email: emailEvento,
                         summary
                     };
                 });
