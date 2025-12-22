@@ -232,34 +232,37 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
                 const resp = await fetch('/.netlify/functions/listar_usuarios');
                 const js = await resp.json();
                 let lista = Array.isArray(js.usuarios) ? js.usuarios : [];
-                // Si el usuario actual no está en la lista, agregarlo
-                if (!lista.some(u => u.email === user.email)) {
-                    lista.unshift({ nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email, email: user.email });
-                }
+                // Ordenar alfabéticamente por nombre
+                lista = lista.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
                 return mostrarMisReservas(emailFiltro, lista);
             } catch (e) {
                 container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
                 return;
             }
         }
-        // Renderizar combo solo una vez para admin
+        // Renderizar filtro de texto y combo para admin
         let filtroUsuario = emailFiltro;
         if (usuariosLista && usuariosLista.length > 0) {
             const formFiltro = document.createElement('form');
             formFiltro.id = 'form-filtro-usuario';
-            formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
+            formFiltro.innerHTML = `
+                <label>Buscar usuario: <input type="text" id="filtro-nombre-usuario" placeholder="Ingrese parte del nombre..." autocomplete="off" style="margin-right:1em;"></label>
+                <label>Usuario: <select id="combo-usuario"><option value="">Seleccione un usuario</option></select></label>
+            `;
             container.appendChild(formFiltro);
+            const inputFiltro = formFiltro.querySelector('#filtro-nombre-usuario');
             const combo = formFiltro.querySelector('#combo-usuario');
-            combo.innerHTML = usuariosLista.map(u => {
-                const mostrar = (u.nombre && u.nombre !== u.email) ? `${u.nombre} (${u.email})` : u.email;
-                return `<option value="${u.email}">${mostrar}</option>`;
-            }).join('');
-            let defaultUsuario = user.email;
-            if (!usuariosLista.some(u => u.email === defaultUsuario)) {
-                defaultUsuario = usuariosLista[0].email;
+            // Función para renderizar opciones del combo según filtro
+            function renderCombo(filtro) {
+                const opciones = usuariosLista
+                    .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())))
+                    .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
+                combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
             }
-            combo.value = emailFiltro || defaultUsuario;
-            combo.disabled = usuariosLista.length === 1;
+            renderCombo('');
+            inputFiltro.addEventListener('input', (e) => {
+                renderCombo(e.target.value);
+            });
             combo.addEventListener('change', (e) => {
                 if (e.target.value) {
                     mostrarMisReservas(e.target.value, usuariosLista);
@@ -273,7 +276,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         if (filtroUsuario) {
             await mostrarMisReservasAdmin({ email: filtroUsuario, nombre: nombreSeleccionado }, esAdmin, usuariosLista);
         } else {
-            container.innerHTML += '<p style="color:red">No hay usuarios disponibles para mostrar reservas.</p>';
+            // No mostrar reservas si no hay usuario seleccionado
         }
     } else {
         // Usuario normal: solo puede ver sus propias reservas
@@ -289,55 +292,71 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         let url = '/.netlify/functions/reservar';
         let emailFiltroValor = emailFiltro && typeof emailFiltro === 'object' ? emailFiltro.email : emailFiltro;
         let nombreFiltroValor = emailFiltro && typeof emailFiltro === 'object' ? emailFiltro.nombre : '';
-        if (emailFiltroValor) {
+        // Siempre pedir todas las reservas futuras (all=1) para admin, filtrar en frontend
+        if (isAdmin) {
+            url += '?all=1';
+        } else if (emailFiltroValor) {
             url += `?email=${encodeURIComponent(emailFiltroValor)}`;
         }
         const resp = await fetch(url);
         const data = await resp.json();
-        // Bloque de depuración: mostrar respuesta cruda del backend
-        const debugDataDiv = document.createElement('div');
-        debugDataDiv.style.background = '#eef';
-        debugDataDiv.style.fontSize = '0.9em';
-        debugDataDiv.style.margin = '1em 0';
-        debugDataDiv.style.padding = '0.5em';
-        debugDataDiv.innerHTML = '<b>DEBUG respuesta backend:</b><pre style="overflow-x:auto;max-width:100%">' + JSON.stringify(data, null, 2) + '</pre>';
-        container.appendChild(debugDataDiv);
         let reservas = data.userEvents || [];
-        // Bloque de depuración: mostrar reservas crudas recibidas
-        const debugDiv = document.createElement('div');
-        debugDiv.style.background = '#ffe';
-        debugDiv.style.fontSize = '0.9em';
-        debugDiv.style.margin = '1em 0';
-        debugDiv.style.padding = '0.5em';
-        debugDiv.innerHTML = '<b>DEBUG reservas crudas:</b><pre style="overflow-x:auto;max-width:100%">' + JSON.stringify(reservas, null, 2) + '</pre>';
-        container.appendChild(debugDiv);
         // Filtrar SOLO por el usuario seleccionado (email o nombre exacto)
         const emailFiltroLower = (emailFiltroValor || '').toLowerCase();
         const nombreFiltroLower = (nombreFiltroValor || '').toLowerCase();
         reservas = reservas.filter(reserva => {
             const nombreReserva = (reserva.nombre || '').toLowerCase();
             const emailReserva = (reserva.email || '').toLowerCase();
+            // Coincidencia exacta por email o nombre
             return (emailFiltroLower && emailReserva === emailFiltroLower) || (nombreFiltroLower && nombreReserva === nombreFiltroLower);
+        });
+        // Filtrar solo reservas futuras
+        const ahora = new Date();
+        reservas = reservas.filter(reserva => {
+            const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
+            return fechaReserva > ahora;
         });
         if (reservas.length === 0) {
             container.innerHTML += '<p>No hay reservas activas.</p>';
             return;
         }
-        const lista = document.createElement('ul');
+        const lista = document.createElement('div');
         lista.className = 'reservas-lista';
         reservas.forEach(reserva => {
-            const li = document.createElement('li');
+            const card = document.createElement('div');
+            card.className = 'reserva-card';
+            card.style.border = '1px solid #ccc';
+            card.style.borderRadius = '8px';
+            card.style.background = '#fafbff';
+            card.style.margin = '1em 0';
+            card.style.padding = '1em';
+            card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.gap = '0.5em';
             const fechaHora = `${reserva.fecha} ${reserva.hora}:00 hs`;
             const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
             const ahora = new Date();
             const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
             const esCancelada = reserva.summary && reserva.summary.startsWith('Cancelada');
             if (esCancelada) return;
-            li.innerHTML = `<strong>Consultorio ${reserva.consultorio}</strong> - ${fechaHora} - <span>${reserva.nombre || reserva.email}</span>`;
+            card.innerHTML = `
+                <div style="font-weight:bold;font-size:1.1em;color:#2a3a5a;">Consultorio ${reserva.consultorio}</div>
+                <div><span style="color:#555;">${fechaHora}</span></div>
+                <div><span style="color:#1a4">${reserva.nombre || reserva.email}</span></div>
+            `;
             if (diffHoras > 24) {
                 const btnCancelar = document.createElement('button');
                 btnCancelar.innerText = 'Cancelar';
                 btnCancelar.className = 'btn-cancelar';
+                btnCancelar.style.background = '#e74c3c';
+                btnCancelar.style.color = '#fff';
+                btnCancelar.style.border = 'none';
+                btnCancelar.style.borderRadius = '4px';
+                btnCancelar.style.padding = '0.5em 1.2em';
+                btnCancelar.style.fontWeight = 'bold';
+                btnCancelar.style.cursor = 'pointer';
+                btnCancelar.style.marginTop = '0.5em';
                 btnCancelar.onclick = async () => {
                     if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
                     try {
@@ -349,7 +368,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                         const result = await resp.json();
                         if (resp.ok) {
                             alert('Reserva cancelada correctamente.');
-                            li.remove();
+                            card.remove();
                         } else {
                             alert('No se pudo cancelar: ' + (result.error || result.details || 'Error desconocido'));
                         }
@@ -357,11 +376,15 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                         alert('Error al cancelar: ' + e.message);
                     }
                 };
-                li.appendChild(btnCancelar);
+                card.appendChild(btnCancelar);
             } else {
-                li.innerHTML += ' <span style="color:gray">(No se puede cancelar: menos de 24h)</span>';
+                const noCancel = document.createElement('span');
+                noCancel.style.color = 'gray';
+                noCancel.style.marginTop = '0.5em';
+                noCancel.innerText = '(No se puede cancelar: menos de 24h)';
+                card.appendChild(noCancel);
             }
-            lista.appendChild(li);
+            lista.appendChild(card);
         });
         container.appendChild(lista);
         const btnVolver = document.createElement('button');
