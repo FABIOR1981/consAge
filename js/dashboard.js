@@ -205,60 +205,70 @@ async function renderDashboardButtons(user) {
 async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     const user = netlifyIdentity.currentUser();
     if (!user) return;
-    const isAdmin = user.app_metadata && user.app_metadata.roles && user.app_metadata.roles.includes('admin');
+    // Consultar al backend el rol real del usuario
+    let esAdmin = false;
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+        }
+    } catch {}
     const container = document.getElementById('calendar-container');
-    container.innerHTML = `<h3>${isAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
+    container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
 
-    // Si es admin y no hay lista de usuarios, obtenerla y re-llamar la función
-    if (isAdmin && !usuariosLista) {
-        try {
-            const resp = await fetch('/.netlify/functions/listar_usuarios');
-            const js = await resp.json();
-            let lista = Array.isArray(js.usuarios) ? js.usuarios : [];
-            // Si el usuario actual no está en la lista, agregarlo
-            if (!lista.some(u => u.email === user.email)) {
-                lista.unshift({ nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email, email: user.email });
+    // Solo admin puede ver reservas de otros
+    if (esAdmin) {
+        // Si es admin y no hay lista de usuarios, obtenerla y re-llamar la función
+        if (!usuariosLista) {
+            try {
+                const resp = await fetch('/.netlify/functions/listar_usuarios');
+                const js = await resp.json();
+                let lista = Array.isArray(js.usuarios) ? js.usuarios : [];
+                // Si el usuario actual no está en la lista, agregarlo
+                if (!lista.some(u => u.email === user.email)) {
+                    lista.unshift({ nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email, email: user.email });
+                }
+                return mostrarMisReservas(emailFiltro, lista);
+            } catch (e) {
+                container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
+                return;
             }
-            return mostrarMisReservas(emailFiltro, lista);
-        } catch (e) {
-            container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
-            return;
         }
-    }
-
-    // Renderizar combo solo una vez para admin
-    let filtroUsuario = emailFiltro;
-    if (isAdmin && usuariosLista && usuariosLista.length > 0) {
-        const formFiltro = document.createElement('form');
-        formFiltro.id = 'form-filtro-usuario';
-        formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
-        container.appendChild(formFiltro);
-        const combo = formFiltro.querySelector('#combo-usuario');
-        combo.innerHTML = usuariosLista.map(u => {
-            // Si el nombre es igual al email, solo muestra el email
-            const mostrar = (u.nombre && u.nombre !== u.email) ? `${u.nombre} (${u.email})` : u.email;
-            return `<option value="${u.email}">${mostrar}</option>`;
-        }).join('');
-        // Selecciona el usuario actual si está en la lista, si no el primero
-        let defaultUsuario = user.email;
-        if (!usuariosLista.some(u => u.email === defaultUsuario)) {
-            defaultUsuario = usuariosLista[0].email;
-        }
-        combo.value = emailFiltro || defaultUsuario;
-        combo.disabled = usuariosLista.length === 1;
-        combo.addEventListener('change', (e) => {
-            if (e.target.value) {
-                mostrarMisReservas(e.target.value, usuariosLista);
+        // Renderizar combo solo una vez para admin
+        let filtroUsuario = emailFiltro;
+        if (usuariosLista && usuariosLista.length > 0) {
+            const formFiltro = document.createElement('form');
+            formFiltro.id = 'form-filtro-usuario';
+            formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
+            container.appendChild(formFiltro);
+            const combo = formFiltro.querySelector('#combo-usuario');
+            combo.innerHTML = usuariosLista.map(u => {
+                const mostrar = (u.nombre && u.nombre !== u.email) ? `${u.nombre} (${u.email})` : u.email;
+                return `<option value="${u.email}">${mostrar}</option>`;
+            }).join('');
+            let defaultUsuario = user.email;
+            if (!usuariosLista.some(u => u.email === defaultUsuario)) {
+                defaultUsuario = usuariosLista[0].email;
             }
-        });
-        filtroUsuario = combo.value;
-    } else if (!isAdmin) {
-        filtroUsuario = user.email;
-    }
-    if (filtroUsuario) {
-        await mostrarMisReservasAdmin(filtroUsuario, isAdmin, usuariosLista);
+            combo.value = emailFiltro || defaultUsuario;
+            combo.disabled = usuariosLista.length === 1;
+            combo.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    mostrarMisReservas(e.target.value, usuariosLista);
+                }
+            });
+            filtroUsuario = combo.value;
+        }
+        if (filtroUsuario) {
+            await mostrarMisReservasAdmin(filtroUsuario, esAdmin, usuariosLista);
+        } else {
+            container.innerHTML += '<p style="color:red">No hay usuarios disponibles para mostrar reservas.</p>';
+        }
     } else {
-        container.innerHTML += '<p style="color:red">No hay usuarios disponibles para mostrar reservas.</p>';
+        // Usuario normal: solo puede ver sus propias reservas
+        await mostrarMisReservasAdmin(user.email, false, null);
     }
 }
 
