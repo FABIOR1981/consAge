@@ -213,6 +213,28 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             if (actual && actual.rol === 'admin') esAdmin = true;
         }
     } catch {}
+    // DEBUG: Mostrar respuesta cruda de reservas
+    let debugReservaSpan = document.getElementById('debug-reservas');
+    if (!debugReservaSpan) {
+        debugReservaSpan = document.createElement('pre');
+        debugReservaSpan.id = 'debug-reservas';
+        debugReservaSpan.style.fontSize = '0.85em';
+        debugReservaSpan.style.color = '#006';
+        debugReservaSpan.style.background = '#f8f8ff';
+        debugReservaSpan.style.border = '1px solid #bbf';
+        debugReservaSpan.style.padding = '0.5em';
+        debugReservaSpan.style.marginTop = '0.5em';
+        const container = document.getElementById('calendar-container');
+        container.appendChild(debugReservaSpan);
+    }
+    // Llamar al backend de reservas y mostrar la respuesta cruda
+    try {
+        const resp = await fetch('/.netlify/functions/reservar?email=' + encodeURIComponent(user.email));
+        const data = await resp.json();
+        debugReservaSpan.innerText = 'DEBUG reservas (/.netlify/functions/reservar):\n' + JSON.stringify(data, null, 2) + '\n(Eliminar este bloque luego)';
+    } catch (e) {
+        debugReservaSpan.innerText = 'DEBUG reservas: error al consultar backend: ' + e.message;
+    }
     const container = document.getElementById('calendar-container');
     container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
 
