@@ -123,7 +123,7 @@ async function reservarTurno(hora, container) {
   if (!confirm(textoConfirmar)) return;
   container.innerHTML = "<p>⌛ Procesando reserva y enviando invitaciones...</p>";
   try {
-    const colorLookup = window.APP_CONFIG.coloresConsultorios || {};
+    const colorLookup = APP_CONFIG.coloresConsultorios || {};
     const defaultColor = Object.values(colorLookup)[0] || '1';
     const colorIdToSend = colorLookup[seleccion.consultorio] || defaultColor;
     const displayName = (user && (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name))) || (user && user.name) || user.email;
