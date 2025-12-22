@@ -197,12 +197,11 @@ async function renderDashboardButtons(user) {
         }
     } catch {}
     if (esAdmin) {
-        btnMisReservas.innerText = 'Reservas';
         const btnInforme = document.createElement('button');
         btnInforme.id = 'informe-btn';
         btnInforme.className = 'btn-secondary';
         btnInforme.innerText = 'Informe';
-        btnInforme.onclick = renderInformeEnDashboard;
+        btnInforme.onclick = () => mostrarSeccion('informe');
         btnsDiv.appendChild(btnInforme);
     }
 }
