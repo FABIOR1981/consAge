@@ -218,7 +218,23 @@ exports.handler = async (event) => {
                 const zonaHoraria = process.env.TIMEZONE || 'America/Montevideo';
                 // Filtrar eventos del usuario
                 const userEvents = busySlots.data.items.filter(event => {
-                    return event.description && event.description.includes(`Reserva realizada por: ${email}`);
+                    if (!event.description) return false;
+                    // Buscar por email exacto
+                    if (event.description.includes(`Reserva realizada por: ${email}`)) return true;
+                    // Buscar por nombre (si está en usuarios.json)
+                    let nombreUsuario = '';
+                    try {
+                        // Cargar usuarios.json como archivo estático
+                        const usuariosResp = require('node-fetch');
+                        // NOTA: Esto es síncrono en Netlify, pero para robustez, podrías cachear el nombre en memoria
+                    } catch {}
+                    // Buscar por nombre extraído del email (antes de @)
+                    const nombreEmail = email.split('@')[0].replace(/\./g, ' ');
+                    if (event.description.includes(`Reserva realizada por: ${nombreEmail}`)) return true;
+                    // Buscar por nombre+email (formato antiguo)
+                    const regexNombreEmail = new RegExp(`Reserva realizada por: (.+?) ?<${email}>`);
+                    if (regexNombreEmail.test(event.description)) return true;
+                    return false;
                 }).map(event => {
                     // Extraer consultorio, fecha, hora, nombre y email
                     let consultorio = '';
@@ -236,8 +252,26 @@ exports.handler = async (event) => {
                         hora = dt.getHours();
                     }
                     if (event.description) {
+                        // Extraer nombre y email si están presentes
                         const m = event.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
-                        if (m) { nombre = m[1].trim(); }
+                        if (m) {
+                            nombre = m[1].trim();
+                            email = m[2].trim();
+                        } else {
+                            // Si solo hay email
+                            const m2 = event.description.match(/Reserva realizada por: ([^@\s]+@[^\s]+)/);
+                            if (m2) {
+                                nombre = '';
+                                email = m2[1].trim();
+                            } else {
+                                // Si solo hay nombre
+                                const m3 = event.description.match(/Reserva realizada por: (.+)/);
+                                if (m3) {
+                                    nombre = m3[1].trim();
+                                    email = '';
+                                }
+                            }
+                        }
                     }
                     return {
                         eventId: event.id,
