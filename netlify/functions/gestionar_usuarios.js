@@ -137,10 +137,7 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // Guardar cambios solo en local (desarrollo). Nunca escribir en producción.
-  if (!IS_PROD) {
-    fs.writeFileSync(USUARIOS_PATH, JSON.stringify(usuarios, null, 2));
-  }
+  // (Eliminado: nunca escribir usuarios.json desde la función serverless)
 
   return {
     statusCode: 200,
