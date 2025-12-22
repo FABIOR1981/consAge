@@ -180,7 +180,17 @@ async function renderDashboardButtons(user) {
     const btnMisReservasFuturas = document.createElement('button');
     btnMisReservasFuturas.id = 'mis-reservas-futuras-btn';
     btnMisReservasFuturas.className = 'btn-primary';
-    btnMisReservasFuturas.innerText = 'Mis Reservas Futuras';
+    // Consultar al backend el rol real del usuario para el texto del botón
+    let esAdmin = false;
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+        }
+    } catch {}
+    btnMisReservasFuturas.innerText = esAdmin ? 'Reservas Futuras' : 'Mis Reservas Futuras';
     btnMisReservasFuturas.onclick = () => {
         mostrarSeccion('mis-reservas-futuras');
     };
