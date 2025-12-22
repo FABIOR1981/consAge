@@ -18,7 +18,46 @@
 .informe-form input, .informe-form select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-top: 5px;
-}
+    .informe-form {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: var(--radius);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: flex-end;
+        margin-bottom: 2rem;
+        border: 1px solid #e9ecef;
+    }
+
+    .informe-form label {
+        display: block;
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .informe-form input, 
+    .informe-form select {
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        min-width: 150px;
+    }
+
+    .informe-form button {
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .informe-form button:hover {
+        background-color: var(--primary);
+    }
