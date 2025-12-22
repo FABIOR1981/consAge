@@ -134,8 +134,15 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
         let estado = APP_CONFIG.estadosReserva.RESERVADA;
         if (r.summary && r.summary.toLowerCase().includes('cancelada')) {
             estado = APP_CONFIG.estadosReserva.CANCELADA;
-        } else if (r.summary && r.summary.toLowerCase().includes('usada')) {
-            estado = APP_CONFIG.estadosReserva.USADA;
+        } else {
+            // Si la fecha/hora de inicio ya pasó, es usada
+            if (r.start) {
+                const ahora = new Date();
+                const inicio = new Date(r.start);
+                if (inicio < ahora) {
+                    estado = APP_CONFIG.estadosReserva.USADA;
+                }
+            }
         }
         tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${estado}</td></tr>`;
         total++;
