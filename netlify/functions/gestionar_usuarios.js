@@ -23,18 +23,20 @@ exports.handler = async function(event, context) {
   // Validar si el usuario que realiza la acción es admin
   const esAdmin = body.solicitante && body.solicitante.rol === 'admin';
 
-  // Alta de usuario (solo admin)
+  // Alta de usuario (solo admin o automático en login)
   if (event.headers['x-netlify-event'] === 'signup') {
-    if (!esAdmin) {
-      return { statusCode: 403, body: JSON.stringify({ error: 'Solo administradores pueden dar de alta usuarios.' }) };
-    }
-    const { email, user_metadata } = body;
+    const { email, user_metadata, auto_signup } = body;
     const nombre = user_metadata && user_metadata.full_name ? user_metadata.full_name : '';
     const rol = user_metadata && user_metadata.role ? user_metadata.role : '';
     // Verifica si ya existe
     const existe = usuarios.find(u => u.email === email);
     if (!existe) {
-      usuarios.push({ email, nombre, rol, activo: true });
+      // Si es admin o es alta automática (auto_signup=true), permite el alta
+      if (esAdmin || auto_signup) {
+        usuarios.push({ email, nombre, rol, activo: true });
+      } else {
+        return { statusCode: 403, body: JSON.stringify({ error: 'Solo administradores pueden dar de alta usuarios.' }) };
+      }
     } else {
       existe.activo = true; // Reactiva si estaba dado de baja
     }
