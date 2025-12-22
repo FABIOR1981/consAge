@@ -213,8 +213,9 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             if (actual && actual.rol === 'admin') esAdmin = true;
         }
     } catch {}
-    // DEBUG: Mostrar respuesta cruda de reservas
+    // DEBUG: Mostrar respuesta cruda de reservas SIEMPRE visible y al inicio del contenedor
     let debugReservaSpan = document.getElementById('debug-reservas');
+    const container = document.getElementById('calendar-container');
     if (!debugReservaSpan) {
         debugReservaSpan = document.createElement('pre');
         debugReservaSpan.id = 'debug-reservas';
@@ -224,14 +225,24 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         debugReservaSpan.style.border = '1px solid #bbf';
         debugReservaSpan.style.padding = '0.5em';
         debugReservaSpan.style.marginTop = '0.5em';
-        const container = document.getElementById('calendar-container');
-        container.appendChild(debugReservaSpan);
+        // Insertar siempre al principio del contenedor
+        if (container.firstChild) {
+            container.insertBefore(debugReservaSpan, container.firstChild);
+        } else {
+            container.appendChild(debugReservaSpan);
+        }
     }
     // Llamar al backend de reservas y mostrar la respuesta cruda
     try {
         const resp = await fetch('/.netlify/functions/reservar?email=' + encodeURIComponent(user.email));
-        const data = await resp.json();
-        debugReservaSpan.innerText = 'DEBUG reservas (/.netlify/functions/reservar):\n' + JSON.stringify(data, null, 2) + '\n(Eliminar este bloque luego)';
+        let text = await resp.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch {}
+        if (!resp.ok) {
+            debugReservaSpan.innerText = 'DEBUG reservas: ERROR ' + resp.status + '\n' + (data && data.error ? data.error + (data.details ? ('\nDetalles: ' + data.details) : '') : text) + '\n(Eliminar este bloque luego)';
+        } else {
+            debugReservaSpan.innerText = 'DEBUG reservas (/.netlify/functions/reservar):\n' + JSON.stringify(data, null, 2) + '\n(Eliminar este bloque luego)';
+        }
     } catch (e) {
         debugReservaSpan.innerText = 'DEBUG reservas: error al consultar backend: ' + e.message;
     }
