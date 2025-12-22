@@ -69,10 +69,9 @@ body {
 }
 
 .table {
-   width: 100%;
-   /* ELIMINA LOS PUNTOS BLANCOS UNIFICANDO BORDES */
-   border-collapse: collapse !important; 
-   border-spacing: 0 !important;
+    width: 100%;
+    border-collapse: collapse !important;
+    border-spacing: 0;
 }
 
 /* Encabezados con estilo moderno */
@@ -97,12 +96,12 @@ body {
 /* --- EFECTO ZEBRA (FILAS PARES) --- */
 /* Usamos un color ligeramente más oscuro para que se note bien */
 .table tbody tr:nth-child(even) {
-   background-color: #f2f4f7 !important;
+    background-color: #f2f4f7 !important;
 }
 
 /* Resalte al pasar el mouse */
 .table tbody tr:hover {
-   background-color: #ebf4ff !important;
+    background-color: #e3f2fd !important;
 }
 
 /* ESTADOS (BADGES) */
@@ -131,4 +130,18 @@ body {
     border-radius: 8px;
     font-weight: 600;
     text-align: center;
+}
+
+/* --- BOTONERA EN HORIZONTAL --- */
+.nav-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px 0;
+    justify-content: flex-start;
+}
+
+.nav-container .btn {
+    min-width: 150px;
+    padding: 12px 20px;
 }
