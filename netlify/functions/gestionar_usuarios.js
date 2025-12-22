@@ -1,7 +1,17 @@
 const fs = require('fs');
 const path = require('path');
 
-const USUARIOS_PATH = path.join(__dirname, 'usuarios.json');
+// Usar carpeta data fuera de netlify/functions
+const pathProyecto = path.resolve(__dirname, '../../');
+const DATA_DIR = process.env.NODE_ENV === 'production' ? '/tmp/data' : path.join(pathProyecto, 'data');
+const USUARIOS_PATH = path.join(DATA_DIR, 'usuarios.json');
+
+// Asegurar que la carpeta existe (solo local o en /tmp)
+if (process.env.NODE_ENV !== 'production' || DATA_DIR.startsWith('/tmp')) {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
 
 
 const fetch = require('node-fetch');
@@ -132,8 +142,10 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // Guardar cambios
-  fs.writeFileSync(USUARIOS_PATH, JSON.stringify(usuarios, null, 2));
+  // Guardar cambios solo si no estamos en producción (Netlify no permite escribir en código fuente)
+  if (process.env.NODE_ENV !== 'production' || USUARIOS_PATH.startsWith('/tmp')) {
+    fs.writeFileSync(USUARIOS_PATH, JSON.stringify(usuarios, null, 2));
+  }
 
   return {
     statusCode: 200,

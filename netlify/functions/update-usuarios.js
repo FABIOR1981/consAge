@@ -65,7 +65,7 @@ exports.handler = async (event, context) => {
     const githubToken = process.env.GITHUB_TOKEN || token;
     const repo = process.env.GITHUB_REPO || 'FABIOR1981/consAge';
     const branch = process.env.GITHUB_BRANCH || 'main';
-    const filePath = 'netlify/functions/usuarios.json';
+    const filePath = 'data/usuarios.json';
     if (!githubToken) {
       return {
         statusCode: 401,
