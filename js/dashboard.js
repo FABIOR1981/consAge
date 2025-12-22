@@ -289,24 +289,20 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         let url = '/.netlify/functions/reservar';
         let emailFiltroValor = emailFiltro && typeof emailFiltro === 'object' ? emailFiltro.email : emailFiltro;
         let nombreFiltroValor = emailFiltro && typeof emailFiltro === 'object' ? emailFiltro.nombre : '';
-        if (isAdmin && !emailFiltroValor) {
-            url += '?all=1';
-        } else if (emailFiltroValor) {
+        if (emailFiltroValor) {
             url += `?email=${encodeURIComponent(emailFiltroValor)}`;
         }
         const resp = await fetch(url);
         const data = await resp.json();
         let reservas = data.userEvents || [];
-        // Filtrar por email o nombre completo (de usuarios.json)
-        if (emailFiltroValor || nombreFiltroValor) {
-            const emailFiltroLower = (emailFiltroValor || '').toLowerCase();
-            const nombreFiltroLower = (nombreFiltroValor || '').toLowerCase();
-            reservas = reservas.filter(reserva => {
-                const nombreReserva = (reserva.nombre || '').toLowerCase();
-                const emailReserva = (reserva.email || '').toLowerCase();
-                return emailReserva === emailFiltroLower || (nombreFiltroLower && nombreReserva === nombreFiltroLower);
-            });
-        }
+        // Filtrar SOLO por el usuario seleccionado (email o nombre exacto)
+        const emailFiltroLower = (emailFiltroValor || '').toLowerCase();
+        const nombreFiltroLower = (nombreFiltroValor || '').toLowerCase();
+        reservas = reservas.filter(reserva => {
+            const nombreReserva = (reserva.nombre || '').toLowerCase();
+            const emailReserva = (reserva.email || '').toLowerCase();
+            return (emailFiltroLower && emailReserva === emailFiltroLower) || (nombreFiltroLower && nombreReserva === nombreFiltroLower);
+        });
         if (reservas.length === 0) {
             container.innerHTML += '<p>No hay reservas activas.</p>';
             return;
