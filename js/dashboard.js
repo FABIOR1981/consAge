@@ -216,7 +216,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     // DEBUG: Mostrar respuesta cruda de reservas SIEMPRE visible y al inicio del contenedor
     let debugReservaSpan = document.getElementById('debug-reservas');
     // Usar solo una declaración de container
-    var container = document.getElementById('calendar-container');
+    // container ya está declarado previamente en esta función, no redeclarar
     if (!debugReservaSpan) {
         debugReservaSpan = document.createElement('pre');
         debugReservaSpan.id = 'debug-reservas';
