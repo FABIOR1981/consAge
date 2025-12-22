@@ -234,20 +234,35 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         }
     }
     // Llamar al backend de reservas y mostrar la respuesta cruda
+    let debugMsg = '';
     try {
         const resp = await fetch('/.netlify/functions/reservar?email=' + encodeURIComponent(user.email));
         let text = await resp.text();
         let data = null;
         try { data = JSON.parse(text); } catch {}
         if (!resp.ok) {
-            debugReservaSpan.innerText = 'DEBUG reservas: ERROR ' + resp.status + '\n' + (data && data.error ? data.error + (data.details ? ('\nDetalles: ' + data.details) : '') : text) + '\n(Eliminar este bloque luego)';
+            debugMsg = 'DEBUG reservas: ERROR ' + resp.status + '\n' + (data && data.error ? data.error + (data.details ? ('\nDetalles: ' + data.details) : '') : text) + '\n(Eliminar este bloque luego)';
         } else {
-            debugReservaSpan.innerText = 'DEBUG reservas (/.netlify/functions/reservar):\n' + JSON.stringify(data, null, 2) + '\n(Eliminar este bloque luego)';
+            debugMsg = 'DEBUG reservas (/.netlify/functions/reservar):\n' + JSON.stringify(data, null, 2) + '\n(Eliminar este bloque luego)';
         }
     } catch (e) {
-        debugReservaSpan.innerText = 'DEBUG reservas: error al consultar backend: ' + e.message;
+        debugMsg = 'DEBUG reservas: error al consultar backend: ' + e.message;
     }
     container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
+    // Insertar el bloque de depuración SIEMPRE arriba
+    let debugReservaSpan = document.getElementById('debug-reservas');
+    if (!debugReservaSpan) {
+        debugReservaSpan = document.createElement('pre');
+        debugReservaSpan.id = 'debug-reservas';
+        debugReservaSpan.style.fontSize = '0.85em';
+        debugReservaSpan.style.color = '#006';
+        debugReservaSpan.style.background = '#f8f8ff';
+        debugReservaSpan.style.border = '1px solid #bbf';
+        debugReservaSpan.style.padding = '0.5em';
+        debugReservaSpan.style.marginTop = '0.5em';
+    }
+    debugReservaSpan.innerText = debugMsg;
+    container.insertBefore(debugReservaSpan, container.firstChild);
 
     // Solo admin puede ver reservas de otros
     if (esAdmin) {
