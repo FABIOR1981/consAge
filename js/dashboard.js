@@ -180,8 +180,6 @@ async function renderDashboardButtons(user) {
         btnReservas.className = 'btn-primary';
         btnReservas.innerText = 'Reservas';
         btnReservas.onclick = () => {
-            const container = document.getElementById('calendar-container');
-            container.innerHTML = '';
             renderReservas(document.getElementById('reservas-container'));
         };
         btnsDiv.appendChild(btnReservas);
