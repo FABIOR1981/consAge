@@ -201,6 +201,7 @@ async function renderDashboardButtons(user) {
 }
 
 async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
+    const container = document.getElementById('calendar-container');
     const user = netlifyIdentity.currentUser();
     if (!user) return;
     // Consultar al backend el rol real del usuario
@@ -215,8 +216,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     } catch {}
     // DEBUG: Mostrar respuesta cruda de reservas SIEMPRE visible y al inicio del contenedor
     let debugReservaSpan = document.getElementById('debug-reservas');
-    // Usar solo una declaración de container
-    // container ya está declarado previamente en esta función, no redeclarar
+    // container ya está declarado al inicio de la función
     if (!debugReservaSpan) {
         debugReservaSpan = document.createElement('pre');
         debugReservaSpan.id = 'debug-reservas';
@@ -247,7 +247,6 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     } catch (e) {
         debugReservaSpan.innerText = 'DEBUG reservas: error al consultar backend: ' + e.message;
     }
-    const container = document.getElementById('calendar-container');
     container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
 
     // Solo admin puede ver reservas de otros
