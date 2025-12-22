@@ -282,16 +282,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         lista.className = 'reservas-lista';
         reservas.forEach(reserva => {
             const card = document.createElement('div');
-            card.className = 'reserva-card';
-            card.style.border = '1px solid #ccc';
-            card.style.borderRadius = '8px';
-            card.style.background = '#fafbff';
-            card.style.margin = '1em 0';
-            card.style.padding = '1em';
-            card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
-            card.style.display = 'flex';
-            card.style.flexDirection = 'column';
-            card.style.gap = '0.5em';
+            card.className = 'reserva-card card';
             const fechaHora = `${reserva.fecha} ${reserva.hora}:00 hs`;
             const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
             const ahora = new Date();
@@ -299,22 +290,14 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
             const esCancelada = reserva.summary && reserva.summary.startsWith('Cancelada');
             if (esCancelada) return;
             card.innerHTML = `
-                <div style="font-weight:bold;font-size:1.1em;color:#2a3a5a;">Consultorio ${reserva.consultorio}</div>
-                <div><span style="color:#555;">${fechaHora}</span></div>
-                <div><span style="color:#1a4">${reserva.nombre || reserva.email}</span></div>
+                <div class="reserva-consultorio">Consultorio ${reserva.consultorio}</div>
+                <div><span class="reserva-fecha">${fechaHora}</span></div>
+                <div><span class="reserva-nombre">${reserva.nombre || reserva.email}</span></div>
             `;
             if (diffHoras > 24) {
                 const btnCancelar = document.createElement('button');
                 btnCancelar.innerText = 'Cancelar';
-                btnCancelar.className = 'btn-cancelar';
-                btnCancelar.style.background = '#e74c3c';
-                btnCancelar.style.color = '#fff';
-                btnCancelar.style.border = 'none';
-                btnCancelar.style.borderRadius = '4px';
-                btnCancelar.style.padding = '0.5em 1.2em';
-                btnCancelar.style.fontWeight = 'bold';
-                btnCancelar.style.cursor = 'pointer';
-                btnCancelar.style.marginTop = '0.5em';
+                btnCancelar.className = 'btn-cancelar btn btn-danger';
                 btnCancelar.onclick = async () => {
                     if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
                     try {
@@ -337,8 +320,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                 card.appendChild(btnCancelar);
             } else {
                 const noCancel = document.createElement('span');
-                noCancel.style.color = 'gray';
-                noCancel.style.marginTop = '0.5em';
+                noCancel.className = 'no-cancelar';
                 noCancel.innerText = '(No se puede cancelar: menos de 24h)';
                 card.appendChild(noCancel);
             }
@@ -347,8 +329,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         container.appendChild(lista);
         const btnVolver = document.createElement('button');
         btnVolver.innerText = 'Volver a Agenda';
-        btnVolver.className = 'btn-volver';
-        btnVolver.style.marginTop = '1.5em';
+        btnVolver.className = 'btn-volver btn';
         btnVolver.onclick = cargarBotonesConsultorios;
         container.appendChild(btnVolver);
     } catch (e) {
@@ -366,6 +347,9 @@ async function renderInformeEnDashboard() {
             let fragment = bodyMatch ? bodyMatch[1] : html;
             // Eliminar tags <script> que carguen el propio informe.js para evitar doble carga
             fragment = fragment.replace(/<script[^>]+src=["']?[^"'>]*informe\.js[^"'>]*["']?[^>]*>[\s\S]*?<\/script>/gi, '');
+            // Asegurar que la tabla tenga la clase 'table' y esté dentro de un div 'table-container'
+            fragment = fragment.replace(/<table([^>]*)>/gi, '<div class="table-container"><table$1 class="table">');
+            fragment = fragment.replace(/<\/table>/gi, '</table></div>');
             container.innerHTML = '<h3>Informe de Reservas</h3>' + fragment;
         // Cargar e inicializar el script del informe (dinámicamente) para que el combo y el formulario funcionen
         try {
