@@ -1,187 +1,71 @@
-/* --- TABLAS MODERNAS --- */
-.table-container {
-    overflow-x: auto;
-    box-shadow: var(--shadow);
+/* Botones Modernos */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
     border-radius: var(--radius);
-    background: var(--white);
-    margin: 20px 0;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
-}
-
-.table thead th {
-    background-color: var(--primary-color);
-    color: var(--white);
-    text-align: left;
-    padding: 16px;
     font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
     text-transform: uppercase;
+    letter-spacing: 0.5px;
     font-size: 0.85rem;
 }
 
-.table tbody td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #eee;
-    color: var(--text-dark);
-}
-
-.table tbody tr:nth-child(even) { background-color: #f8f9fa; }
-.table tbody tr:hover { background-color: #eef2f7; }
-
-/* --- ETIQUETAS DE ESTADO (BADGES) --- */
-.status {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: inline-block;
-    text-align: center;
-    min-width: 90px;
-}
-
-.status.reservada { background-color: #e3f2fd; color: #1976d2; }
-.status.usada { background-color: #e8f5e9; color: var(--success-color); }
-.status.cancelada { background-color: #ffebee; color: var(--error-color); }
-
-/* --- BOTONES --- */
-.btn {
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
 .btn-primary { background: var(--accent-color); color: white; }
-.btn-primary:hover { background: var(--primary-color); transform: translateY(-1px); }
-/* --- TABLAS MODERNAS --- */
+.btn-primary:hover { 
+    background: var(--primary-color); 
+    transform: translateY(-2px); 
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3); 
+}
 
-/* Contenedor para hacerla responsive en móviles */
+/* Tablas con "Aire" */
 .table-container {
-    overflow-x: auto;
-    box-shadow: var(--shadow);
-    border-radius: var(--radius);
     background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
     margin: 20px 0;
+    overflow-x: auto;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Evita que se aplaste mucho en pantallas pequeñas */
 }
 
-/* Encabezados */
 .table thead th {
-    background-color: var(--primary-color);
-    color: var(--white);
+    background: transparent;
+    color: #b2bec3; /* Texto gris claro para encabezados modernos */
     text-align: left;
-    padding: 16px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
+    padding: 12px 16px;
+    font-size: 0.75rem;
     text-transform: uppercase;
+    border-bottom: 2px solid var(--bg-light);
 }
 
-/* Celdas del cuerpo */
 .table tbody td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #eee;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--bg-light);
     color: var(--text-dark);
     font-size: 0.95rem;
-    vertical-align: middle;
 }
 
-/* Efecto Zebra (filas alternas) para guiar el ojo */
-.table tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-/* Efecto Hover (resaltar fila al pasar el mouse) */
 .table tbody tr:hover {
-    background-color: #e2e6ea;
-    transition: background-color 0.2s ease;
+    background-color: rgba(52, 152, 219, 0.02);
 }
 
-/* --- BADGES (Etiquetas de Estado) --- */
+/* Badges de Estado */
 .status {
-    padding: 6px 12px;
+    padding: 6px 14px;
     border-radius: 50px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    text-transform: capitalize;
     display: inline-block;
-    min-width: 80px;
-    text-align: center;
 }
 
-/* Colores según el estado */
-.status.reservada {
-    background-color: #e3f2fd; /* Fondo azul claro */
-    color: #1976d2;            /* Texto azul fuerte */
-}
-
-.status.usada {
-    background-color: #e8f5e9; /* Fondo verde claro */
-    color: #2e7d32;            /* Texto verde fuerte */
-}
-
-.status.cancelada {
-    background-color: #ffebee; /* Fondo rojo claro */
-    color: #c62828;            /* Texto rojo fuerte */
-}
-/* Contenedor General */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* Botones Modernos */
-.btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: var(--accent-color);
-    color: var(--white);
-    border-radius: var(--radius);
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.btn:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-}
-
-/* Tarjetas (Cards) para secciones */
-.card {
-    background: var(--white);
-    padding: 20px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 20px;
-}
-
-/* Header / Navbar */
-.navbar {
-    background: var(--primary-color);
-    color: var(--white);
-    padding: 1rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.nav-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.status.usada { background: #e8f5e9; color: var(--success-color); }
+.status.cancelada { background: #ffebee; color: var(--error-color); }
+.status.reservada { background: #e3f2fd; color: var(--accent-color); }

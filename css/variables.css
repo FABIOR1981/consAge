@@ -1,13 +1,16 @@
 :root {
-    --primary-color: #2c3e50;
-    --accent-color: #3498db;
-    --success-color: #27ae60;
-    --error-color: #e74c3c;
-    --bg-light: #f4f7f6;
-    --text-dark: #333333;
+    /* Paleta refinada */
+    --primary-color: #2c3e50;    /* Azul medianoche */
+    --accent-color: #3498db;     /* Azul brillante */
+    --success-color: #27ae60;    /* Verde esmeralda */
+    --error-color: #e74c3c;      /* Rojo suave */
+    --bg-light: #f8f9fa;         /* Fondo grisáceo muy claro */
+    --text-dark: #2d3436;
     --white: #ffffff;
+
+    /* Tipografía y Bordes */
     --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --radius: 8px;
-    --transition: all 0.3s ease;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    --radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }

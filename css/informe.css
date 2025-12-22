@@ -1,198 +1,41 @@
-/* Este archivo es el CSS principal y moderno para informes y reservas. Unifica todos los estilos previos. */
-
-
 .informe-container {
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 2em 2.5em 2em 2.5em;
-  margin: 2em auto;
-  max-width: 900px;
-}
-
-.informe-titulo {
-  text-align: center;
-  color: var(--primary-color);
-  font-size: 2.1em;
-  font-weight: 700;
-  margin-bottom: 1.2em;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 3rem;
+    max-width: 1100px;
+    margin: 2rem auto;
+    box-shadow: var(--shadow);
 }
 
 .informe-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.2em 2em;
-  align-items: flex-end;
-  margin-bottom: 1.5em;
-}
-.informe-form label, .informe-form select, .informe-form input[type="date"] {
-  margin-right: 1.2em;
-  font-size: 1em;
-}
-.informe-form label {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-  color: var(--primary-color);
-  font-size: 1em;
-}
-.informe-form input[type="date"], .informe-form select, .informe-form input[type="text"] {
-  margin-top: 0.3em;
-  padding: 0.4em 0.7em;
-  border: 1px solid #d1d7e6;
-  border-radius: var(--radius);
-  font-size: 1em;
-  background: #f9fafb;
-  color: var(--primary-color);
-}
-.informe-form button, .informe-form button[type="submit"] {
-  background: var(--primary-color);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius);
-  padding: 0.5em 1.5em;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  margin-top: 0.5em;
-}
-.informe-form button:hover, .informe-form button[type="submit"]:hover {
-  background: var(--accent-color);
-}
-
-.search-row {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 200px;
-}
-/* css/informe.css REFACTORIZADO */
-
-.informe-container {
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 2em;
-  margin: 2em auto;
-  max-width: 1100px;
-}
-
-.informe-titulo {
-  text-align: center;
-  color: var(--primary-color);
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-}
-
-/* --- Formulario de Filtros (Mantenemos tu lógica pero con variables nuevas) --- */
-.informe-form {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: var(--radius);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: flex-end;
-  margin-bottom: 2rem;
-  border: 1px solid #e9ecef;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    background: var(--bg-light);
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2.5rem;
+    align-items: end;
 }
 
 .informe-form label {
-  display: block;
-  font-weight: 600;
-  color: var(--primary-color);
-  font-size: 0.9rem;
-  margin-bottom: 5px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 8px;
 }
 
-.informe-form input, 
-.informe-form select {
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-family: var(--font-main);
-  min-width: 150px;
+.informe-form input, .informe-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dfe6e9;
+    border-radius: 8px;
+    background: white;
+    transition: var(--transition);
 }
 
-.informe-form button {
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.informe-form button:hover {
-  background-color: var(--primary-color);
-}
-
-/* Nota: Ya no hay estilos de tabla aquí. Usaremos los de components.css */
-
-#tabla-informe tr:nth-child(even) {
-  background: #f1f4fa;
-}
-#tabla-informe tr:nth-child(odd) {
-  background: #fff;
-}
-#tabla-informe tr:last-child td {
-  border-bottom: none;
-}
-#tabla-informe tr:hover {
-  background: #eaf1fa;
-}
-
-.btn-cancelar-reserva {
-  background: linear-gradient(90deg, #e74c3c 60%, #c0392b 100%);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius);
-  padding: 0.4em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: 0 1px 4px rgba(231,76,60,0.08);
-}
-.btn-cancelar-reserva:hover {
-  background: linear-gradient(90deg, #c0392b 60%, #e74c3c 100%);
-}
-
-/* Estados visuales */
-#tabla-informe td.estado-cancelada {
-  color: #e74c3c;
-  font-weight: 600;
-}
-#tabla-informe td.estado-usada {
-  color: #16a085;
-  font-weight: 600;
-}
-#tabla-informe td.estado-reservada {
-  color: #2980b9;
-  font-weight: 600;
-}
-
-.total-horas-informe {
-  color: var(--success-color);
-  font-size: 1.1em;
-  font-weight: 600;
-  margin: 1.2em 0 0.5em 0;
-  text-align: right;
-}
-
-@media (max-width: 700px) {
-  .informe-container {
-    padding: 1em 0.5em;
-  }
-  .informe-form {
-    flex-direction: column;
-    gap: 0.7em 0;
-  }
-  #tabla-informe th, #tabla-informe td {
-    padding: 0.5em 0.3em;
-    font-size: 0.95em;
-  }
+.informe-form input:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
