@@ -97,7 +97,7 @@ body {
 /* --- EFECTO ZEBRA (FILAS PARES) --- */
 /* Usamos un color ligeramente más oscuro para que se note bien */
 .table tbody tr:nth-child(even) {
-   background-color: #f4f7f9 !important;
+   background-color: #f2f4f7 !important;
 }
 
 /* Resalte al pasar el mouse */
