@@ -208,6 +208,8 @@ export async function initInforme(container) {
 
 function renderReservasTable(reservas, tabla, totalHorasDiv) {
     let total = 0;
+    let totalUsadas = 0;
+    let totalCanceladas = 0;
     const esMisReservas = tabla.closest('.informe-container') && tabla.closest('.informe-container').querySelector('h2')?.textContent?.includes('Mis Reservas Futuras');
     tabla.innerHTML = `<tr><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th>${esMisReservas ? '<th></th>' : ''}</tr>`;
     reservas.forEach(r => {
@@ -248,6 +250,7 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
         let estado = APP_CONFIG.estadosReserva.RESERVADA;
         if (r.summary && r.summary.toLowerCase().includes('cancelada')) {
             estado = APP_CONFIG.estadosReserva.CANCELADA;
+            totalCanceladas++;
         } else {
             // Si la fecha/hora de inicio ya pasó, es usada
             if (r.start) {
@@ -255,6 +258,7 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
                 const inicio = new Date(r.start);
                 if (inicio < ahora) {
                     estado = APP_CONFIG.estadosReserva.USADA;
+                    totalUsadas++;
                 }
             }
         }
@@ -270,7 +274,7 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
         tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${estado}</td>${esMisReservas ? `<td>${btnCancelar}</td>` : ''}</tr>`;
         total++;
     });
-    totalHorasDiv.innerText = `Total de reservas: ${total}`;
+    totalHorasDiv.innerText = `Total de reservas: ${total} | Usadas: ${totalUsadas} | Canceladas: ${totalCanceladas}`;
 
     // Handler para cancelar
     if (esMisReservas) {
