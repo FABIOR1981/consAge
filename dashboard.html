@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel - Gestión de Consultorios</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/agenda.css">
+    <link rel="stylesheet" href="css/reservas.css">
     <link rel="stylesheet" href="css/informe.css">
+    <link rel="stylesheet" href="css/informe_modular.css">
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
@@ -27,13 +30,15 @@
                 </div>
             </section>
 
-            <section id="agenda-section" class="card">
-                <h2>📅 Gestión de Turnos</h2>
-                <p>Seleccione su consultorio y horario.</p>
-                <div id="calendar-container">
-                    </div>
+            <section id="agenda-section" class="card" style="display:none;">
+                <div id="agenda-container"></div>
             </section>
-            
+            <section id="reservas-section" class="card" style="display:none;">
+                <div id="reservas-container"></div>
+            </section>
+            <section id="informe-section" class="card" style="display:none;">
+                <div id="informe-container"></div>
+            </section>
         </main>
     </div>
 

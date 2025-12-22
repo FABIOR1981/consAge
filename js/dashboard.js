@@ -1,5 +1,7 @@
 // js/dashboard.js
-import { APP_CONFIG } from './config.js';
+import { renderReservas } from './reservas.js';
+import { renderAgenda } from './agenda.js';
+import { renderInforme } from './informe_modular.js';
 
 let seleccion = {
     consultorio: null,
@@ -170,23 +172,19 @@ async function renderDashboardButtons(user) {
     btnAgenda.className = 'btn-secondary';
     btnAgenda.innerText = 'Agenda';
     btnAgenda.onclick = () => {
-        // Limpiar y mostrar solo la agenda
-        const container = document.getElementById('calendar-container');
-        container.innerHTML = '';
-        cargarBotonesConsultorios();
+        mostrarSeccion('agenda');
     };
     btnsDiv.appendChild(btnAgenda);
-    const btnMisReservas = document.createElement('button');
-    btnMisReservas.id = 'mis-reservas-btn';
-    btnMisReservas.className = 'btn-primary';
-    btnMisReservas.innerText = 'Mis Reservas';
-    btnMisReservas.onclick = () => {
-        // Limpiar y mostrar solo la sección de reservas
-        const container = document.getElementById('calendar-container');
-        container.innerHTML = '';
-        mostrarMisReservas();
-    };
-    btnsDiv.appendChild(btnMisReservas);
+        const btnReservas = document.createElement('button');
+        btnReservas.id = 'mis-reservas-btn';
+        btnReservas.className = 'btn-primary';
+        btnReservas.innerText = 'Reservas';
+        btnReservas.onclick = () => {
+            const container = document.getElementById('calendar-container');
+            container.innerHTML = '';
+            renderReservas(document.getElementById('reservas-container'));
+        };
+        btnsDiv.appendChild(btnReservas);
 
     // Consultar al backend el rol real del usuario
     let esAdmin = false;
@@ -209,87 +207,21 @@ async function renderDashboardButtons(user) {
     }
 }
 
-async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
-    const container = document.getElementById('calendar-container');
-    const user = netlifyIdentity.currentUser();
-    if (!user) return;
-    // Consultar al backend el rol real del usuario
-    let esAdmin = false;
-    try {
-        const resp = await fetch('/.netlify/functions/listar_usuarios');
-        const js = await resp.json();
-        if (Array.isArray(js.usuarios)) {
-            const actual = js.usuarios.find(u => u.email === user.email);
-            if (actual && actual.rol === 'admin') esAdmin = true;
-        }
-    } catch {}
-    // Limpiar solo la sección de reservas
-    container.innerHTML = '';
-    const titulo = document.createElement('h3');
-    titulo.textContent = esAdmin ? 'Reservas realizadas' : 'Mis Reservas';
-    titulo.style.marginBottom = '0.5em';
-    container.appendChild(titulo);
-
-    // Solo admin puede ver reservas de otros
-    if (esAdmin) {
-        // Si es admin y no hay lista de usuarios, obtenerla y re-llamar la función
-        if (!usuariosLista) {
-            try {
-                const resp = await fetch('/.netlify/functions/listar_usuarios');
-                const js = await resp.json();
-                let lista = Array.isArray(js.usuarios) ? js.usuarios : [];
-                // Ordenar alfabéticamente por nombre
-                lista = lista.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-                return mostrarMisReservas(emailFiltro, lista);
-            } catch (e) {
-                container.innerHTML += `<p style='color:red'>No se pudo cargar la lista de usuarios: ${e.message}</p>`;
-                return;
-            }
-        }
-        // Renderizar filtro de texto y combo para admin
-        let filtroUsuario = emailFiltro;
-        if (usuariosLista && usuariosLista.length > 0) {
-            const formFiltro = document.createElement('form');
-            formFiltro.id = 'form-filtro-usuario';
-            formFiltro.innerHTML = `
-                <label style="font-weight:500;">Buscar usuario: <input type="text" id="filtro-nombre-usuario" placeholder="Ingrese parte del nombre..." autocomplete="off" style="margin-right:1em;"></label>
-                <label style="font-weight:500;">Usuario: <select id="combo-usuario"><option value="">Seleccione un usuario</option></select></label>
-            `;
-            container.appendChild(formFiltro);
-            const inputFiltro = formFiltro.querySelector('#filtro-nombre-usuario');
-            const combo = formFiltro.querySelector('#combo-usuario');
-            // Función para renderizar opciones del combo según filtro
-            function renderCombo(filtro) {
-                const opciones = usuariosLista
-                    .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())))
-                    .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
-                combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
-            }
-            renderCombo('');
-            inputFiltro.addEventListener('input', (e) => {
-                renderCombo(e.target.value);
-            });
-            combo.addEventListener('change', (e) => {
-                // Al seleccionar un usuario, limpiar la lista de reservas y mostrar solo las de ese usuario
-                const reservasDiv = document.querySelector('.reservas-lista');
-                if (reservasDiv) reservasDiv.remove();
-                if (e.target.value) {
-                    mostrarMisReservas(e.target.value, usuariosLista);
-                }
-            });
-            filtroUsuario = combo.value;
-        }
-        // Buscar el usuario seleccionado en la lista para obtener su nombre completo
-        let usuarioSeleccionado = usuariosLista.find(u => u.email === filtroUsuario);
-        let nombreSeleccionado = usuarioSeleccionado && usuarioSeleccionado.nombre ? usuarioSeleccionado.nombre : '';
-        if (filtroUsuario) {
-            await mostrarMisReservasAdmin({ email: filtroUsuario, nombre: nombreSeleccionado }, esAdmin, usuariosLista);
-        } else {
-            // No mostrar reservas si no hay usuario seleccionado
-        }
-    } else {
-        // Usuario normal: solo puede ver sus propias reservas
-        await mostrarMisReservasAdmin({ email: user.email, nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : '' }, false, null);
+function mostrarSeccion(seccion) {
+    // Ocultar todas las secciones
+    document.getElementById('agenda-section').style.display = 'none';
+    document.getElementById('reservas-section').style.display = 'none';
+    document.getElementById('informe-section').style.display = 'none';
+    // Mostrar la sección seleccionada y cargar su contenido
+    if (seccion === 'agenda') {
+        document.getElementById('agenda-section').style.display = '';
+        renderAgenda(document.getElementById('agenda-container'));
+    } else if (seccion === 'reservas') {
+        document.getElementById('reservas-section').style.display = '';
+        renderReservas(document.getElementById('reservas-container'));
+    } else if (seccion === 'informe') {
+        document.getElementById('informe-section').style.display = '';
+        renderInforme(document.getElementById('informe-container'));
     }
 }
 
@@ -481,7 +413,7 @@ const initDashboard = async () => {
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
     await renderDashboardButtons(user);
-    cargarBotonesConsultorios();
+    // La agenda ahora es modular, no se llama aquí
 };
 
 if (window.netlifyIdentity) {
@@ -490,6 +422,5 @@ if (window.netlifyIdentity) {
     document.addEventListener('DOMContentLoaded', () => {
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) logoutBtn.addEventListener('click', () => window.netlifyIdentity.logout());
-        // El botón mis-reservas se crea dinámicamente, así que no se puede agregar aquí
-    });
-}
+
+        // ...existing code...

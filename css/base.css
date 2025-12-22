@@ -1,0 +1,24 @@
+/* base.css: Tipografía, colores y utilidades globales */
+:root {
+  --color-principal: #e74c3c;
+  --color-secundario: #2a3a5a;
+  --color-fondo: #fafbff;
+  --color-texto: #222;
+  --color-borde: #ccc;
+  --color-exito: #1a4;
+  --color-error: #e74c3c;
+}
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: var(--color-texto);
+  background: #f7f8fa;
+  margin: 0;
+}
+.container {
+  max-width: 900px;
+  margin: 2em auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  padding: 2em;
+}
