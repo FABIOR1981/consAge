@@ -15,7 +15,7 @@ async function getUsuariosDesdeGitHub() {
   try {
     const repo = process.env.GITHUB_REPO || 'FABIOR1981/consAge';
     const branch = process.env.GITHUB_BRANCH || 'main';
-    const filePath = 'netlify/functions/usuarios.json';
+    const filePath = 'data/usuarios.json';
     const githubToken = process.env.GITHUB_TOKEN;
     if (!githubToken) return [];
     const fileUrl = `https://api.github.com/repos/${repo}/contents/${filePath}?ref=${branch}`;
