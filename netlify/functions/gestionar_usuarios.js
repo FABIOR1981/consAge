@@ -96,7 +96,11 @@ exports.handler = async function(event, context) {
   let usuarios = mergeUsuarios(usuariosLocales, usuariosRemotos);
 
   // Validar si el usuario que realiza la acción es admin
-  const esAdmin = body.solicitante && body.solicitante.rol === 'admin';
+  // Si el rol es vacío, se considera 'usuario' (no admin)
+  const rolSolicitante = body.solicitante && typeof body.solicitante.rol === 'string' && body.solicitante.rol.trim() !== ''
+    ? body.solicitante.rol.trim()
+    : 'usuario';
+  const esAdmin = rolSolicitante === 'admin';
 
   // Alta de usuario (solo admin o automático en login)
   if (event.headers['x-netlify-event'] === 'signup') {
