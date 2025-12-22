@@ -215,8 +215,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         }
     } catch {}
     // DEBUG: Mostrar respuesta cruda de reservas SIEMPRE visible y al inicio del contenedor
-    let debugReservaSpan = document.getElementById('debug-reservas');
-    // container ya está declarado al inicio de la función
+    var debugReservaSpan = document.getElementById('debug-reservas');
     if (!debugReservaSpan) {
         debugReservaSpan = document.createElement('pre');
         debugReservaSpan.id = 'debug-reservas';
@@ -249,18 +248,7 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         debugMsg = 'DEBUG reservas: error al consultar backend: ' + e.message;
     }
     container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
-    // Insertar el bloque de depuración SIEMPRE arriba (sin redeclarar)
-    var debugReservaSpan = document.getElementById('debug-reservas');
-    if (!debugReservaSpan) {
-        debugReservaSpan = document.createElement('pre');
-        debugReservaSpan.id = 'debug-reservas';
-        debugReservaSpan.style.fontSize = '0.85em';
-        debugReservaSpan.style.color = '#006';
-        debugReservaSpan.style.background = '#f8f8ff';
-        debugReservaSpan.style.border = '1px solid #bbf';
-        debugReservaSpan.style.padding = '0.5em';
-        debugReservaSpan.style.marginTop = '0.5em';
-    }
+    // Reinsertar el bloque de depuración SIEMPRE arriba
     debugReservaSpan.innerText = debugMsg;
     container.insertBefore(debugReservaSpan, container.firstChild);
 
