@@ -392,15 +392,25 @@ const initDashboard = async () => {
     emailSpan.innerText = user.email;
     // Consultar el rol real del usuario
     let rol = '';
+    let rolMsg = '';
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
         const js = await resp.json();
         if (Array.isArray(js.usuarios)) {
             const actual = js.usuarios.find(u => u.email === user.email);
-            if (actual && actual.rol) rol = actual.rol;
+            if (actual && actual.rol) {
+                rol = actual.rol;
+                rolMsg = `Rol: ${rol}`;
+            } else {
+                rolMsg = 'Rol no encontrado';
+            }
+        } else {
+            rolMsg = 'No se pudo obtener el rol';
         }
-    } catch {}
-    // Crear o actualizar un span para el rol
+    } catch {
+        rolMsg = 'No se pudo obtener el rol';
+    }
+    // Crear o actualizar un span para el rol, siempre debajo del email
     let rolSpan = document.getElementById('user-rol');
     if (!rolSpan) {
         rolSpan = document.createElement('span');
@@ -408,9 +418,14 @@ const initDashboard = async () => {
         rolSpan.style.display = 'block';
         rolSpan.style.fontSize = '0.95em';
         rolSpan.style.color = '#888';
-        emailSpan.parentNode.insertBefore(rolSpan, emailSpan.nextSibling);
+        // Insertar justo después del email
+        if (emailSpan.nextSibling) {
+            emailSpan.parentNode.insertBefore(rolSpan, emailSpan.nextSibling);
+        } else {
+            emailSpan.parentNode.appendChild(rolSpan);
+        }
     }
-    rolSpan.innerText = rol ? `Rol: ${rol}` : '';
+    rolSpan.innerText = rolMsg;
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
     await renderDashboardButtons(user);
