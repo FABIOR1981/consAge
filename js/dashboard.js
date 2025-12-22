@@ -387,7 +387,30 @@ async function renderInformeEnDashboard() {
 const initDashboard = async () => {
     const user = netlifyIdentity.currentUser();
     if (!user) { window.location.href = "index.html"; return; }
-    document.getElementById('user-email').innerText = user.email;
+    // Mostrar email y rol debajo
+    const emailSpan = document.getElementById('user-email');
+    emailSpan.innerText = user.email;
+    // Consultar el rol real del usuario
+    let rol = '';
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol) rol = actual.rol;
+        }
+    } catch {}
+    // Crear o actualizar un span para el rol
+    let rolSpan = document.getElementById('user-rol');
+    if (!rolSpan) {
+        rolSpan = document.createElement('span');
+        rolSpan.id = 'user-rol';
+        rolSpan.style.display = 'block';
+        rolSpan.style.fontSize = '0.95em';
+        rolSpan.style.color = '#888';
+        emailSpan.parentNode.insertBefore(rolSpan, emailSpan.nextSibling);
+    }
+    rolSpan.innerText = rol ? `Rol: ${rol}` : '';
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
     await renderDashboardButtons(user);
