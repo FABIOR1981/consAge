@@ -7,16 +7,6 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const DATA_DIR = IS_PROD ? '/tmp/data' : path.join(pathProyecto, 'data');
 const USUARIOS_PATH = path.join(DATA_DIR, 'usuarios.json');
 
-// Solo crear carpeta si es local o si es /tmp/data en producción
-if (!IS_PROD) {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-} else if (IS_PROD && DATA_DIR === '/tmp/data') {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-}
 
 
 const fetch = require('node-fetch');
