@@ -1,16 +1,12 @@
 :root {
-    /* Paleta de Colores Profesional */
-    --primary-color: #2c3e50;    /* Azul oscuro elegante */
-    --accent-color: #3498db;     /* Azul brillante para llamadas a la acción */
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
     --success-color: #27ae60;
+    --error-color: #e74c3c;
     --bg-light: #f4f7f6;
     --text-dark: #333333;
     --white: #ffffff;
-
-    /* Tipografía */
     --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    
-    /* Sombras y Bordes */
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --radius: 8px;
     --transition: all 0.3s ease;
