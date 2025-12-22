@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const USUARIOS_PATH = path.join(__dirname, 'usuarios.json');
+const USUARIOS_PATH = path.join(__dirname, '../../data/usuarios.json');
 
 exports.handler = async function(event, context) {
   if (event.httpMethod !== 'GET') {
@@ -12,6 +12,7 @@ exports.handler = async function(event, context) {
   if (fs.existsSync(USUARIOS_PATH)) {
     usuarios = JSON.parse(fs.readFileSync(USUARIOS_PATH, 'utf8'));
   }
+  // (No logs)
   // Solo usuarios activos
   usuarios = usuarios.filter(u => u.activo !== false);
   return {

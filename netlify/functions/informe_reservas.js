@@ -66,7 +66,7 @@ exports.handler = async (event) => {
                 }
             });
             const users = Array.from(usersMap.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
-            console.log('Usuarios encontrados para combo:', users);
+                // console.log('Usuarios encontrados para combo:', users);
             return { statusCode: 200, body: JSON.stringify({ users }) };
         }
         // Filtrar por usuario si se indica
@@ -121,7 +121,7 @@ exports.handler = async (event) => {
 
         return { statusCode: 200, body: JSON.stringify({ reservas: resultado, totalHoras }) };
     } catch (error) {
-        console.error('Error informe_reservas:', error.message);
+            // console.error('Error informe_reservas:', error.message);
         return { statusCode: 500, body: JSON.stringify({ error: 'Error', details: error.message }) };
     }
 };
