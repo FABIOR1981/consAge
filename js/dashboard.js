@@ -203,14 +203,9 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     // Si es admin y no hay lista de usuarios, obtenerla y re-llamar la función
     if (isAdmin && !usuariosLista) {
         try {
-            const hoy = new Date();
-            const fechaFinDefault = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + 1);
-            const fechaInicioDefault = new Date(hoy.getTime() - (90 * 24 * 60 * 60 * 1000));
-            const fInicio = fechaInicioDefault.toISOString().slice(0,10);
-            const fFin = fechaFinDefault.toISOString().slice(0,10);
-            const resp = await fetch(`/.netlify/functions/informe_reservas?listUsers=1&fechaInicio=${encodeURIComponent(fInicio)}&fechaFin=${encodeURIComponent(fFin)}`);
+            const resp = await fetch('/.netlify/functions/listar_usuarios');
             const js = await resp.json();
-            let lista = Array.isArray(js.users) ? js.users : [];
+            let lista = Array.isArray(js.usuarios) ? js.usuarios : [];
             // Si el usuario actual no está en la lista, agregarlo
             if (!lista.some(u => u.email === user.email)) {
                 lista.unshift({ nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email, email: user.email });

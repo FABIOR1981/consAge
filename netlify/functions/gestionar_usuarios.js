@@ -20,8 +20,14 @@ exports.handler = async function(event, context) {
     usuarios = JSON.parse(fs.readFileSync(USUARIOS_PATH, 'utf8'));
   }
 
-  // Alta de usuario
+  // Validar si el usuario que realiza la acción es admin
+  const esAdmin = body.solicitante && body.solicitante.rol === 'admin';
+
+  // Alta de usuario (solo admin)
   if (event.headers['x-netlify-event'] === 'signup') {
+    if (!esAdmin) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'Solo administradores pueden dar de alta usuarios.' }) };
+    }
     const { email, user_metadata } = body;
     const nombre = user_metadata && user_metadata.full_name ? user_metadata.full_name : '';
     const rol = user_metadata && user_metadata.role ? user_metadata.role : '';
@@ -34,12 +40,28 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // Baja lógica de usuario
+  // Baja lógica de usuario (solo admin)
   if (event.headers['x-netlify-event'] === 'delete') {
+    if (!esAdmin) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'Solo administradores pueden dar de baja usuarios.' }) };
+    }
     const { email } = body;
     const usuario = usuarios.find(u => u.email === email);
     if (usuario) {
       usuario.activo = false;
+    }
+  }
+
+  // Edición de usuario (solo admin)
+  if (event.headers['x-netlify-event'] === 'edit') {
+    if (!esAdmin) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'Solo administradores pueden editar usuarios.' }) };
+    }
+    const { email, nombre, rol } = body;
+    const usuario = usuarios.find(u => u.email === email);
+    if (usuario) {
+      if (nombre) usuario.nombre = nombre;
+      if (rol) usuario.rol = rol;
     }
   }
 
