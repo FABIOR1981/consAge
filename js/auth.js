@@ -3,6 +3,7 @@ if (window.netlifyIdentity) {
     // Al inicializar el widget
     window.netlifyIdentity.on("init", user => {
         if (user) {
+            console.log("Usuario recibido de Netlify Identity (init):", user);
             registrarUsuarioEnBackend(user);
             window.location.href = "dashboard.html";
         }
@@ -10,6 +11,7 @@ if (window.netlifyIdentity) {
 
     // Al hacer login exitoso
     window.netlifyIdentity.on("login", user => {
+        console.log("Usuario recibido de Netlify Identity (login):", user);
         registrarUsuarioEnBackend(user);
         window.location.href = "dashboard.html";
     });

@@ -54,6 +54,7 @@ exports.handler = async function(event, context) {
   let body;
   try {
     body = JSON.parse(event.body);
+    console.log("Body recibido en gestionar_usuarios:", body);
   } catch (e) {
     return {
       statusCode: 400,
@@ -91,7 +92,14 @@ exports.handler = async function(event, context) {
         return { statusCode: 403, body: JSON.stringify({ error: 'Solo administradores pueden dar de alta usuarios.' }) };
       }
     } else {
+      // Si ya existe, actualiza nombre y rol si vienen en el login y no están vacíos
       existe.activo = true; // Reactiva si estaba dado de baja
+      if (nombre && nombre.trim() && nombre !== existe.nombre) {
+        existe.nombre = nombre;
+      }
+      if (rol && rol.trim() && rol !== existe.rol) {
+        existe.rol = rol;
+      }
     }
     // Si se agregó un usuario nuevo automáticamente, sincronizar con GitHub
     if (usuarioAgregado && auto_signup) {
