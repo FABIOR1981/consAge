@@ -108,8 +108,8 @@ exports.handler = async (event, context) => {
         Accept: 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        message: `🔧 Update usuarios.json via Admin Panel\n\nTotal usuarios: ${data.length}\nTimestamp: ${new Date().toLocaleString('es-UY', { timeZone: 'America/Montevideo' })}`,
+        body: JSON.stringify({
+          message: 'Actualización de usuarios realizada.',
         content: encodedContent,
         sha: currentSha,
         branch: branch,

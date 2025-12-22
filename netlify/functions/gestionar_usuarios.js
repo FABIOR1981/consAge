@@ -53,7 +53,6 @@ function mergeUsuarios(local, remoto) {
       }
     }
   }
-  console.log('DEBUG mergeUsuarios - resultado:', JSON.stringify(base));
   return base;
 }
 
@@ -75,7 +74,6 @@ exports.handler = async function(event, context) {
   let body;
   try {
     body = JSON.parse(event.body);
-    console.log("Body recibido en gestionar_usuarios:", body);
   } catch (e) {
     return {
       statusCode: 400,
@@ -90,8 +88,6 @@ exports.handler = async function(event, context) {
   }
   // Leer usuarios remotos (GitHub)
   let usuariosRemotos = await getUsuariosDesdeGitHub();
-  console.log('DEBUG gestionar_usuarios - usuariosLocales:', JSON.stringify(usuariosLocales));
-  console.log('DEBUG gestionar_usuarios - usuariosRemotos:', JSON.stringify(usuariosRemotos));
   // Merge seguro
   let usuarios = mergeUsuarios(usuariosLocales, usuariosRemotos);
 
