@@ -294,7 +294,23 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         }
         const resp = await fetch(url);
         const data = await resp.json();
+        // Bloque de depuración: mostrar respuesta cruda del backend
+        const debugDataDiv = document.createElement('div');
+        debugDataDiv.style.background = '#eef';
+        debugDataDiv.style.fontSize = '0.9em';
+        debugDataDiv.style.margin = '1em 0';
+        debugDataDiv.style.padding = '0.5em';
+        debugDataDiv.innerHTML = '<b>DEBUG respuesta backend:</b><pre style="overflow-x:auto;max-width:100%">' + JSON.stringify(data, null, 2) + '</pre>';
+        container.appendChild(debugDataDiv);
         let reservas = data.userEvents || [];
+        // Bloque de depuración: mostrar reservas crudas recibidas
+        const debugDiv = document.createElement('div');
+        debugDiv.style.background = '#ffe';
+        debugDiv.style.fontSize = '0.9em';
+        debugDiv.style.margin = '1em 0';
+        debugDiv.style.padding = '0.5em';
+        debugDiv.innerHTML = '<b>DEBUG reservas crudas:</b><pre style="overflow-x:auto;max-width:100%">' + JSON.stringify(reservas, null, 2) + '</pre>';
+        container.appendChild(debugDiv);
         // Filtrar SOLO por el usuario seleccionado (email o nombre exacto)
         const emailFiltroLower = (emailFiltroValor || '').toLowerCase();
         const nombreFiltroLower = (nombreFiltroValor || '').toLowerCase();
