@@ -95,7 +95,7 @@ export async function initInforme(container) {
 
 function renderReservasTable(reservas, tabla, totalHorasDiv) {
     let total = 0;
-    tabla.innerHTML = `<tr><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Email</th></tr>`;
+    tabla.innerHTML = `<tr><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th></tr>`;
     reservas.forEach(r => {
         // Extraer fecha y hora desde r.start
         let fecha = '';
@@ -130,7 +130,14 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
                 }
             }
         }
-        tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${email}</td></tr>`;
+        // Determinar estado
+        let estado = APP_CONFIG.estadosReserva.RESERVADA;
+        if (r.summary && r.summary.toLowerCase().includes('cancelada')) {
+            estado = APP_CONFIG.estadosReserva.CANCELADA;
+        } else if (r.summary && r.summary.toLowerCase().includes('usada')) {
+            estado = APP_CONFIG.estadosReserva.USADA;
+        }
+        tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${estado}</td></tr>`;
         total++;
     });
     totalHorasDiv.innerText = `Total de reservas: ${total}`;

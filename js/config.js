@@ -37,5 +37,10 @@ export const APP_CONFIG = {
         horasAntelacion: 24,
         reglaFinDeSemana: true // Si es lunes, debe cancelar el viernes
     },
-    zonaHoraria: 'America/Montevideo'
+    zonaHoraria: 'America/Montevideo',
+    estadosReserva: {
+        RESERVADA: 'Reservada',
+        USADA: 'Usada',
+        CANCELADA: 'Cancelada'
+    }
 };
