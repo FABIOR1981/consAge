@@ -1,14 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 
-// Usar solo un usuarios.json: en local en data/, en producción en /tmp/data/
+// Usar solo un usuarios.json: en local en data/, en producción SIEMPRE en /tmp/data/
 const pathProyecto = path.resolve(__dirname, '../../');
 const IS_PROD = process.env.NODE_ENV === 'production';
 const DATA_DIR = IS_PROD ? '/tmp/data' : path.join(pathProyecto, 'data');
 const USUARIOS_PATH = path.join(DATA_DIR, 'usuarios.json');
 
-// Asegurar que la carpeta existe solo si es local o en /tmp (Netlify)
-if (!IS_PROD || (IS_PROD && DATA_DIR.startsWith('/tmp'))) {
+// Solo crear carpeta si es local o si es /tmp/data en producción
+if (!IS_PROD) {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} else if (IS_PROD && DATA_DIR === '/tmp/data') {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
@@ -143,8 +147,8 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // Guardar cambios solo si no estamos en producción, o si estamos en /tmp (Netlify)
-  if (!IS_PROD || USUARIOS_PATH.startsWith('/tmp')) {
+  // Guardar cambios solo en local. En producción, solo sincronizar con GitHub.
+  if (!IS_PROD) {
     fs.writeFileSync(USUARIOS_PATH, JSON.stringify(usuarios, null, 2));
   }
 
