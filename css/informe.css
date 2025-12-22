@@ -1,41 +1,41 @@
-.informe-container {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 3rem;
-    max-width: 1100px;
-    margin: 2rem auto;
-    box-shadow: var(--shadow);
-}
-
 .informe-form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    background: var(--bg-light);
-    padding: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    background: #f9fafb;
+    padding: 25px;
     border-radius: var(--radius);
-    margin-bottom: 2.5rem;
+    margin-bottom: 30px;
     align-items: end;
 }
 
 .informe-form label {
-    font-size: 0.85rem;
-    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
     color: var(--primary-color);
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    gap: 8px;
 }
 
 .informe-form input, .informe-form select {
-    width: 100%;
     padding: 12px;
     border: 1px solid #dfe6e9;
     border-radius: 8px;
+    font-size: 0.95rem;
     background: white;
-    transition: var(--transition);
 }
 
 .informe-form input:focus {
     border-color: var(--accent-color);
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.total-horas-informe {
+    color: var(--success-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: right;
+    margin-top: 20px;
 }
