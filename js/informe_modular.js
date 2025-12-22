@@ -1,3 +1,4 @@
+import { APP_CONFIG } from './config.js';
 // Mostrar reservas futuras del usuario logueado (o seleccionado si admin)
 export async function renderMisReservasFuturas(container) {
     let esAdmin = false;
