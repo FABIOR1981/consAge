@@ -102,7 +102,7 @@ const mostrarHorarios = async () => {
     grid.className = 'horarios-grid';
     for (let h = APP_CONFIG.horarios.inicio; h < APP_CONFIG.horarios.fin; h++) {
         const btn = document.createElement('button');
-        btn.className = 'btn-horario';
+        btn.className = 'btn';
         btn.innerText = `${h.toString().padStart(2, '0')}:00`;
         if (ocupadasPorUsuario.includes(h)) {
             btn.classList.add('ocupado-usuario');
@@ -120,7 +120,7 @@ const mostrarHorarios = async () => {
     container.appendChild(grid);
     const btnAtras = document.createElement('button');
     btnAtras.innerText = "← Cambiar Fecha";
-    btnAtras.className = "btn-volver";
+    btnAtras.className = "btn btn-volver";
     btnAtras.onclick = () => elegirFecha(seleccion.consultorio);
     container.appendChild(btnAtras);
 };
@@ -169,7 +169,7 @@ async function renderDashboardButtons(user) {
     btnsDiv.innerHTML = '';
     const btnAgenda = document.createElement('button');
     btnAgenda.id = 'agenda-btn';
-    btnAgenda.className = 'btn-secondary';
+    btnAgenda.className = 'btn btn-primary';
     btnAgenda.innerText = 'Agenda';
     btnAgenda.onclick = () => {
         mostrarSeccion('agenda');
@@ -179,7 +179,7 @@ async function renderDashboardButtons(user) {
     // Botón de reservas futuras (nuevo, basado en informe)
     const btnMisReservasFuturas = document.createElement('button');
     btnMisReservasFuturas.id = 'mis-reservas-futuras-btn';
-    btnMisReservasFuturas.className = 'btn-primary';
+    btnMisReservasFuturas.className = 'btn btn-primary';
     // Consultar al backend el rol real del usuario para el texto del botón y para el botón de informe
     let esAdmin = false;
     try {
@@ -199,7 +199,7 @@ async function renderDashboardButtons(user) {
     if (esAdmin) {
         const btnInforme = document.createElement('button');
         btnInforme.id = 'informe-btn';
-        btnInforme.className = 'btn-secondary';
+        btnInforme.className = 'btn btn-secondary';
         btnInforme.innerText = 'Informe';
         btnInforme.onclick = () => mostrarSeccion('informe');
         btnsDiv.appendChild(btnInforme);
