@@ -193,7 +193,8 @@ export async function initInforme(container) {
 
 function renderReservasTable(reservas, tabla, totalHorasDiv) {
     let total = 0;
-    tabla.innerHTML = `<tr><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th></tr>`;
+    const esMisReservas = tabla.closest('.informe-container') && tabla.closest('.informe-container').querySelector('h2')?.textContent?.includes('Mis Reservas Futuras');
+    tabla.innerHTML = `<tr><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th>${esMisReservas ? '<th></th>' : ''}</tr>`;
     reservas.forEach(r => {
         // Extraer fecha y hora desde r.start
         let fecha = '';
@@ -242,8 +243,51 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
                 }
             }
         }
-        tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${estado}</td></tr>`;
+        let btnCancelar = '';
+        if (esMisReservas && estado === APP_CONFIG.estadosReserva.RESERVADA && r.start) {
+            const ahora = new Date();
+            const inicio = new Date(r.start);
+            const diffHoras = (inicio - ahora) / (1000 * 60 * 60);
+            if (diffHoras > 24) {
+                btnCancelar = `<button class="btn-cancelar-reserva" data-id="${r.id}" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:0.3em 1em;cursor:pointer;">Cancelar</button>`;
+            }
+        }
+        tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${estado}</td>${esMisReservas ? `<td>${btnCancelar}</td>` : ''}</tr>`;
         total++;
     });
     totalHorasDiv.innerText = `Total de reservas: ${total}`;
+
+    // Handler para cancelar
+    if (esMisReservas) {
+        tabla.querySelectorAll('.btn-cancelar-reserva').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.getAttribute('data-id');
+                if (!id) return;
+                if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+                const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+                try {
+                    const resp = await fetch('/.netlify/functions/reservar', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ eventId: id, email: user.email })
+                    });
+                    const result = await resp.json();
+                    if (resp.ok) {
+                        alert('Reserva cancelada correctamente.');
+                        // Refrescar la lista
+                        const cont = tabla.closest('.informe-container').parentNode;
+                        if (cont && typeof window.renderMisReservasFuturas === 'function') {
+                            window.renderMisReservasFuturas(cont);
+                        } else {
+                            location.reload();
+                        }
+                    } else {
+                        alert('No se pudo cancelar: ' + (result.error || result.details || 'Error desconocido'));
+                    }
+                } catch (e) {
+                    alert('Error al cancelar: ' + e.message);
+                }
+            });
+        });
+    }
 }
