@@ -278,27 +278,41 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
             container.innerHTML += '<p>No hay reservas activas.</p>';
             return;
         }
-        const lista = document.createElement('div');
-        lista.className = 'reservas-lista';
+        // --- NUEVA ESTRUCTURA DE TABLA ---
+        const tablaContainer = document.createElement('div');
+        tablaContainer.className = 'table-container';
+        const tabla = document.createElement('table');
+        tabla.className = 'table';
+        tabla.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Consultorio</th>
+                    <th>Fecha y Hora</th>
+                    <th>Usuario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = tabla.querySelector('tbody');
         reservas.forEach(reserva => {
-            const card = document.createElement('div');
-            card.className = 'reserva-row';
+            const tr = document.createElement('tr');
             const fechaHora = `${reserva.fecha} ${reserva.hora}:00 hs`;
             const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
             const ahora = new Date();
             const diffHoras = (fechaReserva - ahora) / (1000 * 60 * 60);
-            const esCancelada = reserva.summary && reserva.summary.startsWith('Cancelada');
-            if (esCancelada) return;
-            card.innerHTML = `
-                <div class="reserva-consultorio">Consultorio ${reserva.consultorio}</div>
-                <div><span class="reserva-fecha">${fechaHora}</span></div>
-                <div><span class="reserva-nombre">${reserva.nombre || reserva.email}</span></div>
+            tr.innerHTML = `
+                <td>Consultorio ${reserva.consultorio}</td>
+                <td>${fechaHora}</td>
+                <td>${reserva.nombre || reserva.email}</td>
+                <td class="acciones-celda"></td>
             `;
+            const tdAcciones = tr.querySelector('.acciones-celda');
             if (diffHoras > 24) {
-                const btnCancelar = document.createElement('button');
-                btnCancelar.innerText = 'Cancelar';
-                btnCancelar.className = 'btn-cancelar btn btn-danger';
-                btnCancelar.onclick = async () => {
+                const btn = document.createElement('button');
+                btn.innerText = 'Cancelar';
+                btn.className = 'btn btn-danger btn-sm';
+                btn.onclick = async () => {
                     if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
                     try {
                         const resp = await fetch('/.netlify/functions/reservar', {
@@ -309,7 +323,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                         const result = await resp.json();
                         if (resp.ok) {
                             alert('Reserva cancelada correctamente.');
-                            card.remove();
+                            tr.remove();
                         } else {
                             alert('No se pudo cancelar: ' + (result.error || result.details || 'Error desconocido'));
                         }
@@ -317,23 +331,21 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                         alert('Error al cancelar: ' + e.message);
                     }
                 };
-                card.appendChild(btnCancelar);
+                tdAcciones.appendChild(btn);
             } else {
-                const noCancel = document.createElement('span');
-                noCancel.className = 'no-cancelar';
-                noCancel.innerText = '(No se puede cancelar: menos de 24h)';
-                card.appendChild(noCancel);
+                tdAcciones.innerHTML = '<span class="no-cancelar">Bloqueado (-24h)</span>';
             }
-            lista.appendChild(card);
+            tbody.appendChild(tr);
         });
-        container.appendChild(lista);
+        container.appendChild(tablaContainer);
+        tablaContainer.appendChild(tabla);
         const btnVolver = document.createElement('button');
         btnVolver.innerText = 'Volver a Agenda';
         btnVolver.className = 'btn-volver btn';
         btnVolver.onclick = cargarBotonesConsultorios;
         container.appendChild(btnVolver);
     } catch (e) {
-        container.innerHTML += `<p style='color:red'>Error al consultar reservas: ${e.message}</p>`;
+        container.innerHTML += '<p style="color:red">Error al consultar reservas: ' + e.message + '</p>';
     }
 }
 
