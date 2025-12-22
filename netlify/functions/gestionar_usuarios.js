@@ -34,11 +34,17 @@ async function getUsuariosDesdeGitHub() {
 }
 
 function mergeUsuarios(local, remoto) {
-  const map = new Map();
-  [...(Array.isArray(remoto) ? remoto : []), ...(Array.isArray(local) ? local : [])].forEach(u => {
-    if (u && u.email) map.set(u.email, { ...u });
-  });
-  return Array.from(map.values());
+  // Une ambos arrays y solo evita duplicados exactos (mismo email)
+  const todos = [...(Array.isArray(remoto) ? remoto : []), ...(Array.isArray(local) ? local : [])];
+  const resultado = [];
+  const emails = new Set();
+  for (const u of todos) {
+    if (u && u.email && !emails.has(u.email)) {
+      resultado.push({ ...u });
+      emails.add(u.email);
+    }
+  }
+  return resultado;
 }
 
 async function syncUsuariosConGitHub(usuarios) {
