@@ -180,7 +180,7 @@ async function renderDashboardButtons(user) {
     const btnMisReservasFuturas = document.createElement('button');
     btnMisReservasFuturas.id = 'mis-reservas-futuras-btn';
     btnMisReservasFuturas.className = 'btn-primary';
-    // Consultar al backend el rol real del usuario para el texto del botón
+    // Consultar al backend el rol real del usuario para el texto del botón y para el botón de informe
     let esAdmin = false;
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
@@ -196,16 +196,6 @@ async function renderDashboardButtons(user) {
     };
     btnsDiv.appendChild(btnMisReservasFuturas);
 
-    // Consultar al backend el rol real del usuario
-    let esAdmin = false;
-    try {
-        const resp = await fetch('/.netlify/functions/listar_usuarios');
-        const js = await resp.json();
-        if (Array.isArray(js.usuarios)) {
-            const actual = js.usuarios.find(u => u.email === user.email);
-            if (actual && actual.rol === 'admin') esAdmin = true;
-        }
-    } catch {}
     if (esAdmin) {
         const btnInforme = document.createElement('button');
         btnInforme.id = 'informe-btn';
