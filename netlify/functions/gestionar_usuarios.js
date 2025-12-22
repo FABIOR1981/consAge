@@ -137,7 +137,7 @@ exports.handler = async function(event, context) {
     }
   }
 
-  // Guardar cambios solo en local. En producción, solo sincronizar con GitHub.
+  // Guardar cambios solo en local (desarrollo). Nunca escribir en producción.
   if (!IS_PROD) {
     fs.writeFileSync(USUARIOS_PATH, JSON.stringify(usuarios, null, 2));
   }
