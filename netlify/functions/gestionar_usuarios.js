@@ -90,6 +90,8 @@ exports.handler = async function(event, context) {
   }
   // Leer usuarios remotos (GitHub)
   let usuariosRemotos = await getUsuariosDesdeGitHub();
+  console.log('DEBUG gestionar_usuarios - usuariosLocales:', JSON.stringify(usuariosLocales));
+  console.log('DEBUG gestionar_usuarios - usuariosRemotos:', JSON.stringify(usuariosRemotos));
   // Merge seguro
   let usuarios = mergeUsuarios(usuariosLocales, usuariosRemotos);
 
