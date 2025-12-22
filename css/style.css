@@ -1,31 +1,10 @@
 body {
-    font-family: var(--font-main);
     background-color: var(--bg-light);
+    font-family: var(--font-main);
     margin: 0;
-    padding: 10px; /* Menos padding en móvil */
-    color: var(--text-dark);
+    padding: 15px;
 }
 
 @media (min-width: 768px) {
     body { padding: 40px; }
-}
-
-.container, .dashboard-container {
-    max-width: 1100px;
-    margin: 20px auto;
-    background: var(--white);
-    padding: 1.5rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-}
-
-@media (min-width: 768px) {
-    .container { padding: 3rem; }
-}
-
-h1 {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    text-align: center;
-    margin-bottom: 2rem;
 }

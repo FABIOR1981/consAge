@@ -1,74 +1,51 @@
-/* --- BOTONES MODERNOS --- */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    border-radius: var(--radius);
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition);
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.btn-primary { background: var(--accent-color); color: white; }
-.btn-primary:hover { 
-    background: var(--primary-color); 
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-}
-
-/* --- TABLAS RESPONSIVAS Y CON RENGLONES --- */
+/* Contenedor para scroll en móviles */
 .table-container {
-    overflow-x: auto; /* Permite scroll lateral en móvil */
+    overflow-x: auto;
     background: var(--white);
     border-radius: var(--radius);
-    margin-top: 20px;
+    box-shadow: var(--shadow-md);
+    margin: 20px 0;
+    border: 1px solid #eee;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Asegura que no se amontone el texto */
+    min-width: 600px; /* Evita que se amontone en pantallas pequeñas */
 }
 
 .table thead th {
-    background-color: #f8f9fa;
-    color: #636e72;
+    background-color: var(--primary-color);
+    color: var(--white);
     text-align: left;
-    padding: 15px;
-    font-size: 0.75rem;
+    padding: 18px;
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 2px solid var(--bg-light);
 }
 
 .table tbody td {
     padding: 16px;
-    border-bottom: 1px solid var(--bg-light);
-    font-size: 0.95rem;
+    border-bottom: 1px solid #eee;
+    color: var(--text-dark);
 }
 
-/* EFECTO CEBRA (Renglones) */
+/* ESTO CREA LOS RENGLONES (ZEBRA) */
 .table tbody tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.02);
+    background-color: #f2f2f2 !important; /* Gris visible */
 }
 
 .table tbody tr:hover {
-    background-color: rgba(52, 152, 219, 0.05);
+    background-color: #e1f5fe !important; /* Azul clarito al pasar el mouse */
 }
 
-/* --- BADGES DE ESTADO --- */
+/* BADGES DE ESTADO */
 .status {
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: 50px;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: bold;
     display: inline-block;
 }
-
 .status.usada { background: #e8f5e9; color: var(--success-color); }
 .status.cancelada { background: #ffebee; color: var(--error-color); }
 .status.reservada { background: #e3f2fd; color: var(--accent-color); }
