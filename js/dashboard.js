@@ -214,43 +214,8 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             if (actual && actual.rol === 'admin') esAdmin = true;
         }
     } catch {}
-    // DEBUG: Mostrar respuesta cruda de reservas SIEMPRE visible y al inicio del contenedor
-    var debugReservaSpan = document.getElementById('debug-reservas');
-    if (!debugReservaSpan) {
-        debugReservaSpan = document.createElement('pre');
-        debugReservaSpan.id = 'debug-reservas';
-        debugReservaSpan.style.fontSize = '0.85em';
-        debugReservaSpan.style.color = '#006';
-        debugReservaSpan.style.background = '#f8f8ff';
-        debugReservaSpan.style.border = '1px solid #bbf';
-        debugReservaSpan.style.padding = '0.5em';
-        debugReservaSpan.style.marginTop = '0.5em';
-        // Insertar siempre al principio del contenedor
-        if (container.firstChild) {
-            container.insertBefore(debugReservaSpan, container.firstChild);
-        } else {
-            container.appendChild(debugReservaSpan);
-        }
-    }
-    // Llamar al backend de reservas y mostrar la respuesta cruda
-    let debugMsg = '';
-    try {
-        const resp = await fetch('/.netlify/functions/reservar?email=' + encodeURIComponent(user.email));
-        let text = await resp.text();
-        let data = null;
-        try { data = JSON.parse(text); } catch {}
-        if (!resp.ok) {
-            debugMsg = 'DEBUG reservas: ERROR ' + resp.status + '\n' + (data && data.error ? data.error + (data.details ? ('\nDetalles: ' + data.details) : '') : text) + '\n(Eliminar este bloque luego)';
-        } else {
-            debugMsg = 'DEBUG reservas (/.netlify/functions/reservar):\n' + JSON.stringify(data, null, 2) + '\n(Eliminar este bloque luego)';
-        }
-    } catch (e) {
-        debugMsg = 'DEBUG reservas: error al consultar backend: ' + e.message;
-    }
+    // ...bloque de depuración eliminado...
     container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
-    // Reinsertar el bloque de depuración SIEMPRE arriba
-    debugReservaSpan.innerText = debugMsg;
-    container.insertBefore(debugReservaSpan, container.firstChild);
 
     // Solo admin puede ver reservas de otros
     if (esAdmin) {
