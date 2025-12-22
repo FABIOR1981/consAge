@@ -293,19 +293,26 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
         totalHorasDiv.innerText = '';
     }
 
-    // Handler para cancelar
-    if (esMisReservas) {
+    // Handler para cancelar (tanto usuario como admin)
+    if (esMisReservas || esReservasFuturas) {
         tabla.querySelectorAll('.btn-cancelar-reserva').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = btn.getAttribute('data-id');
                 if (!id) return;
                 if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
                 const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+                // Si es admin, obtener el usuario seleccionado del combo
+                let email = user && user.email;
+                if (esReservasFuturas) {
+                    // Buscar el combo de usuario
+                    const combo = document.getElementById('combo-usuario-futuras');
+                    if (combo && combo.value) email = combo.value;
+                }
                 try {
                     const resp = await fetch('/.netlify/functions/reservar', {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ eventId: id, email: user.email })
+                        body: JSON.stringify({ eventId: id, email })
                     });
                     const result = await resp.json();
                     if (resp.ok) {
