@@ -1,0 +1,9 @@
+{
+  "name": "consage-functions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.0",
+    "jwks-rsa": "^3.0.1"
+  }
+}
