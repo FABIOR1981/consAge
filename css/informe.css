@@ -131,7 +131,7 @@
 }
 
 /* Nota: Ya no hay estilos de tabla aquí. Usaremos los de components.css */
-}
+
 #tabla-informe tr:nth-child(even) {
   background: #f1f4fa;
 }
