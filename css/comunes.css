@@ -1,3 +1,17 @@
+/* Menú visual para dashboard */
+.menu-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+   gap: 15px;
+   margin-top: 20px;
+}
+.btn-menu {
+   height: 60px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 1.1rem;
+}
 /* css/comunes.css - EL ADN DEL PROYECTO */
 :root {
     --primary: #2c3e50;
@@ -43,53 +57,33 @@ body {
 .btn-primary { background: var(--accent); color: white; }
 .btn-primary:hover { background: var(--primary); transform: translateY(-2px); }
 
-/* --- ESTILO DE TABLA DEFINITIVO --- */
-
-/* 1. Contenedor para que no se pegue a los bordes */
-.table-container {
-    margin: 25px 0;
-    padding: 10px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    overflow-x: auto;
+/* --- ESTILO DE TABLA ZEBRA ALTO CONTRASTE --- */
+.table-container { 
+   margin: 20px 0; 
+   border-radius: 12px; 
+   overflow: hidden; 
+   box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
 }
-
-/* 2. La tabla con bordes y alineación */
-.table {
-    width: 100%;
-    border-collapse: separate; /* Cambiado para manejar mejor los bordes redondeados */
-    border-spacing: 0;
-    min-width: 800px;
+.table { 
+   width: 100%; 
+   border-collapse: collapse; 
+   background: white; 
 }
-
-/* 3. Encabezados con fondo oscuro y texto claro */
-.table thead th {
-    background-color: #2c3e50 !important;
-    color: #ffffff !important;
-    padding: 15px;
-    text-align: left;
-    font-size: 0.9rem;
-    border-bottom: 2px solid #34495e;
+.table thead th { 
+   background-color: #2c3e50; 
+   color: #ffffff; 
+   padding: 15px; 
+   text-align: left; 
 }
-
-/* 4. Celdas con bordes sutiles para guiar la vista */
-.table tbody td {
-    padding: 14px 15px;
-    border-bottom: 1px solid #edf2f7; /* Línea horizontal sutil */
-    color: #2d3748;
-    vertical-align: middle;
+.table tbody td { 
+   padding: 12px 15px; 
+   border-bottom: 1px solid #eee; 
 }
-
-/* 5. EFECTO ZEBRA (FILAS PARES) */
-/* Usamos un gris un poco más fuerte para que se note en tu HP Pavilion */
-.table tbody tr:nth-child(even) {
-    background-color: #f7fafc !important;
+.table tbody tr:nth-child(even) { 
+   background-color: #f2f4f7 !important; 
 }
-
-/* 6. Efecto al pasar el mouse */
-.table tbody tr:hover {
-    background-color: #ebf4ff !important;
+.table tbody tr:hover { 
+   background-color: #e3f2fd !important; 
 }
 
 /* ESTADOS (BADGES) */

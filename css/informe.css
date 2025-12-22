@@ -26,9 +26,6 @@
         gap: 20px;
         align-items: flex-end;
         margin-bottom: 2rem;
-        border: 1px solid #e9ecef;
-    }
-
     .informe-form label {
         display: block;
         font-weight: 600;

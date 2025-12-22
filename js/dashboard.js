@@ -167,19 +167,23 @@ async function renderDashboardButtons(user) {
     const btnsDiv = document.getElementById('dashboard-btns');
     if (!btnsDiv) return;
     btnsDiv.innerHTML = '';
+    // Crear contenedor visual de menú
+    const menuGrid = document.createElement('div');
+    menuGrid.className = 'menu-grid';
+
     const btnAgenda = document.createElement('button');
     btnAgenda.id = 'agenda-btn';
-    btnAgenda.className = 'btn btn-primary';
+    btnAgenda.className = 'btn btn-primary btn-menu';
     btnAgenda.innerText = 'Agenda';
     btnAgenda.onclick = () => {
         mostrarSeccion('agenda');
     };
-    btnsDiv.appendChild(btnAgenda);
+    menuGrid.appendChild(btnAgenda);
 
     // Botón de reservas futuras (nuevo, basado en informe)
     const btnMisReservasFuturas = document.createElement('button');
     btnMisReservasFuturas.id = 'mis-reservas-futuras-btn';
-    btnMisReservasFuturas.className = 'btn btn-primary';
+    btnMisReservasFuturas.className = 'btn btn-primary btn-menu';
     // Consultar al backend el rol real del usuario para el texto del botón y para el botón de informe
     let esAdmin = false;
     try {
@@ -194,16 +198,17 @@ async function renderDashboardButtons(user) {
     btnMisReservasFuturas.onclick = () => {
         mostrarSeccion('mis-reservas-futuras');
     };
-    btnsDiv.appendChild(btnMisReservasFuturas);
+    menuGrid.appendChild(btnMisReservasFuturas);
 
     if (esAdmin) {
         const btnInforme = document.createElement('button');
         btnInforme.id = 'informe-btn';
-        btnInforme.className = 'btn btn-secondary';
+        btnInforme.className = 'btn btn-secondary btn-menu';
         btnInforme.innerText = 'Informe';
         btnInforme.onclick = () => mostrarSeccion('informe');
-        btnsDiv.appendChild(btnInforme);
+        menuGrid.appendChild(btnInforme);
     }
+    btnsDiv.appendChild(menuGrid);
 }
 
 function mostrarSeccion(seccion) {
