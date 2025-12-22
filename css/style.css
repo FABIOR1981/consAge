@@ -2,32 +2,30 @@ body {
     font-family: var(--font-main);
     background-color: var(--bg-light);
     margin: 0;
+    padding: 10px; /* Menos padding en móvil */
     color: var(--text-dark);
-    line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+    body { padding: 40px; }
 }
 
 .container, .dashboard-container {
     max-width: 1100px;
-    margin: 40px auto;
+    margin: 20px auto;
     background: var(--white);
-    padding: 3rem;
+    padding: 1.5rem;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
 }
 
-/* Encabezados */
-h1, h2 {
-    color: var(--primary-color);
-    font-weight: 700;
-    text-align: center;
+@media (min-width: 768px) {
+    .container { padding: 3rem; }
 }
 
-/* Navegación */
-.nav-bar {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
+h1 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 2rem;
 }

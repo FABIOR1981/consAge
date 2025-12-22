@@ -1,15 +1,16 @@
-/* --- BOTONES --- */
+/* --- BOTONES MODERNOS --- */
 .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     padding: 12px 24px;
     border-radius: var(--radius);
     font-weight: 600;
     border: none;
     cursor: pointer;
     transition: var(--transition);
-    font-size: 0.9rem;
     text-decoration: none;
+    font-size: 0.9rem;
 }
 
 .btn-primary { background: var(--accent-color); color: white; }
@@ -19,23 +20,23 @@
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-/* --- TABLAS MODERNAS --- */
+/* --- TABLAS RESPONSIVAS Y CON RENGLONES --- */
 .table-container {
-    overflow-x: auto;
+    overflow-x: auto; /* Permite scroll lateral en móvil */
     background: var(--white);
     border-radius: var(--radius);
-    margin: 20px 0;
+    margin-top: 20px;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 700px;
+    min-width: 600px; /* Asegura que no se amontone el texto */
 }
 
 .table thead th {
     background-color: #f8f9fa;
-    color: #b2bec3;
+    color: #636e72;
     text-align: left;
     padding: 15px;
     font-size: 0.75rem;
@@ -47,11 +48,16 @@
 .table tbody td {
     padding: 16px;
     border-bottom: 1px solid var(--bg-light);
-    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+/* EFECTO CEBRA (Renglones) */
+.table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 .table tbody tr:hover {
-    background-color: rgba(52, 152, 219, 0.02);
+    background-color: rgba(52, 152, 219, 0.05);
 }
 
 /* --- BADGES DE ESTADO --- */
@@ -61,8 +67,6 @@
     font-size: 0.75rem;
     font-weight: 700;
     display: inline-block;
-    min-width: 90px;
-    text-align: center;
 }
 
 .status.usada { background: #e8f5e9; color: var(--success-color); }
