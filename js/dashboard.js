@@ -301,6 +301,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                 const nombreReserva = (reserva.nombre || '').toLowerCase();
                 const emailReserva = (reserva.email || '').toLowerCase();
                 const emailUsuario = (user.email || '').toLowerCase();
+                console.log('[DEBUG reservas] emailReserva:', emailReserva, '| emailUsuario:', emailUsuario, '| nombreReserva:', nombreReserva, '| nombreUsuario:', nombreUsuario);
                 return emailReserva === emailUsuario || (nombreReserva && nombreReserva === nombreUsuario);
             });
         }
