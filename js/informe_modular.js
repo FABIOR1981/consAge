@@ -34,7 +34,7 @@ export async function renderMisReservasFuturas(container) {
         ${comboHtml}
         <div id="total-horas-informe"></div>
         <table id="tabla-informe">
-            <tr><td colspan="5">${esAdmin ? 'Seleccione un usuario para ver sus reservas futuras.' : 'Buscando reservas futuras...'}</td></tr>
+            <tr><td colspan="7">${esAdmin ? 'Seleccione un usuario para ver sus reservas futuras.' : 'Buscando reservas futuras...'}</td></tr>
         </table>
     </div>`;
     let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
@@ -50,7 +50,7 @@ export async function renderMisReservasFuturas(container) {
             reservas = reservas.filter(r => r.start && new Date(r.start) > ahora);
             renderReservasTable(reservas, container.querySelector('#tabla-informe'), container.querySelector('#total-horas-informe'));
         } catch (err) {
-            container.querySelector('#tabla-informe').innerHTML = `<tr><td colspan=\"5\">Error: ${err.message}</td></tr>`;
+            container.querySelector('#tabla-informe').innerHTML = `<tr><td colspan=\"7\">Error: ${err.message}</td></tr>`;
         }
     };
     if (esAdmin) {

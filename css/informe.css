@@ -18,13 +18,12 @@
 .informe-form input, .informe-form select {
     width: 100%;
     padding: 10px;
-    .informe-form {
         background-color: #f8f9fa;
-        padding: 20px;
+        padding: 25px;
         border-radius: var(--radius);
         display: flex;
         flex-wrap: wrap;
-        gap: 15px;
+        gap: 20px;
         align-items: flex-end;
         margin-bottom: 2rem;
         border: 1px solid #e9ecef;
