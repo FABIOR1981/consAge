@@ -47,6 +47,7 @@ export async function renderMisReservasFuturas(container) {
     }
     // Si no es admin, cargar directamente
     cargarReservas(user.email);
+}
 export async function renderInforme(container) {
     if (__informeInitDone) return;
     __informeInitDone = true;
