@@ -215,7 +215,14 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         }
     } catch {}
     // ...bloque de depuración eliminado...
-    container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
+    // Limpiar solo la sección de reservas, no toda la agenda
+    container.innerHTML = '';
+    const titulo = document.createElement('h3');
+    titulo.textContent = esAdmin ? 'Reservas' : 'Mis Reservas';
+    container.appendChild(titulo);
+    const p = document.createElement('p');
+    p.textContent = 'Consultando reservas...';
+    container.appendChild(p);
 
     // Solo admin puede ver reservas de otros
     if (esAdmin) {
@@ -260,14 +267,17 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
             });
             filtroUsuario = combo.value;
         }
+        // Buscar el usuario seleccionado en la lista para obtener su nombre completo
+        let usuarioSeleccionado = usuariosLista.find(u => u.email === filtroUsuario);
+        let nombreSeleccionado = usuarioSeleccionado && usuarioSeleccionado.nombre ? usuarioSeleccionado.nombre : '';
         if (filtroUsuario) {
-            await mostrarMisReservasAdmin(filtroUsuario, esAdmin, usuariosLista);
+            await mostrarMisReservasAdmin({ email: filtroUsuario, nombre: nombreSeleccionado }, esAdmin, usuariosLista);
         } else {
             container.innerHTML += '<p style="color:red">No hay usuarios disponibles para mostrar reservas.</p>';
         }
     } else {
         // Usuario normal: solo puede ver sus propias reservas
-        await mostrarMisReservasAdmin(user.email, false, null);
+        await mostrarMisReservasAdmin({ email: user.email, nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : '' }, false, null);
     }
 }
 
@@ -277,30 +287,24 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
     const container = document.getElementById('calendar-container');
     try {
         let url = '/.netlify/functions/reservar';
-        if (isAdmin && !emailFiltro) {
+        let emailFiltroValor = emailFiltro && typeof emailFiltro === 'object' ? emailFiltro.email : emailFiltro;
+        let nombreFiltroValor = emailFiltro && typeof emailFiltro === 'object' ? emailFiltro.nombre : '';
+        if (isAdmin && !emailFiltroValor) {
             url += '?all=1';
-        } else if (emailFiltro) {
-            url += `?email=${encodeURIComponent(emailFiltro)}`;
+        } else if (emailFiltroValor) {
+            url += `?email=${encodeURIComponent(emailFiltroValor)}`;
         }
         const resp = await fetch(url);
         const data = await resp.json();
         let reservas = data.userEvents || [];
-        // Si no es admin, filtrar por email o nombre (usando nombre de usuarios.json)
-        if (!isAdmin && user) {
-            let nombreUsuario = '';
-            try {
-                const resp = await fetch('/.netlify/functions/listar_usuarios');
-                const js = await resp.json();
-                if (Array.isArray(js.usuarios)) {
-                    const actual = js.usuarios.find(u => u.email === user.email);
-                    if (actual && actual.nombre) nombreUsuario = actual.nombre.toLowerCase();
-                }
-            } catch {}
+        // Filtrar por email o nombre completo (de usuarios.json)
+        if (emailFiltroValor || nombreFiltroValor) {
+            const emailFiltroLower = (emailFiltroValor || '').toLowerCase();
+            const nombreFiltroLower = (nombreFiltroValor || '').toLowerCase();
             reservas = reservas.filter(reserva => {
                 const nombreReserva = (reserva.nombre || '').toLowerCase();
                 const emailReserva = (reserva.email || '').toLowerCase();
-                const emailUsuario = (user.email || '').toLowerCase();
-                return emailReserva === emailUsuario || (nombreReserva && nombreReserva === nombreUsuario);
+                return emailReserva === emailFiltroLower || (nombreFiltroLower && nombreReserva === nombreFiltroLower);
             });
         }
         if (reservas.length === 0) {
