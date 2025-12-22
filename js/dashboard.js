@@ -40,8 +40,6 @@ const reservarTurno = async (hora) => {
             alert("✅ ¡Éxito! Turno agendado. Revisa tu email y calendario.");
             cargarBotonesConsultorios();
         } else {
-            // mostrar la respuesta completa para depuración (missing fields o ocupados)
-            console.error('Error reservar:', datos);
             const msg = datos && (datos.error || datos.details) ? `${datos.error || ''} ${datos.details || ''}` : 'Error desconocido';
             const extras = datos && datos.missing ? `\nCampos faltantes: ${datos.missing.join(', ')}` : '';
             const ocup = datos && datos.ocupados ? `\nOcupados: ${JSON.stringify(datos.ocupados)}` : '';
@@ -301,7 +299,6 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                 const nombreReserva = (reserva.nombre || '').toLowerCase();
                 const emailReserva = (reserva.email || '').toLowerCase();
                 const emailUsuario = (user.email || '').toLowerCase();
-                console.log('[DEBUG reservas] emailReserva:', emailReserva, '| emailUsuario:', emailUsuario, '| nombreReserva:', nombreReserva, '| nombreUsuario:', nombreUsuario);
                 return emailReserva === emailUsuario || (nombreReserva && nombreReserva === nombreUsuario);
             });
         }
@@ -380,7 +377,7 @@ async function renderInformeEnDashboard() {
             const mod = await import(new URL('./informe.js', import.meta.url));
             if (mod && typeof mod.initInforme === 'function') mod.initInforme();
         } catch (impErr) {
-            console.error('No se pudo inicializar informe.js:', impErr);
+            // Silenciar error de inicialización de informe.js
         }
     } catch (e) {
         container.innerHTML += `<p style='color:red'>Error al cargar informe: ${e.message}</p>`;
