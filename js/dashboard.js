@@ -230,7 +230,11 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
         container.appendChild(formFiltro);
         const combo = formFiltro.querySelector('#combo-usuario');
-        combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre} (${u.email})</option>`).join('');
+        combo.innerHTML = usuariosLista.map(u => {
+            // Si el nombre es igual al email, solo muestra el email
+            const mostrar = (u.nombre && u.nombre !== u.email) ? `${u.nombre} (${u.email})` : u.email;
+            return `<option value="${u.email}">${mostrar}</option>`;
+        }).join('');
         // Selecciona el usuario actual si está en la lista, si no el primero
         let defaultUsuario = user.email;
         if (!usuariosLista.some(u => u.email === defaultUsuario)) {
