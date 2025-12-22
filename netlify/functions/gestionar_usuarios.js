@@ -34,17 +34,32 @@ async function getUsuariosDesdeGitHub() {
 }
 
 function mergeUsuarios(local, remoto) {
-  // Une ambos arrays y solo evita duplicados exactos (mismo email)
-  const todos = [...(Array.isArray(remoto) ? remoto : []), ...(Array.isArray(local) ? local : [])];
-  const resultado = [];
-  const emails = new Set();
-  for (const u of todos) {
-    if (u && u.email && !emails.has(u.email)) {
-      resultado.push({ ...u });
-      emails.add(u.email);
+  // Dado un usuario nuevo, buscar por email:
+  // - Si no existe, agregarlo
+  // - Si existe y nombre o rol cambian, actualizar
+  // Se asume que local y remoto son arrays de usuarios
+  const base = Array.isArray(remoto) ? [...remoto] : [];
+  const nuevos = Array.isArray(local) ? local : [];
+  for (const nuevo of nuevos) {
+    if (!nuevo || !nuevo.email) continue;
+    const idx = base.findIndex(u => u.email === nuevo.email);
+    if (idx === -1) {
+      base.push({ ...nuevo });
+    } else {
+      // Actualizar nombre o rol si cambian
+      if (nuevo.nombre && nuevo.nombre !== base[idx].nombre) {
+        base[idx].nombre = nuevo.nombre;
+      }
+      if (nuevo.rol && nuevo.rol !== base[idx].rol) {
+        base[idx].rol = nuevo.rol;
+      }
+      // Actualizar activo si viene en el nuevo
+      if (typeof nuevo.activo === 'boolean') {
+        base[idx].activo = nuevo.activo;
+      }
     }
   }
-  return resultado;
+  return base;
 }
 
 async function syncUsuariosConGitHub(usuarios) {
