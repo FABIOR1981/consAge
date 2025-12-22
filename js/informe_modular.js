@@ -97,7 +97,40 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
     let total = 0;
     tabla.innerHTML = `<tr><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Email</th></tr>`;
     reservas.forEach(r => {
-        tabla.innerHTML += `<tr><td>${r.fecha}</td><td>${r.hora}:00</td><td>${r.consultorio}</td><td>${r.nombre || ''}</td><td>${r.email || ''}</td></tr>`;
+        // Extraer fecha y hora desde r.start
+        let fecha = '';
+        let hora = '';
+        if (r.start) {
+            const d = new Date(r.start);
+            fecha = d.toLocaleDateString('es-ES');
+            hora = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        }
+        // Extraer consultorio desde summary: "C2: ..."
+        let consultorio = '';
+        if (r.summary) {
+            const match = r.summary.match(/^C(\d+):/);
+            if (match) consultorio = match[1];
+        }
+        // Extraer usuario y email desde description
+        let usuario = '';
+        let email = '';
+        if (r.description) {
+            let m = r.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
+            if (m) {
+                usuario = m[1];
+                email = m[2];
+            } else {
+                m = r.description.match(/Reserva realizada por: ([^\n@]+@[\w.\-]+)/);
+                if (m) {
+                    usuario = m[1];
+                    email = m[1];
+                } else {
+                    m = r.description.match(/Reserva realizada por: ([^\n]+)/);
+                    if (m) usuario = m[1];
+                }
+            }
+        }
+        tabla.innerHTML += `<tr><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${email}</td></tr>`;
         total++;
     });
     totalHorasDiv.innerText = `Total de reservas: ${total}`;
