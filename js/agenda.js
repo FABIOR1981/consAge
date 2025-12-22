@@ -2,6 +2,8 @@
 // (Aquí irá la lógica modularizada de agenda, importable desde dashboard.js)
 
 
+
+import { APP_CONFIG } from './config.js';
 // Variables de estado para la agenda
 let seleccion = { consultorio: null, fecha: null };
 let envIdPorHora = {};
@@ -15,8 +17,7 @@ function cargarBotonesConsultorios(container) {
   container.innerHTML = '<h3>Paso 1: Elija un Consultorio</h3>';
   const grid = document.createElement('div');
   grid.className = 'consultorios-grid';
-  // APP_CONFIG debe estar disponible globalmente o importarse aquí
-  (window.APP_CONFIG.consultorios || []).filter(num => num !== 1).forEach(num => {
+  (APP_CONFIG.consultorios || []).filter(num => num !== 1).forEach(num => {
     const btn = document.createElement('button');
     btn.innerText = `Consultorio ${num}`;
     btn.className = 'btn-consultorio';
@@ -68,7 +69,7 @@ async function mostrarHorarios(container) {
   }
   const grid = document.createElement('div');
   grid.className = 'horarios-grid';
-  for (let h = window.APP_CONFIG.horarios.inicio; h < window.APP_CONFIG.horarios.fin; h++) {
+  for (let h = APP_CONFIG.horarios.inicio; h < APP_CONFIG.horarios.fin; h++) {
     const btn = document.createElement('button');
     btn.className = 'btn-horario';
     btn.innerText = `${h.toString().padStart(2, '0')}:00`;
