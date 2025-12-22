@@ -5,6 +5,7 @@ let __informeInitDone = false;
 export async function renderInforme(container) {
     if (__informeInitDone) return;
     __informeInitDone = true;
+    // Renderizado inicial, luego se completa el combo de usuarios si es admin
     container.innerHTML = `
     <div class="informe-container">
         <h2 class="informe-titulo">Informe de Reservas</h2>
@@ -20,11 +21,7 @@ export async function renderInforme(container) {
                     <option value="">Todos</option>
                 </select>
             </label>
-            <div class="search-row">
-                <label for="input-busqueda" class="search-label">Búsqueda:</label>
-                <input type="text" name="busqueda" id="input-busqueda" class="search-input" placeholder="Ingrese nombre, apellido o email">
-                <span class="search-note">(usuario, nombre u apellido)</span>
-            </div>
+            <div class="search-row" id="search-row-informe"></div>
             <button type="submit">Buscar</button>
         </form>
         <div id="total-horas-informe"></div>
@@ -32,7 +29,62 @@ export async function renderInforme(container) {
             <tr><td colspan="5">Complete los filtros y presione Buscar</td></tr>
         </table>
     </div>`;
+    await renderComboUsuariosInforme(container);
     initInforme(container);
+// Renderiza el combo de usuarios con filtro solo para admin
+async function renderComboUsuariosInforme(container) {
+    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+    if (!user) return;
+    let esAdmin = false;
+    let usuariosLista = [];
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+            usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        }
+    } catch {}
+    const searchRow = container.querySelector('#search-row-informe');
+    if (!esAdmin || usuariosLista.length === 0) {
+        // Si no es admin, dejar el input de texto simple
+        searchRow.innerHTML = `
+            <label for="input-busqueda" class="search-label">Búsqueda:</label>
+            <input type="text" name="busqueda" id="input-busqueda" class="search-input" placeholder="Ingrese nombre, apellido o email">
+            <span class="search-note">(usuario, nombre u apellido)</span>
+        `;
+        return;
+    }
+    // Si es admin, usar combo con filtro
+    searchRow.innerHTML = `
+        <label style="font-weight:500;">Buscar usuario: <input type="text" id="filtro-nombre-usuario-informe" placeholder="Ingrese parte del nombre..." autocomplete="off" style="margin-right:1em;"></label>
+        <label style="font-weight:500;">Usuario: <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select></label>
+    `;
+    const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
+    const combo = searchRow.querySelector('#combo-usuario-informe');
+    function renderCombo(filtro) {
+        const opciones = usuariosLista
+            .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())))
+            .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
+        combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
+    }
+    renderCombo('');
+    inputFiltro.addEventListener('input', (e) => {
+        renderCombo(e.target.value);
+    });
+    // Sincronizar con el input oculto de búsqueda
+    combo.addEventListener('change', (e) => {
+        let inputBusqueda = container.querySelector('input[name="busqueda"]');
+        if (!inputBusqueda) {
+            inputBusqueda = document.createElement('input');
+            inputBusqueda.type = 'hidden';
+            inputBusqueda.name = 'busqueda';
+            combo.form.appendChild(inputBusqueda);
+        }
+        inputBusqueda.value = e.target.value;
+    });
+}
 }
 
 export async function initInforme(container) {
