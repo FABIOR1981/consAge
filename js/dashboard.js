@@ -249,8 +249,8 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
         debugMsg = 'DEBUG reservas: error al consultar backend: ' + e.message;
     }
     container.innerHTML = `<h3>${esAdmin ? 'Reservas' : 'Mis Reservas'}</h3><p>Consultando reservas...</p>`;
-    // Insertar el bloque de depuración SIEMPRE arriba
-    let debugReservaSpan = document.getElementById('debug-reservas');
+    // Insertar el bloque de depuración SIEMPRE arriba (sin redeclarar)
+    var debugReservaSpan = document.getElementById('debug-reservas');
     if (!debugReservaSpan) {
         debugReservaSpan = document.createElement('pre');
         debugReservaSpan.id = 'debug-reservas';
