@@ -223,32 +223,32 @@ async function mostrarMisReservas(emailFiltro = null, usuariosLista = null) {
     }
 
     // Renderizar combo solo una vez para admin
-    let filtroEmail = emailFiltro;
+    let filtroUsuario = emailFiltro;
     if (isAdmin && usuariosLista && usuariosLista.length > 0) {
         const formFiltro = document.createElement('form');
         formFiltro.id = 'form-filtro-usuario';
         formFiltro.innerHTML = `<label>Usuario: <select id="combo-usuario"></select></label>`;
         container.appendChild(formFiltro);
         const combo = formFiltro.querySelector('#combo-usuario');
-        combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre}</option>`).join('');
+        combo.innerHTML = usuariosLista.map(u => `<option value="${u.email}">${u.nombre} (${u.email})</option>`).join('');
         // Selecciona el usuario actual si está en la lista, si no el primero
-        let defaultEmail = user.email;
-        if (!usuariosLista.some(u => u.email === defaultEmail)) {
-            defaultEmail = usuariosLista[0].email;
+        let defaultUsuario = user.email;
+        if (!usuariosLista.some(u => u.email === defaultUsuario)) {
+            defaultUsuario = usuariosLista[0].email;
         }
-        combo.value = emailFiltro || defaultEmail;
+        combo.value = emailFiltro || defaultUsuario;
         combo.disabled = usuariosLista.length === 1;
         combo.addEventListener('change', (e) => {
             if (e.target.value) {
                 mostrarMisReservas(e.target.value, usuariosLista);
             }
         });
-        filtroEmail = combo.value;
+        filtroUsuario = combo.value;
     } else if (!isAdmin) {
-        filtroEmail = user.email;
+        filtroUsuario = user.email;
     }
-    if (filtroEmail) {
-        await mostrarMisReservasAdmin(filtroEmail, isAdmin, usuariosLista);
+    if (filtroUsuario) {
+        await mostrarMisReservasAdmin(filtroUsuario, isAdmin, usuariosLista);
     } else {
         container.innerHTML += '<p style="color:red">No hay usuarios disponibles para mostrar reservas.</p>';
     }

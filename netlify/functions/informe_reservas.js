@@ -71,38 +71,29 @@ exports.handler = async (event) => {
         }
         // Filtrar por usuario si se indica
         if (usuario) {
-            // Buscar por email, nombre o apellido (coincidencia exacta o parcial en email)
+            // Buscar por email, nombre completo o usuario (coincidencia exacta o parcial)
             const busqueda = usuario.trim().toLowerCase();
             eventos = eventos.filter(ev => {
                 if (!ev.description) return false;
-                // Si la búsqueda es un email (contiene @), buscar por substring en la línea 'Reserva realizada por: ...'
-                if (busqueda.includes('@')) {
-                    const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
-                    if (match) {
-                        const email = match[1].trim().toLowerCase();
-                        // Log para depuración
-                        // console.log('Comparando email:', email, 'con búsqueda:', busqueda);
-                        return email.includes(busqueda);
-                    }
-                    return false;
-                }
-                // Si la búsqueda NO es un email, buscar solo en el usuario antes del @
-                const match = ev.description.match(/Reserva realizada por: ([^\n]+)/);
+                // Buscar por email
+                const match = ev.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
                 if (match) {
-                    const email = match[1].trim().toLowerCase();
-                    const usuarioEmail = email.split('@')[0];
-                    if (usuarioEmail === busqueda) return true;
-                    if (usuarioEmail.startsWith(busqueda)) return true;
-                }
-                // Buscar por nombre/apellido en user_metadata si existiera (coincidencia exacta en palabras)
-                if (ev.user_metadata && ev.user_metadata.name) {
-                    const nombre = ev.user_metadata.name.trim().toLowerCase();
-                    if (nombre.split(/\s+/).includes(busqueda)) return true;
-                }
-                // Buscar en summary por si se guarda allí (coincidencia exacta en palabras)
-                if (ev.summary) {
-                    const palabras = ev.summary.toLowerCase().split(/\s+/);
-                    if (palabras.includes(busqueda)) return true;
+                    const nombre = match[1].trim().toLowerCase();
+                    const email = match[2].trim().toLowerCase();
+                    if (email.includes(busqueda) || nombre.includes(busqueda)) return true;
+                } else {
+                    // Buscar por email simple
+                    const matchEmail = ev.description.match(/Reserva realizada por: ([^\n@]+@[^\n]+)/);
+                    if (matchEmail) {
+                        const email = matchEmail[1].trim().toLowerCase();
+                        if (email.includes(busqueda)) return true;
+                    }
+                    // Buscar por nombre simple
+                    const matchNombre = ev.description.match(/Reserva realizada por: ([^\n]+)/);
+                    if (matchNombre) {
+                        const nombre = matchNombre[1].trim().toLowerCase();
+                        if (nombre.includes(busqueda)) return true;
+                    }
                 }
                 return false;
             });
