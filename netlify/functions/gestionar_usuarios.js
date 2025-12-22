@@ -7,8 +7,8 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const DATA_DIR = IS_PROD ? '/tmp/data' : path.join(pathProyecto, 'data');
 const USUARIOS_PATH = path.join(DATA_DIR, 'usuarios.json');
 
-// Asegurar que la carpeta existe (solo si se puede escribir)
-if (!IS_PROD || DATA_DIR.startsWith('/tmp')) {
+// Asegurar que la carpeta existe solo si es local o en /tmp (Netlify)
+if (!IS_PROD || (IS_PROD && DATA_DIR.startsWith('/tmp'))) {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
