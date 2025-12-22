@@ -428,20 +428,7 @@ const initDashboard = async () => {
         }
     }
     rolSpan.innerText = rolMsg;
-    // DEBUG: Mostrar lista de usuarios recibidos del backend (eliminar luego)
-    let debugSpan = document.getElementById('usuarios-debug');
-    if (!debugSpan) {
-        debugSpan = document.createElement('pre');
-        debugSpan.id = 'usuarios-debug';
-        debugSpan.style.fontSize = '0.85em';
-        debugSpan.style.color = '#c00';
-        debugSpan.style.background = '#fff8f8';
-        debugSpan.style.border = '1px solid #fbb';
-        debugSpan.style.padding = '0.5em';
-        debugSpan.style.marginTop = '0.5em';
-        rolSpan.parentNode.insertBefore(debugSpan, rolSpan.nextSibling);
-    }
-    debugSpan.innerText = 'DEBUG usuarios.json desde backend:\n' + JSON.stringify(usuariosDebug, null, 2) + '\n(Eliminar este bloque luego)';
+    // ...bloque de depuración eliminado...
     const welcomeMsg = document.getElementById('welcome-msg');
     if (welcomeMsg) welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores. ¡Gestiona tus turnos de forma fácil y rápida!";
     await renderDashboardButtons(user);
