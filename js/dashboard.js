@@ -285,7 +285,25 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         }
         const resp = await fetch(url);
         const data = await resp.json();
-        const reservas = data.userEvents || [];
+        let reservas = data.userEvents || [];
+        // Si no es admin, filtrar por email o nombre (usando nombre de usuarios.json)
+        if (!isAdmin && user) {
+            let nombreUsuario = '';
+            try {
+                const resp = await fetch('/.netlify/functions/listar_usuarios');
+                const js = await resp.json();
+                if (Array.isArray(js.usuarios)) {
+                    const actual = js.usuarios.find(u => u.email === user.email);
+                    if (actual && actual.nombre) nombreUsuario = actual.nombre.toLowerCase();
+                }
+            } catch {}
+            reservas = reservas.filter(reserva => {
+                const nombreReserva = (reserva.nombre || '').toLowerCase();
+                const emailReserva = (reserva.email || '').toLowerCase();
+                const emailUsuario = (user.email || '').toLowerCase();
+                return emailReserva === emailUsuario || (nombreReserva && nombreReserva === nombreUsuario);
+            });
+        }
         if (reservas.length === 0) {
             container.innerHTML += '<p>No hay reservas activas.</p>';
             return;
