@@ -282,7 +282,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         lista.className = 'reservas-lista';
         reservas.forEach(reserva => {
             const card = document.createElement('div');
-            card.className = 'reserva-card card';
+            card.className = 'reserva-item';
             const fechaHora = `${reserva.fecha} ${reserva.hora}:00 hs`;
             const fechaReserva = new Date(`${reserva.fecha}T${reserva.hora.toString().padStart(2,'0')}:00:00-03:00`);
             const ahora = new Date();
