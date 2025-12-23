@@ -2,18 +2,29 @@ import { APP_CONFIG } from './config.js';
 
 let seleccion = { consultorio: null, fecha: null };
 
+/**
+ * Renderiza la vista inicial de la agenda
+ */
 export async function renderAgenda(container) {
-    container.innerHTML = '<div class="informe-container"><h2 class="informe-titulo">Agenda de Turnos</h2><div id="agenda-content"></div></div>';
+    // Aumentamos el tamaño base para que se vea mejor en pantallas de laptop
+    container.style.fontSize = "1.15rem"; 
+    container.innerHTML = `
+        <div class="informe-container">
+            <h2 class="informe-titulo" style="font-size: 2.3rem; margin-bottom: 1.5rem;">📅 Agenda de Turnos</h2>
+            <div id="agenda-content"></div>
+        </div>`;
     cargarBotonesConsultorios(container.querySelector('#agenda-content'));
 }
 
+/**
+ * Paso 1: Muestra los consultorios disponibles según el ROL
+ */
 async function cargarBotonesConsultorios(container) {
-    container.innerHTML = '<p style="margin-bottom:1em;"><strong>Paso 1:</strong> Elija un Consultorio</p>';
+    container.innerHTML = '<p style="margin-bottom:1.5em; font-weight: 500; font-size: 1.3rem;">Paso 1: Seleccione un Consultorio</p>';
     
-    // 1. Obtener el usuario y su rol
+    // Verificación de ROL: El Consultorio 1 es exclusivo para Administradores
     const user = window.netlifyIdentity?.currentUser();
     let esAdmin = false;
-
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
         const js = await resp.json();
@@ -21,22 +32,31 @@ async function cargarBotonesConsultorios(container) {
             const actual = js.usuarios.find(u => u.email === user.email);
             if (actual && actual.rol === 'admin') esAdmin = true;
         }
-    } catch (e) { console.error("Error verificando rol:", e); }
+    } catch (e) { 
+        console.error("Error al verificar permisos de administrador:", e); 
+    }
 
     const grid = document.createElement('div');
     grid.className = 'consultorios-grid';
-    grid.style = "display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:10px;";
+    // Diseño de botones grandes y espaciados
+    grid.style = "display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:20px;";
 
-    // 2. Filtrar consultorios: Si no es admin, quitamos el 1
-    const consultoriosDisponibles = APP_CONFIG.consultorios.filter(num => {
-        if (num === 1) return esAdmin; // Solo incluye el 1 si es admin
-        return true; // El resto siempre se incluye
+    // Filtrar: El consultorio 1 solo se incluye si el usuario es administrador
+    const consultoriosFiltrados = (APP_CONFIG.consultorios || []).filter(num => {
+        if (num === 1) return esAdmin;
+        return true;
     });
 
-    consultoriosDisponibles.forEach(num => {
+    consultoriosFiltrados.forEach(num => {
         const btn = document.createElement('button');
         btn.innerText = `Consultorio ${num}`;
         btn.className = 'btn btn-primary';
+        btn.style = "padding: 30px 20px; font-size: 1.4rem; font-weight: bold; border-radius: 15px; cursor: pointer; transition: transform 0.2s;";
+        
+        // Efecto visual al pasar el mouse
+        btn.onmouseover = () => btn.style.transform = "scale(1.03)";
+        btn.onmouseout = () => btn.style.transform = "scale(1)";
+        
         btn.onclick = () => elegirFecha(num, container);
         grid.appendChild(btn);
     });
@@ -44,92 +64,113 @@ async function cargarBotonesConsultorios(container) {
     container.appendChild(grid);
 }
 
+/**
+ * Paso 2: Selección de fecha para el consultorio elegido
+ */
 function elegirFecha(num, container) {
     seleccion.consultorio = num;
     container.innerHTML = `
-        <p><strong>Paso 2:</strong> Seleccione Día (Consultorio ${num})</p>
-        <input type="date" id="input-fecha-agenda" class="search-input" style="margin-bottom:1em; display:block; max-width:300px;">
-        <button id="btn-volver-cons" class="btn btn-secondary" style="margin-right:10px;">Volver</button>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 5px solid #007bff;">
+            <p style="font-weight:bold; font-size:1.5rem; margin-top:0;">Paso 2: Fecha para el Consultorio ${num}</p>
+            <input type="date" id="input-fecha-agenda" class="search-input" 
+                   style="padding:15px; font-size:1.3rem; margin: 1em 0; display:block; width:100%; max-width:400px; border-radius: 8px; border: 1px solid #ccc;">
+            <button id="btn-volver-cons" class="btn btn-secondary" style="font-size:1rem; padding: 10px 20px;">← Cambiar Consultorio</button>
+        </div>
+        <div id="horarios-resultado" style="margin-top: 2rem;"></div>
     `;
 
     const input = container.querySelector('#input-fecha-agenda');
+    // Evitar que elijan fechas pasadas
     input.min = new Date().toISOString().split('T')[0];
-
+    
     container.querySelector('#btn-volver-cons').onclick = () => cargarBotonesConsultorios(container);
 
     input.onchange = (e) => {
         seleccion.fecha = e.target.value;
-        if (seleccion.fecha) cargarHorarios(container);
+        if (seleccion.fecha) {
+            cargarHorarios(container.querySelector('#horarios-resultado'));
+        }
     };
 }
 
-async function cargarHorarios(container) {
-    const originalContent = container.innerHTML;
-    container.innerHTML += '<p id="cargando-h">Buscando horarios disponibles...</p>';
+/**
+ * Paso 3: Consulta disponibilidad y muestra la tabla
+ */
+async function cargarHorarios(targetContainer) {
+    targetContainer.innerHTML = '<p id="cargando-h" style="font-size: 1.2rem; color: #666;">⌛ Consultando disponibilidad en tiempo real...</p>';
     
     try {
-        const url = `/.netlify/functions/consultar_disponibilidad?consultorio=${seleccion.consultorio}&fecha=${seleccion.fecha}`;
-        const resp = await fetch(url);
-        const ocupados = await resp.json();
-
-        const listaOcupados = Array.isArray(ocupados) ? ocupados : (ocupados.ocupados || []);
+        // CORRECCIÓN CLAVE: Usamos 'informe_reservas' porque es la función que procesa las consultas de calendario
+        const url = `/.netlify/functions/informe_reservas?consultorio=${seleccion.consultorio}&fechaInicio=${seleccion.fecha}&fechaFin=${seleccion.fecha}`;
         
-        // --- AQUÍ APLICAMOS EL ESTILO ZEBRA ---
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error("No se pudo conectar con el servidor de calendario.");
+        
+        const data = await resp.json();
+        const reservasExistentes = data.reservas || [];
+        
+        // Mapeamos las horas que ya tienen una reserva
+        const horasBloqueadas = reservasExistentes.map(res => {
+            const fechaRes = new Date(res.start);
+            return `${fechaRes.getHours().toString().padStart(2, '0')}:00`;
+        });
+
         let html = `
-        <div class="table-main-container" style="margin-top:20px;">
-            <table class="custom-table">
+        <div class="table-main-container">
+            <table class="custom-table" style="width:100%; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                 <thead>
-                    <tr>
-                        <th>Hora</th>
+                    <tr style="font-size: 1.2rem; background-color: #f1f3f5;">
+                        <th style="padding: 20px;">Hora</th>
                         <th>Estado</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>`;
 
-        const { inicio, fin, intervalo } = APP_CONFIG.horarios;
-        for (let h = inicio; h < fin; h++) {
+        // Generamos los rangos según la configuración global
+        for (let h = APP_CONFIG.horarios.inicio; h < APP_CONFIG.horarios.fin; h++) {
             const horaStr = `${h.toString().padStart(2, '0')}:00`;
-            const estaOcupado = listaOcupados.includes(horaStr);
+            const estaOcupado = horasBloqueadas.includes(horaStr);
             
             html += `
-                <tr>
-                    <td><strong>${horaStr} hs</strong></td>
+                <tr style="height: 80px; font-size: 1.25rem; border-bottom: 1px solid #eee;">
+                    <td style="padding-left: 20px;"><strong>${horaStr} hs</strong></td>
                     <td>
-                        <span class="status-badge ${estaOcupado ? 'cancelada' : 'usada'}" style="padding:4px 8px;">
-                            ${estaOcupado ? 'Ocupado' : 'Libre'}
+                        <span class="status-badge ${estaOcupado ? 'cancelada' : 'usada'}" style="padding: 10px 25px; border-radius: 25px; font-size: 1rem;">
+                            ${estaOcupado ? 'Ocupado' : 'Disponible'}
                         </span>
                     </td>
                     <td>
-                        ${estaOcupado 
-                            ? '<span style="color:#95a5a6;">No disponible</span>' 
-                            : `<button class="btn btn-primary btn-reservar-ahora" data-hora="${h}" style="padding:4px 10px; font-size:0.85em;">Reservar</button>`}
+                        ${estaOcupado ? '<span style="color: #999; font-style: italic;">No disponible</span>' 
+                                     : `<button class="btn btn-primary btn-reserva-final" data-hora="${h}" style="padding: 12px 30px; font-size: 1rem;">Reservar</button>`}
                     </td>
                 </tr>`;
         }
-
-        html += '</tbody></table></div>';
-        const cargandoMsg = container.querySelector('#cargando-h');
-        if(cargandoMsg) cargandoMsg.remove();
         
-        // Insertamos la tabla
-        const divTabla = document.createElement('div');
-        divTabla.innerHTML = html;
-        container.appendChild(divTabla);
+        html += '</tbody></table></div>';
+        targetContainer.innerHTML = html;
 
-        // Eventos para botones de reserva
-        container.querySelectorAll('.btn-reservar-ahora').forEach(btn => {
-            btn.onclick = () => ejecutarReserva(btn.getAttribute('data-hora'), container);
+        // Asignar eventos a los botones de reserva
+        targetContainer.querySelectorAll('.btn-reserva-final').forEach(btn => {
+            btn.onclick = () => ejecutarReserva(btn.getAttribute('data-hora'), targetContainer);
         });
 
     } catch (err) {
-        container.innerHTML += `<p style="color:red">Error: ${err.message}</p>`;
+        targetContainer.innerHTML = `
+            <div style="padding: 20px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; color: #c53030;">
+                <strong>Error:</strong> ${err.message}. Por favor, intente recargar la página.
+            </div>`;
     }
 }
 
-async function ejecutarReserva(hora, container) {
+/**
+ * Finalizar la reserva enviando los datos al backend
+ */
+async function ejecutarReserva(hora, targetContainer) {
     const user = window.netlifyIdentity.currentUser();
-    if(!confirm(`¿Reservar Consultorio ${seleccion.consultorio} a las ${hora}:00 hs?`)) return;
+    const texto = `¿Confirmar reserva del Consultorio ${seleccion.consultorio} para el día ${seleccion.fecha} a las ${hora}:00 hs?`;
+    
+    if (!confirm(texto)) return;
 
     try {
         const resp = await fetch('/.netlify/functions/reservar', {
@@ -140,18 +181,19 @@ async function ejecutarReserva(hora, container) {
                 nombre: user.user_metadata?.full_name || user.email,
                 consultorio: seleccion.consultorio,
                 fecha: seleccion.fecha,
-                hora: hora
+                hora: parseInt(hora),
+                colorId: APP_CONFIG.coloresConsultorios[seleccion.consultorio] || "1"
             })
         });
 
         if (resp.ok) {
-            alert("✅ Reserva exitosa");
-            cargarHorarios(container);
+            alert("✅ Turno agendado correctamente. Se ha enviado un correo de confirmación.");
+            cargarHorarios(targetContainer); // Actualizar la tabla para mostrar el nuevo estado
         } else {
-            const d = await resp.json();
-            alert("❌ Error: " + (d.error || "No se pudo realizar"));
+            const dataError = await resp.json();
+            alert("❌ Error: " + (dataError.error || "El turno ya no está disponible."));
         }
     } catch (e) {
-        alert("Error de conexión");
+        alert("Error de conexión al procesar la reserva.");
     }
 }
