@@ -135,18 +135,19 @@ async function cargarHorarios(targetContainer) {
         let diaSemana = null;
         if (seleccion.fecha) {
             const fechaObj = new Date(seleccion.fecha);
+            // getDay(): 0=Domingo, 1=Lunes, ..., 6=Sábado
+            // config.js: 1=Lunes, ..., 6=Sábado
             diaSemana = fechaObj.getDay();
-            // En config.js: 1=Lunes ... 6=Sábado (getDay: 0=Domingo, 6=Sábado)
-            // Ajustamos para comparar correctamente:
-            // Si config usa 1-6, getDay 1-6 es igual, pero getDay 0 es domingo
-            diaLaboral = APP_CONFIG.diasLaborales.includes(diaSemana);
-            if (APP_CONFIG.horariosEspeciales && APP_CONFIG.horariosEspeciales[diaSemana]) {
-                inicio = APP_CONFIG.horariosEspeciales[diaSemana].inicio;
-                fin = APP_CONFIG.horariosEspeciales[diaSemana].fin;
+            // Convertimos getDay a formato config.js (1=Lunes, ..., 6=Sábado, 0=Domingo)
+            const diaConfig = diaSemana === 0 ? 7 : diaSemana; // 7 para domingo si se quisiera usar
+            diaLaboral = APP_CONFIG.diasLaborales.includes(diaConfig);
+            if (APP_CONFIG.horariosEspeciales && APP_CONFIG.horariosEspeciales[diaConfig]) {
+                inicio = APP_CONFIG.horariosEspeciales[diaConfig].inicio;
+                fin = APP_CONFIG.horariosEspeciales[diaConfig].fin;
             }
         }
         if (!diaLaboral) {
-            targetContainer.innerHTML = `<div style="padding: 20px; background: #fffbe5; border: 1px solid #ffe066; border-radius: 8px; color: #b08900; font-size:1.2rem;">⛔ No se pueden agendar turnos en este día. Solo días laborales.</div>`;
+            targetContainer.innerHTML = `<div style=\"padding: 20px; background: #fffbe5; border: 1px solid #ffe066; border-radius: 8px; color: #b08900; font-size:1.2rem;\">⛔ No se pueden agendar turnos en este día. Solo días laborales.</div>`;
             return;
         }
         // Generamos los rangos según la configuración global o especial y el intervalo
