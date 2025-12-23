@@ -280,16 +280,16 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
         }
         // --- NUEVA ESTRUCTURA DE TABLA ---
         const tablaContainer = document.createElement('div');
-        tablaContainer.className = 'table-container';
+        tablaContainer.className = 'table-main-container';
         const tabla = document.createElement('table');
-        tabla.className = 'table';
+        tabla.className = 'custom-table';
         tabla.innerHTML = `
             <thead>
                 <tr>
                     <th>Consultorio</th>
                     <th>Fecha y Hora</th>
                     <th>Usuario</th>
-                    <th>Acciones</th>
+                    <th style="text-align:right">Acciones</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -305,7 +305,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin, usuariosLista) {
                 <td>Consultorio ${reserva.consultorio}</td>
                 <td>${fechaHora}</td>
                 <td>${reserva.nombre || reserva.email}</td>
-                <td class="acciones-celda"></td>
+                <td class="acciones-celda" style="text-align:right"></td>
             `;
             const tdAcciones = tr.querySelector('.acciones-celda');
             if (diffHoras > 24) {
