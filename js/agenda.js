@@ -127,19 +127,30 @@ async function cargarHorarios(targetContainer) {
                 </thead>
                 <tbody>`;
 
-        // Determinar si la fecha seleccionada es sábado (6)
+        // Determinar día de la semana y si es laboral
         let inicio = APP_CONFIG.horarios.inicio;
         let fin = APP_CONFIG.horarios.fin;
+        let intervalo = APP_CONFIG.horarios.intervalo || 60;
+        let diaLaboral = true;
+        let diaSemana = null;
         if (seleccion.fecha) {
             const fechaObj = new Date(seleccion.fecha);
-            const diaSemana = fechaObj.getDay();
+            diaSemana = fechaObj.getDay();
+            // En config.js: 1=Lunes ... 6=Sábado (getDay: 0=Domingo, 6=Sábado)
+            // Ajustamos para comparar correctamente:
+            // Si config usa 1-6, getDay 1-6 es igual, pero getDay 0 es domingo
+            diaLaboral = APP_CONFIG.diasLaborales.includes(diaSemana);
             if (APP_CONFIG.horariosEspeciales && APP_CONFIG.horariosEspeciales[diaSemana]) {
                 inicio = APP_CONFIG.horariosEspeciales[diaSemana].inicio;
                 fin = APP_CONFIG.horariosEspeciales[diaSemana].fin;
             }
         }
-        // Generamos los rangos según la configuración global o especial
-        for (let h = inicio; h < fin; h++) {
+        if (!diaLaboral) {
+            targetContainer.innerHTML = `<div style="padding: 20px; background: #fffbe5; border: 1px solid #ffe066; border-radius: 8px; color: #b08900; font-size:1.2rem;">⛔ No se pueden agendar turnos en este día. Solo días laborales.</div>`;
+            return;
+        }
+        // Generamos los rangos según la configuración global o especial y el intervalo
+        for (let h = inicio; h < fin; h += intervalo / 60) {
             const horaStr = `${h.toString().padStart(2, '0')}:00`;
             const estaOcupado = horasBloqueadas.includes(horaStr);
             
