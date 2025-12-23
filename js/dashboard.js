@@ -199,7 +199,7 @@ function mostrarSeccion(seccion) {
     }
 }
 
-// Función que genera la TABLA con Estilo Zebra
+// Función que genera la TABLA REAL con Estilo Zebra
 async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
     const container = document.getElementById('calendar-container');
     container.innerHTML = '<p>Cargando reservas...</p>';
@@ -222,7 +222,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
                 <tr>
                     <th>#</th>
                     <th>Fecha</th>
-                    <th>Hora/Cons.</th>
+                    <th>Hora Consultorio</th>
                     <th>Usuario</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -239,8 +239,10 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
                 <td>${res.fecha}</td>
                 <td>${res.hora}:00 (C${res.consultorio})</td>
                 <td>${res.nombre || res.email}</td>
-                <td><span class="status-badge">Activa</span></td>
-                <td class="acciones-celda"></td>
+                <td><span class="status-badge ${res.estado?.toLowerCase() || 'reservada'}">${res.estado || 'Reservada'}</span></td>
+                <td>
+                    ${res.estado !== 'Cancelada' ? `<button class="btn-cancelar-small" onclick="cancelarReserva('${res.hora}', '${res.eventId}')">Cancelar</button>` : ''}
+                </td>
             `;
             tbody.appendChild(tr);
         });

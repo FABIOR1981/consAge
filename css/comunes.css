@@ -1,88 +1,85 @@
-/* --- NAVEGACIÓN Y BOTONES --- */
+/* --- BOTONES DEL DASHBOARD (Fuerza Horizontal) --- */
 .menu-grid {
     display: flex !important;
-    flex-direction: row !important; /* Fuerza horizontal */
+    flex-direction: row !important;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     margin: 20px 0;
     justify-content: flex-start;
 }
 
 .btn-menu {
-    padding: 12px 24px;
+    flex: 0 1 auto;
+    padding: 10px 20px;
+    min-width: 130px;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    border: none;
-    transition: transform 0.1s;
-    min-width: 140px;
 }
 
-.btn-menu:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-
-/* --- TABLAS Y ESTILO ZEBRA --- */
+/* --- ESTILO ZEBRA PARA TABLAS --- */
 .table-main-container {
     width: 100%;
     overflow-x: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     margin-top: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
 }
 
 .custom-table {
     width: 100%;
     border-collapse: collapse !important;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 0.95rem;
+    background-color: white;
 }
 
-/* Cabecera */
 .custom-table thead th {
-    background-color: #2c3e50;
-    color: white;
+    background-color: #f4f7f9;
+    color: #333;
+    padding: 12px;
     text-align: left;
-    padding: 15px;
-    font-weight: 600;
+    border-bottom: 2px solid #2c3e50;
+    font-size: 0.9rem;
 }
 
-/* Filas */
 .custom-table td {
-    padding: 12px 15px;
+    padding: 12px;
     border-bottom: 1px solid #eee;
-    color: #444;
+    font-size: 0.9rem;
+    vertical-align: middle;
 }
 
-/* ESTILO ZEBRA (Fuerza color en celdas para evitar que el fondo del body lo tape) */
+/* EL MOTOR DEL EFECTO ZEBRA */
+/* Aplicamos el color a la celda (td) para que no lo herede del fondo general */
 .custom-table tbody tr:nth-child(even) td {
-    background-color: #f8f9fa !important; /* Gris suave */
+    background-color: #f9f9f9 !important;
 }
 
 .custom-table tbody tr:nth-child(odd) td {
-    background-color: #ffffff !important; /* Blanco */
+    background-color: #ffffff !important;
 }
 
-/* Efecto al pasar el mouse */
+/* Efecto Hover */
 .custom-table tbody tr:hover td {
-    background-color: #e9ecef !important;
+    background-color: #f1f4f6 !important;
 }
 
-/* Badges de estado */
+/* --- ESTADOS Y BOTONES DE ACCIÓN --- */
 .status-badge {
-    background: #e3f2fd;
-    color: #1976d2;
     padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
     font-weight: bold;
+    text-transform: uppercase;
 }
+.status-badge.reservada { background: #e3f2fd; color: #1976d2; }
+.status-badge.cancelada { background: #ffebee; color: #c62828; }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 600px) {
-    .menu-grid {
-        flex-direction: column !important; /* En móviles muy pequeños sí bajamos */
-    }
+.btn-cancelar-small {
+    background-color: #e53935;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
 }
