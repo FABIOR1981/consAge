@@ -1,212 +1,115 @@
-import { renderReservas } from './reservas.js';
 import { renderAgenda } from './agenda.js';
 import { renderInforme } from './informe_modular.js';
 
-let seleccion = {
-    consultorio: null,
-    fecha: null
-};
-
-// --- Gestión de Reservas ---
-const reservarTurno = async (hora) => {
-    const user = netlifyIdentity.currentUser();
-    const textoConfirmar = `¿Confirmar Consultorio ${seleccion.consultorio}\nFecha: ${seleccion.fecha}\nHora: ${hora}:00 hs?`;
-    if (!confirm(textoConfirmar)) return;
-
-    const container = document.getElementById('calendar-container');
-    container.innerHTML = "<p>⌛ Procesando reserva...</p>";
-
-    try {
-        const colorLookup = APP_CONFIG.coloresConsultorios || {};
-        const defaultColor = Object.values(colorLookup)[0] || '1';
-        const colorIdToSend = colorLookup[seleccion.consultorio] || defaultColor;
-
-        const displayName = (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.name || user?.email);
-        
-        const respuesta = await fetch('/.netlify/functions/reservar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: user.email,
-                nombre: displayName,
-                consultorio: seleccion.consultorio,
-                fecha: seleccion.fecha,
-                hora: hora,
-                colorId: colorIdToSend
-            })
-        });
-
-        if (respuesta.ok) {
-            alert("✅ ¡Éxito! Turno agendado.");
-            cargarBotonesConsultorios();
-        } else {
-            const datos = await respuesta.json();
-            alert(`❌ Error: ${datos.error || 'No se pudo reservar'}`);
-            mostrarHorarios();
-        }
-    } catch (err) {
-        alert("❌ Error de red: " + err.message);
-        mostrarHorarios();
-    }
-};
-
-const elegirFecha = (num) => {
-    seleccion.consultorio = num;
-    const container = document.getElementById('calendar-container');
-    container.innerHTML = `<h3>Seleccione Día (Consultorio ${num})</h3>`;
-    const input = document.createElement('input');
-    input.type = 'date';
-    input.className = 'input-calendario';
-    input.min = new Date().toISOString().split('T')[0];
-    input.onchange = (e) => {
-        const selected = new Date(e.target.value + 'T00:00:00');
-        if ([0, 6].includes(selected.getDay())) { alert("No se permiten fines de semana."); return; }
-        seleccion.fecha = e.target.value;
-        mostrarHorarios();
-    };
-    container.appendChild(input);
-    const btnAtras = document.createElement('button');
-    btnAtras.innerText = "← Volver";
-    btnAtras.className = "btn-volver";
-    btnAtras.onclick = cargarBotonesConsultorios;
-    container.appendChild(btnAtras);
-};
-
-const mostrarHorarios = async () => {
-    const container = document.getElementById('calendar-container');
-    container.innerHTML = `<h3>Horarios: C${seleccion.consultorio} para el ${seleccion.fecha}</h3>`;
-    const user = netlifyIdentity.currentUser();
-    try {
-        const resp = await fetch(`/.netlify/functions/reservar?email=${encodeURIComponent(user.email)}&fecha=${seleccion.fecha}&consultorio=${seleccion.consultorio}`);
-        const data = await resp.json();
-        
-        const grid = document.createElement('div');
-        grid.className = 'horarios-grid';
-        
-        for (let h = APP_CONFIG.horarios.inicio; h < APP_CONFIG.horarios.fin; h++) {
-            const btn = document.createElement('button');
-            btn.className = 'btn';
-            btn.innerText = `${h.toString().padStart(2, '0')}:00`;
-            
-            if (data.ocupadasPorUsuario.includes(h)) {
-                btn.classList.add('ocupado-usuario');
-                btn.innerText += ' (Tuyo)';
-                btn.onclick = () => cancelarReserva(h, data.userEvents.find(ev => ev.hora === h)?.eventId);
-            } else if (!data.horasDisponibles.includes(h)) {
-                btn.disabled = true;
-                btn.classList.add('ocupado-otro');
-            } else {
-                btn.classList.add('libre');
-                btn.onclick = () => reservarTurno(h);
-            }
-            grid.appendChild(btn);
-        }
-        container.appendChild(grid);
-    } catch (e) {
-        container.innerHTML += '<p style="color:red">Error cargando disponibilidad.</p>';
-    }
-};
-
-const cancelarReserva = async (hora, eventId) => {
-    if (!confirm(`¿Cancelar reserva de las ${hora}:00 hs?`)) return;
-    try {
-        const resp = await fetch('/.netlify/functions/reservar', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ eventId, email: netlifyIdentity.currentUser().email })
-        });
-        if (resp.ok) { alert('Cancelada.'); mostrarHorarios(); }
-    } catch (e) { alert('Error al cancelar.'); }
-};
-
-const cargarBotonesConsultorios = () => {
-    const container = document.getElementById('calendar-container');
-    container.innerHTML = '<h3>Paso 1: Elija un Consultorio</h3>';
-    const grid = document.createElement('div');
-    grid.className = 'consultorios-grid';
-    APP_CONFIG.consultorios.filter(num => num !== 1).forEach(num => {
-        const btn = document.createElement('button');
-        btn.innerText = `Consultorio ${num}`;
-        btn.className = 'btn-consultorio';
-        btn.onclick = () => elegirFecha(num);
-        grid.appendChild(btn);
-    });
-    container.appendChild(grid);
-};
-
-// --- Navegación ---
-async function renderDashboardButtons(user) {
-    const btnsDiv = document.getElementById('dashboard-btns');
-    if (!btnsDiv) return;
-    btnsDiv.innerHTML = '';
-    
-    const menuGrid = document.createElement('div');
-    menuGrid.className = 'menu-grid';
-
-    const btnAgenda = document.createElement('button');
-    btnAgenda.className = 'btn btn-primary btn-menu';
-    btnAgenda.innerText = 'Agenda';
-    btnAgenda.onclick = () => mostrarSeccion('agenda');
-    
-    const btnReservas = document.createElement('button');
-    btnReservas.className = 'btn btn-primary btn-menu';
-    btnReservas.innerText = 'Reservas Futuras';
-    btnReservas.onclick = () => mostrarSeccion('mis-reservas-futuras');
-
-    menuGrid.appendChild(btnAgenda);
-    menuGrid.appendChild(btnReservas);
-
-    try {
-        const resp = await fetch('/.netlify/functions/listar_usuarios');
-        const js = await resp.json();
-        const actual = js.usuarios.find(u => u.email === user.email);
-        if (actual?.rol === 'admin') {
-            const btnInforme = document.createElement('button');
-            btnInforme.className = 'btn btn-secondary btn-menu';
-            btnInforme.innerText = 'Informe';
-            btnInforme.onclick = () => mostrarSeccion('informe');
-            menuGrid.appendChild(btnInforme);
-        }
-    } catch {}
-    
-    btnsDiv.appendChild(menuGrid);
-}
-
+/**
+ * Función principal para cambiar entre secciones del dashboard
+ * @param {string} seccion - El nombre de la sección a mostrar
+ */
 function mostrarSeccion(seccion) {
-    const secciones = ['agenda-section', 'reservas-section', 'informe-section', 'mis-reservas-futuras-section'];
-    secciones.forEach(s => {
-        const el = document.getElementById(s);
+    // 1. IDs de las secciones definidos en dashboard.html
+    const seccionesIds = [
+        'agenda-section', 
+        'reservas-section', 
+        'informe-section', 
+        'admin-section'
+    ];
+
+    // 2. Ocultar todas las secciones para limpiar la pantalla
+    seccionesIds.forEach(id => {
+        const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
 
+    // 3. Actualizar el título principal (quitar el "Cargando...")
+    const welcome = document.getElementById('welcome-msg');
+    if (welcome) {
+        welcome.innerText = "Panel de Gestión";
+    }
+
+    // 4. Lógica para activar la sección seleccionada
     if (seccion === 'agenda') {
-        document.getElementById('agenda-section').style.display = '';
-        renderAgenda(document.getElementById('agenda-container'));
-    } else if (seccion === 'mis-reservas-futuras') {
-        let misResSection = document.getElementById('mis-reservas-futuras-section');
-        if (!misResSection) {
-            misResSection = document.createElement('section');
-            misResSection.id = 'mis-reservas-futuras-section';
-            misResSection.className = 'card';
-            document.querySelector('main.content').appendChild(misResSection);
+        const sec = document.getElementById('agenda-section');
+        const cont = document.getElementById('agenda-container');
+        if (sec && cont) {
+            sec.style.display = 'block';
+            renderAgenda(cont);
         }
-        misResSection.style.display = '';
-        import('./informe_modular.js').then(mod => mod.renderMisReservasFuturas(misResSection));
-    } else if (seccion === 'informe') {
-        document.getElementById('informe-section').style.display = '';
-        renderInforme(document.getElementById('informe-container'));
+    } 
+    else if (seccion === 'mis-reservas-futuras') {
+        const sec = document.getElementById('reservas-section');
+        const cont = document.getElementById('reservas-container');
+        if (sec && cont) {
+            sec.style.display = 'block';
+            // Cargamos dinámicamente la función desde el módulo de informes
+            import('./informe_modular.js').then(mod => {
+                mod.renderMisReservasFuturas(cont);
+            });
+        }
+    } 
+    else if (seccion === 'informe') {
+        const sec = document.getElementById('informe-section');
+        const cont = document.getElementById('informe-container');
+        if (sec && cont) {
+            sec.style.display = 'block';
+            renderInforme(cont);
+        }
     }
 }
 
-// Inicialización
+/**
+ * Configuración inicial del Dashboard al cargar la página
+ */
 const initDashboard = async () => {
-    const user = netlifyIdentity.currentUser();
-    if (!user) { window.location.href = "index.html"; return; }
-    document.getElementById('user-email').innerText = user.email;
-    await renderDashboardButtons(user);
+    // Verificar si el usuario está autenticado mediante Netlify Identity
+    const user = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
+    
+    if (!user) {
+        console.warn("Usuario no autenticado, redirigiendo al login...");
+        window.location.href = "index.html";
+        return;
+    }
+
+    // Mostrar el email del usuario en la barra de navegación
+    const emailEl = document.getElementById('user-email');
+    if (emailEl) emailEl.innerText = user.email;
+
+    // Configurar los eventos de los botones del menú
+    const btnAgenda = document.getElementById('btn-agenda');
+    const btnReservas = document.getElementById('btn-reservas');
+    const btnInforme = document.getElementById('btn-informe');
+    const btnLogout = document.getElementById('logout-btn');
+
+    if (btnAgenda) btnAgenda.onclick = () => mostrarSeccion('agenda');
+    if (btnReservas) btnReservas.onclick = () => mostrarSeccion('mis-reservas-futuras');
+    if (btnInforme) btnInforme.onclick = () => mostrarSeccion('informe');
+    
+    if (btnLogout) {
+        btnLogout.onclick = () => {
+            window.netlifyIdentity.logout();
+        };
+    }
+
+    // Por defecto, al entrar, mostramos la sección de Agenda
+    mostrarSeccion('agenda');
 };
 
+// --- Manejo de eventos de Netlify Identity ---
 if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => { if(user) initDashboard(); else window.location.href="index.html"; });
-    window.netlifyIdentity.on("logout", () => window.location.href = "index.html");
+    window.netlifyIdentity.on("init", user => {
+        if (user) {
+            initDashboard();
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+
+    window.netlifyIdentity.on("login", user => {
+        initDashboard();
+    });
+
+    window.netlifyIdentity.on("logout", () => {
+        window.location.href = "index.html";
+    });
+} else {
+    console.error("Netlify Identity no detectado. Verifica el script en el HTML.");
 }
