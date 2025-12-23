@@ -139,8 +139,9 @@ async function cargarHorarios(targetContainer) {
             // config.js: 1=Lunes, ..., 6=Sábado
             diaSemana = fechaObj.getDay();
             // Convertimos getDay a formato config.js (1=Lunes, ..., 6=Sábado, 0=Domingo)
-            const diaConfig = diaSemana === 0 ? 7 : diaSemana; // 7 para domingo si se quisiera usar
-            diaLaboral = APP_CONFIG.diasLaborales.includes(diaConfig);
+            const diaConfig = diaSemana === 0 ? 7 : diaSemana; // 1=Lunes, ..., 6=Sábado, 7=Domingo
+            // Aseguramos que la comparación sea entre números
+            diaLaboral = APP_CONFIG.diasLaborales.map(Number).includes(diaConfig);
             if (APP_CONFIG.horariosEspeciales && APP_CONFIG.horariosEspeciales[diaConfig]) {
                 inicio = APP_CONFIG.horariosEspeciales[diaConfig].inicio;
                 fin = APP_CONFIG.horariosEspeciales[diaConfig].fin;
