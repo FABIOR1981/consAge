@@ -112,6 +112,13 @@
     margin: auto;
 }
 
+/* Wrapper global: centra también encabezados y botones */
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 0 20px;
+}
+
 /* Inputs y tamaños */
 input[type="date"], .search-input {
     font-size: 1.05rem;
