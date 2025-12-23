@@ -99,3 +99,32 @@
 .custom-table tbody tr:nth-child(odd) td {
     background-color: #ffffff !important;
 }
+
+/* Contenedor central para mejor lectura en escritorio */
+.informe-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+.table-main-container {
+    max-width: 800px;
+    margin: auto;
+}
+
+/* Inputs y tamaños */
+input[type="date"], .search-input {
+    font-size: 1.05rem;
+    padding: 12px;
+    max-width: 420px;
+    width: 100%;
+}
+
+.custom-table td {
+    font-size: 0.95rem;
+}
+
+@media (min-width: 1024px) {
+    body { font-size: 16px; line-height: 1.5; }
+    .informe-form { padding: 30px; }
+}

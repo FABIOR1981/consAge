@@ -6,8 +6,6 @@ let seleccion = { consultorio: null, fecha: null };
  * Renderiza la vista inicial de la agenda
  */
 export async function renderAgenda(container) {
-    // Aumentamos el tamaño base para que se vea mejor en pantallas de laptop
-    container.style.fontSize = "1.15rem"; 
     container.innerHTML = `
         <div class="informe-container">
             <h2 class="informe-titulo" style="font-size: 2.3rem; margin-bottom: 1.5rem;">📅 Agenda de Turnos</h2>
