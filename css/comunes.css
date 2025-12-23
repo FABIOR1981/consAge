@@ -1,176 +1,88 @@
-/* Menú visual para dashboard */
+/* --- NAVEGACIÓN Y BOTONES --- */
 .menu-grid {
-   display: flex !important;
-   flex-direction: row !important;
-   flex-wrap: wrap;
-   gap: 12px;
-   margin: 20px 0;
-   justify-content: flex-start;
+    display: flex !important;
+    flex-direction: row !important; /* Fuerza horizontal */
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0;
+    justify-content: flex-start;
 }
+
 .btn-menu {
-    padding: 10px 20px;
+    padding: 12px 24px;
     font-weight: 600;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s;
+    min-width: 140px;
 }
+
 .btn-menu:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    filter: brightness(1.1);
 }
 
-/* css/comunes.css - EL ADN DEL PROYECTO */
-:root {
-    --primary: #2c3e50;
-    --accent: #3498db;
-    --success: #27ae60;
-    --error: #e74c3c;
-    --bg: #f4f7f6;
-    --white: #ffffff;
-    --text: #333333;
-    --shadow: 0 4px 15px rgba(0,0,0,0.1);
-    --radius: 8px;
-}
-
-body { 
-    font-family: 'Segoe UI', Roboto, sans-serif; 
-    background-color: var(--bg); 
-    margin: 0; 
-    color: var(--text); 
-}
-
-/* CONTENEDORES */
-.dashboard-container, .container {
-    max-width: 1100px;
-    margin: 30px auto;
-    padding: 20px;
-}
-
-/* BOTONES GLOBALES */
-/* Botones principales del dashboard */
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.3s;
-    text-decoration: none;
-    text-align: center;
-    margin-right: 10px;
-    min-width: 120px;
-}
-.btn-primary { background: var(--accent); color: white; }
-.btn-primary:hover { background: var(--primary); transform: translateY(-2px); }
-
-/* css/comunes.css - SOLUCIÓN DEFINITIVA DE TABLAS */
-
-/* Contenedor con scroll para tu HP Pavilion */
+/* --- TABLAS Y ESTILO ZEBRA --- */
 .table-main-container {
     width: 100%;
     overflow-x: auto;
-    margin: 20px 0;
-    border: 1px solid #e2e8f0;
+    background: white;
     border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-top: 20px;
 }
 
-/* La tabla */
 .custom-table {
     width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    font-family: sans-serif;
-    font-size: 14px;
+    border-collapse: collapse !important;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
 }
 
-/* Encabezado sólido */
+/* Cabecera */
 .custom-table thead th {
     background-color: #2c3e50;
-    color: #ffffff;
+    color: white;
     text-align: left;
-    padding: 12px 15px;
+    padding: 15px;
     font-weight: 600;
 }
 
-/* Filas base */
-.custom-table tbody tr {
-    border-bottom: 1px solid #edf2f7;
-}
-
-/* ESTILO ZEBRA: Aplicado a la fila */
-.custom-table tbody tr:nth-child(even) {
-    background-color: #f7fafc !important;
-}
-
-/* Asegurar que la fila impar sea blanca */
-.custom-table tbody tr:nth-child(odd) {
-    background-color: #ffffff !important;
-}
-
-/* Hover para mejorar la experiencia */
-.custom-table tbody tr:hover {
-    background-color: #edf2f7 !important;
-}
-
-/* Celdas */
+/* Filas */
 .custom-table td {
     padding: 12px 15px;
-    color: #4a5568;
+    border-bottom: 1px solid #eee;
+    color: #444;
 }
 
-/* ESTADOS (BADGES) */
-.status { 
-    padding: 5px 12px; 
-    border-radius: 20px; 
-    font-size: 0.8rem; 
-    font-weight: bold; 
-    display: inline-block;
-}
-.status.usada { background: #e8f5e9; color: #2e7d32; }
-.status.cancelada { background: #ffebee; color: #c62828; }
-.status.reservada { background: #e3f2fd; color: #1976d2; }
-/* Contenedor de la botonera principal */
-.button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 20px 0;
-    justify-content: flex-start;
+/* ESTILO ZEBRA (Fuerza color en celdas para evitar que el fondo del body lo tape) */
+.custom-table tbody tr:nth-child(even) td {
+    background-color: #f8f9fa !important; /* Gris suave */
 }
 
-.btn-nav {
-    min-width: 150px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-align: center;
+.custom-table tbody tr:nth-child(odd) td {
+    background-color: #ffffff !important; /* Blanco */
 }
 
-/* --- BOTONERA EN HORIZONTAL --- */
-.nav-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 20px 0;
-    justify-content: flex-start;
+/* Efecto al pasar el mouse */
+.custom-table tbody tr:hover td {
+    background-color: #e9ecef !important;
 }
 
-.nav-container .btn {
-    min-width: 150px;
-    padding: 12px 20px;
+/* Badges de estado */
+.status-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
 }
 
-/* Contenedor de la botonera principal */
-.menu-nav {
-    display: flex !important;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 30px;
-}
-
-.menu-nav .btn {
-    flex: 1;
-    min-width: 140px;
-    max-width: 200px;
+/* --- RESPONSIVE --- */
+@media (max-width: 600px) {
+    .menu-grid {
+        flex-direction: column !important; /* En móviles muy pequeños sí bajamos */
+    }
 }
