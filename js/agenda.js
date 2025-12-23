@@ -112,7 +112,9 @@ async function cargarHorarios(targetContainer) {
         // Mapeamos las horas que ya tienen una reserva
         const horasBloqueadas = reservasExistentes.map(res => {
             const fechaRes = new Date(res.start);
-            return `${fechaRes.getHours().toString().padStart(2, '0')}:00`;
+            const hh = fechaRes.getHours().toString().padStart(2, '0');
+            const mm = (fechaRes.getMinutes() || 0).toString().padStart(2, '0');
+            return `${hh}:${mm}`;
         });
 
         let html = `
@@ -130,17 +132,28 @@ async function cargarHorarios(targetContainer) {
         // Determinar día de la semana y si es laboral
         let inicio = APP_CONFIG.horarios.inicio;
         let fin = APP_CONFIG.horarios.fin;
-        let intervalo = APP_CONFIG.horarios.intervalo || 60;
         let diaLaboral = true;
         let diaSemana = null;
+        // Parsear fecha como local para evitar desfaces por zona horaria (ej: '2025-12-29' tratado como UTC)
         if (seleccion.fecha) {
-            const fechaObj = new Date(seleccion.fecha);
-            // getDay(): 0=Domingo, 1=Lunes, ..., 6=Sábado
-            // config.js: 1=Lunes, ..., 6=Sábado
+            const isoMatch = /^\d{4}-\d{2}-\d{2}$/;
+            const localMatch = /^\d{2}\/\d{2}\/\d{4}$/;
+            let fechaObj;
+            if (isoMatch.test(seleccion.fecha)) {
+                const [y, m, d] = seleccion.fecha.split('-').map(Number);
+                fechaObj = new Date(y, m - 1, d);
+            } else if (localMatch.test(seleccion.fecha)) {
+                const [d, m, y] = seleccion.fecha.split('/').map(Number);
+                fechaObj = new Date(y, m - 1, d);
+            } else {
+                fechaObj = new Date(seleccion.fecha);
+            }
+            if (isNaN(fechaObj.getTime())) {
+                targetContainer.innerHTML = `<div style=\"padding: 20px; background: #fffbe5; border: 1px solid #ffe066; border-radius: 8px; color: #b08900; font-size:1.2rem;\">⛔ Fecha inválida.</div>`;
+                return;
+            }
             diaSemana = fechaObj.getDay();
-            // Convertimos getDay a formato config.js (1=Lunes, ..., 6=Sábado, 0=Domingo)
-            const diaConfig = diaSemana === 0 ? 7 : diaSemana; // 1=Lunes, ..., 6=Sábado, 7=Domingo
-            // Aseguramos que la comparación sea entre números
+            const diaConfig = diaSemana === 0 ? 7 : diaSemana;
             diaLaboral = APP_CONFIG.diasLaborales.map(Number).includes(diaConfig);
             if (APP_CONFIG.horariosEspeciales && APP_CONFIG.horariosEspeciales[diaConfig]) {
                 inicio = APP_CONFIG.horariosEspeciales[diaConfig].inicio;
@@ -151,9 +164,14 @@ async function cargarHorarios(targetContainer) {
             targetContainer.innerHTML = `<div style=\"padding: 20px; background: #fffbe5; border: 1px solid #ffe066; border-radius: 8px; color: #b08900; font-size:1.2rem;\">⛔ No se pueden agendar turnos en este día. Solo días laborales.</div>`;
             return;
         }
-        // Generamos los rangos según la configuración global o especial y el intervalo
-        for (let h = inicio; h < fin; h += intervalo / 60) {
-            const horaStr = `${h.toString().padStart(2, '0')}:00`;
+        // Generamos los rangos según la configuración global o especial y el intervalo (en minutos)
+        const intervalo = APP_CONFIG.horarios.intervalo || 60;
+        const startMinutes = inicio * 60;
+        const endMinutes = fin * 60;
+        for (let mins = startMinutes; mins < endMinutes; mins += intervalo) {
+            const hh = Math.floor(mins / 60);
+            const mm = mins % 60;
+            const horaStr = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}`;
             const estaOcupado = horasBloqueadas.includes(horaStr);
             
             html += `
@@ -166,7 +184,7 @@ async function cargarHorarios(targetContainer) {
                     </td>
                     <td>
                         ${estaOcupado ? '<span style="color: #999; font-style: italic;">No disponible</span>' 
-                                     : `<button class="btn btn-primary btn-reserva-final" data-hora="${h}" style="padding: 12px 30px; font-size: 1rem;">Reservar</button>`}
+                                     : `<button class="btn btn-primary btn-reserva-final" data-hora="${horaStr}" style="padding: 12px 30px; font-size: 1rem;">Reservar</button>`}
                     </td>
                 </tr>`;
         }
@@ -192,9 +210,16 @@ async function cargarHorarios(targetContainer) {
  */
 async function ejecutarReserva(hora, targetContainer) {
     const user = window.netlifyIdentity.currentUser();
-    const texto = `¿Confirmar reserva del Consultorio ${seleccion.consultorio} para el día ${seleccion.fecha} a las ${hora}:00 hs?`;
+    const texto = `¿Confirmar reserva del Consultorio ${seleccion.consultorio} para el día ${seleccion.fecha} a las ${hora} hs?`;
     
     if (!confirm(texto)) return;
+
+    const [hhStr, mmStr] = (hora || '').split(':');
+    const hh = parseInt(hhStr, 10);
+    const mm = parseInt(mmStr || '0', 10);
+    if (isNaN(hh) || isNaN(mm)) { alert('Hora inválida'); return; }
+    // Backend actual solo soporta horas enteras (minutos = 0)
+    if (mm !== 0) { alert('El sistema actualmente sólo soporta franjas en horas completas.'); return; }
 
     try {
         const resp = await fetch('/.netlify/functions/reservar', {
@@ -205,7 +230,7 @@ async function ejecutarReserva(hora, targetContainer) {
                 nombre: user.user_metadata?.full_name || user.email,
                 consultorio: seleccion.consultorio,
                 fecha: seleccion.fecha,
-                hora: parseInt(hora),
+                hora: hh,
                 colorId: APP_CONFIG.coloresConsultorios[seleccion.consultorio] || "1"
             })
         });
