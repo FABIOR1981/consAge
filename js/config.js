@@ -38,9 +38,7 @@ export const APP_CONFIG = {
     horarioSabado: {
         inicio: 8,
         fin: 15
-    }
-
-
+    },
     cancelacion: {
         horasAntelacion: 24,
         reglaFinDeSemana: true // Si es lunes, debe cancelar el viernes
