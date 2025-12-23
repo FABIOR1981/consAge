@@ -1,115 +1,81 @@
 import { renderAgenda } from './agenda.js';
 import { renderInforme } from './informe_modular.js';
 
-/**
- * Función principal para cambiar entre secciones del dashboard
- * @param {string} seccion - El nombre de la sección a mostrar
- */
-function mostrarSeccion(seccion) {
-    // 1. IDs de las secciones definidos en dashboard.html
-    const seccionesIds = [
-        'agenda-section', 
-        'reservas-section', 
-        'informe-section', 
-        'admin-section'
-    ];
-
-    // 2. Ocultar todas las secciones para limpiar la pantalla
-    seccionesIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
-
-    // 3. Actualizar el título principal (quitar el "Cargando...")
-    const welcome = document.getElementById('welcome-msg');
-    if (welcome) {
-        welcome.innerText = "Panel de Gestión";
-    }
-
-    // 4. Lógica para activar la sección seleccionada
-    if (seccion === 'agenda') {
-        const sec = document.getElementById('agenda-section');
-        const cont = document.getElementById('agenda-container');
-        if (sec && cont) {
-            sec.style.display = 'block';
-            renderAgenda(cont);
-        }
-    } 
-    else if (seccion === 'mis-reservas-futuras') {
-        const sec = document.getElementById('reservas-section');
-        const cont = document.getElementById('reservas-container');
-        if (sec && cont) {
-            sec.style.display = 'block';
-            // Cargamos dinámicamente la función desde el módulo de informes
-            import('./informe_modular.js').then(mod => {
-                mod.renderMisReservasFuturas(cont);
-            });
-        }
-    } 
-    else if (seccion === 'informe') {
-        const sec = document.getElementById('informe-section');
-        const cont = document.getElementById('informe-container');
-        if (sec && cont) {
-            sec.style.display = 'block';
-            renderInforme(cont);
-        }
-    }
-}
-
-/**
- * Configuración inicial del Dashboard al cargar la página
- */
+// Función para inicializar el Dashboard y controlar los permisos
 const initDashboard = async () => {
-    // Verificar si el usuario está autenticado mediante Netlify Identity
-    const user = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
-    
+    const user = window.netlifyIdentity?.currentUser();
     if (!user) {
-        console.warn("Usuario no autenticado, redirigiendo al login...");
         window.location.href = "index.html";
         return;
     }
 
-    // Mostrar el email del usuario en la barra de navegación
-    const emailEl = document.getElementById('user-email');
-    if (emailEl) emailEl.innerText = user.email;
+    document.getElementById('user-email').innerText = user.email;
 
-    // Configurar los eventos de los botones del menú
-    const btnAgenda = document.getElementById('btn-agenda');
-    const btnReservas = document.getElementById('btn-reservas');
-    const btnInforme = document.getElementById('btn-informe');
-    const btnLogout = document.getElementById('logout-btn');
-
-    if (btnAgenda) btnAgenda.onclick = () => mostrarSeccion('agenda');
-    if (btnReservas) btnReservas.onclick = () => mostrarSeccion('mis-reservas-futuras');
-    if (btnInforme) btnInforme.onclick = () => mostrarSeccion('informe');
-    
-    if (btnLogout) {
-        btnLogout.onclick = () => {
-            window.netlifyIdentity.logout();
-        };
+    // --- LÓGICA DE VALIDACIÓN DE ROL DESDE usuarios.json ---
+    let esAdmin = false;
+    try {
+        // Llamamos a la función que lee tu carpeta /data/usuarios.json
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const data = await resp.json();
+        
+        if (data.usuarios && Array.isArray(data.usuarios)) {
+            const usuarioEncontrado = data.usuarios.find(u => u.email === user.email);
+            if (usuarioEncontrado && usuarioEncontrado.rol === 'admin') {
+                esAdmin = true;
+            }
+        }
+    } catch (error) {
+        console.error("Error al consultar el archivo de usuarios:", error);
     }
 
-    // Por defecto, al entrar, mostramos la sección de Agenda
-    mostrarSeccion('agenda');
+    // --- CONTROL DE VISIBILIDAD DEL BOTÓN INFORME ---
+    const btnInforme = document.getElementById('btn-informe');
+    if (btnInforme) {
+        if (esAdmin) {
+            btnInforme.style.display = 'inline-block'; // Mostrar si es admin
+        } else {
+            btnInforme.remove(); // Eliminar por completo si no es admin
+        }
+    }
+
+    // Asignar los eventos de los botones
+    document.getElementById('btn-agenda').onclick = () => mostrarSeccion('agenda');
+    document.getElementById('btn-reservas').onclick = () => mostrarSeccion('mis-reservas-futuras');
+    if (esAdmin && btnInforme) {
+        btnInforme.onclick = () => mostrarSeccion('informe');
+    }
 };
 
-// --- Manejo de eventos de Netlify Identity ---
+// Función para cambiar entre secciones
+function mostrarSeccion(seccion) {
+    // Ocultar todas las secciones primero
+    const secciones = ['agenda-section', 'reservas-section', 'informe-section'];
+    secciones.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    if (seccion === 'agenda') {
+        document.getElementById('agenda-section').style.display = 'block';
+        renderAgenda(document.getElementById('agenda-container'));
+    } 
+    else if (seccion === 'mis-reservas-futuras') {
+        document.getElementById('reservas-section').style.display = 'block';
+        import('./informe_modular.js').then(mod => mod.renderMisReservasFuturas(document.getElementById('reservas-container')));
+    } 
+    else if (seccion === 'informe') {
+        document.getElementById('informe-section').style.display = 'block';
+        renderInforme(document.getElementById('informe-container'));
+    }
+}
+
+// Escuchar el inicio de Netlify Identity
 if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", user => {
-        if (user) {
-            initDashboard();
-        } else {
-            window.location.href = "index.html";
-        }
+        if (!user) window.location.href = "index.html";
+        else initDashboard();
     });
-
-    window.netlifyIdentity.on("login", user => {
-        initDashboard();
-    });
-
-    window.netlifyIdentity.on("logout", () => {
-        window.location.href = "index.html";
-    });
-} else {
-    console.error("Netlify Identity no detectado. Verifica el script en el HTML.");
+    window.netlifyIdentity.on("logout", () => window.location.href = "index.html");
 }
+
+document.getElementById('logout-btn').onclick = () => window.netlifyIdentity.logout();
