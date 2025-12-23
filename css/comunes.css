@@ -1,85 +1,96 @@
-/* --- BOTONES DEL DASHBOARD (Fuerza Horizontal) --- */
+/* --- ESTILOS GENERALES --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+/* --- MENÚ DASHBOARD (Siempre Horizontal) --- */
 .menu-grid {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap;
     gap: 10px;
     margin: 20px 0;
-    justify-content: flex-start;
 }
 
 .btn-menu {
     flex: 0 1 auto;
     padding: 10px 20px;
-    min-width: 130px;
-    font-weight: 600;
-    border-radius: 6px;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
+    font-weight: 600;
 }
 
-/* --- ESTILO ZEBRA PARA TABLAS --- */
-.table-main-container {
+/* --- ZEBRA SYSTEM (ESTRICTO) --- */
+.table-container-zebra {
     width: 100%;
     overflow-x: auto;
-    margin-top: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-.custom-table {
+.table-zebra {
     width: 100%;
     border-collapse: collapse !important;
     background-color: white;
 }
 
-.custom-table thead th {
-    background-color: #f4f7f9;
-    color: #333;
+.table-zebra thead th {
+    background-color: #2c3e50 !important;
+    color: white !important;
     padding: 12px;
     text-align: left;
-    border-bottom: 2px solid #2c3e50;
-    font-size: 0.9rem;
 }
 
-.custom-table td {
-    padding: 12px;
+.table-zebra td {
+    padding: 10px;
     border-bottom: 1px solid #eee;
-    font-size: 0.9rem;
-    vertical-align: middle;
 }
 
-/* EL MOTOR DEL EFECTO ZEBRA */
-/* Aplicamos el color a la celda (td) para que no lo herede del fondo general */
-.custom-table tbody tr:nth-child(even) td {
-    background-color: #f9f9f9 !important;
+/* EL MOTOR ZEBRA: Aplicamos color a la celda (td) */
+/* Filas PARES: Gris suave */
+.table-zebra tbody tr:nth-child(even) td {
+    background-color: #f2f4f6 !important;
 }
 
-.custom-table tbody tr:nth-child(odd) td {
+/* Filas IMPARES: Blanco */
+.table-zebra tbody tr:nth-child(odd) td {
     background-color: #ffffff !important;
 }
 
-/* Efecto Hover */
-.custom-table tbody tr:hover td {
-    background-color: #f1f4f6 !important;
+/* Resaltado al pasar el mouse */
+.table-zebra tbody tr:hover td {
+    background-color: #e9ecef !important;
 }
 
-/* --- ESTADOS Y BOTONES DE ACCIÓN --- */
-.status-badge {
-    padding: 4px 10px;
-    border-radius: 15px;
-    font-size: 0.75rem;
+/* --- COMPONENTES --- */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
     font-weight: bold;
-    text-transform: uppercase;
 }
-.status-badge.reservada { background: #e3f2fd; color: #1976d2; }
-.status-badge.cancelada { background: #ffebee; color: #c62828; }
+.badge.reservada { background: #d1ecf1; color: #0c5460; }
+.badge.cancelada { background: #f8d7da; color: #721c24; }
+.badge.usada { background: #d4edda; color: #155724; }
 
-.btn-cancelar-small {
-    background-color: #e53935;
+.btn-cancelar {
+    background-color: #dc3545;
     color: white;
     border: none;
     padding: 5px 10px;
-    border-radius: 4px;
+    border-radius: 3px;
     cursor: pointer;
-    font-size: 0.8rem;
 }

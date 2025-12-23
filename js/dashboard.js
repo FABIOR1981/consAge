@@ -156,7 +156,6 @@ async function renderDashboardButtons(user) {
     menuGrid.appendChild(btnAgenda);
     menuGrid.appendChild(btnReservas);
 
-    // Verificar Rol Admin
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
         const js = await resp.json();
@@ -184,22 +183,22 @@ function mostrarSeccion(seccion) {
         document.getElementById('agenda-section').style.display = '';
         renderAgenda(document.getElementById('agenda-container'));
     } else if (seccion === 'mis-reservas-futuras') {
-        let misReservasSection = document.getElementById('mis-reservas-futuras-section');
-        if (!misReservasSection) {
-            misReservasSection = document.createElement('section');
-            misReservasSection.id = 'mis-reservas-futuras-section';
-            misReservasSection.className = 'card';
-            document.querySelector('main.content').appendChild(misReservasSection);
+        let misResSection = document.getElementById('mis-reservas-futuras-section');
+        if (!misResSection) {
+            misResSection = document.createElement('section');
+            misResSection.id = 'mis-reservas-futuras-section';
+            misResSection.className = 'card';
+            document.querySelector('main.content').appendChild(misResSection);
         }
-        misReservasSection.style.display = '';
-        import('./informe_modular.js').then(mod => mod.renderMisReservasFuturas(misReservasSection));
+        misResSection.style.display = '';
+        import('./informe_modular.js').then(mod => mod.renderMisReservasFuturas(misResSection));
     } else if (seccion === 'informe') {
         document.getElementById('informe-section').style.display = '';
         renderInforme(document.getElementById('informe-container'));
     }
 }
 
-// Función que genera la TABLA REAL con Estilo Zebra
+// ESTA FUNCIÓN ES LA QUE GENERA LA TABLA ZEBRA
 async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
     const container = document.getElementById('calendar-container');
     container.innerHTML = '<p>Cargando reservas...</p>';
@@ -212,43 +211,37 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
 
         container.innerHTML = '<h3>Mis Reservas Futuras</h3>';
         
-        const tablaContainer = document.createElement('div');
-        tablaContainer.className = 'table-main-container';
-
-        const tabla = document.createElement('table');
-        tabla.className = 'custom-table';
-        tabla.innerHTML = `
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Fecha</th>
-                    <th>Hora Consultorio</th>
-                    <th>Usuario</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
+        const tablaHTML = `
+            <div class="table-container-zebra">
+                <table class="table-zebra">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Fecha</th>
+                            <th>Hora Cons.</th>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reservas.map((res, idx) => `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${res.fecha}</td>
+                                <td>${res.hora}:00 (C${res.consultorio})</td>
+                                <td>${res.nombre || res.email}</td>
+                                <td><span class="badge ${res.estado.toLowerCase()}">${res.estado}</span></td>
+                                <td>
+                                    ${res.estado !== 'Cancelada' ? `<button class="btn-cancelar" onclick="cancelarReserva('${res.hora}', '${res.eventId}')">Cancelar</button>` : ''}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
         `;
-
-        const tbody = tabla.querySelector('tbody');
-        reservas.forEach((res, idx) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${idx + 1}</td>
-                <td>${res.fecha}</td>
-                <td>${res.hora}:00 (C${res.consultorio})</td>
-                <td>${res.nombre || res.email}</td>
-                <td><span class="status-badge ${res.estado?.toLowerCase() || 'reservada'}">${res.estado || 'Reservada'}</span></td>
-                <td>
-                    ${res.estado !== 'Cancelada' ? `<button class="btn-cancelar-small" onclick="cancelarReserva('${res.hora}', '${res.eventId}')">Cancelar</button>` : ''}
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        tablaContainer.appendChild(tabla);
-        container.appendChild(tablaContainer);
+        container.innerHTML += tablaHTML;
     } catch (e) {
         container.innerHTML = '<p>Error al cargar reservas.</p>';
     }
@@ -257,11 +250,7 @@ async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
 const initDashboard = async () => {
     const user = netlifyIdentity.currentUser();
     if (!user) { window.location.href = "index.html"; return; }
-    
     document.getElementById('user-email').innerText = user.email;
-    const welcomeMsg = document.getElementById('welcome-msg');
-    if (welcomeMsg) welcomeMsg.innerText = "Bienvenidos a la agenda de DeMaria Consultores.";
-    
     await renderDashboardButtons(user);
 };
 
