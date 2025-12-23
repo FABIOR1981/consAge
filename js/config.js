@@ -32,7 +32,13 @@ export const APP_CONFIG = {
         fin: 21,    // 21:00
         intervalo: 60 // minutos por turno
     },
-    diasLaborales: [1, 2, 3, 4, 5], // Lunes a Viernes
+    diasLaborales: [1, 2, 3, 4, 5, 6], // Lunes a Sábado
+    horariosEspeciales: {
+        6: { // Sábado
+            inicio: 8, // 08:00
+            fin: 14  // 14:00
+        }
+    },
     cancelacion: {
         horasAntelacion: 24,
         reglaFinDeSemana: true // Si es lunes, debe cancelar el viernes

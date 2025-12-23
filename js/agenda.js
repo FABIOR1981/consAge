@@ -127,8 +127,19 @@ async function cargarHorarios(targetContainer) {
                 </thead>
                 <tbody>`;
 
-        // Generamos los rangos según la configuración global
-        for (let h = APP_CONFIG.horarios.inicio; h < APP_CONFIG.horarios.fin; h++) {
+        // Determinar si la fecha seleccionada es sábado (6)
+        let inicio = APP_CONFIG.horarios.inicio;
+        let fin = APP_CONFIG.horarios.fin;
+        if (seleccion.fecha) {
+            const fechaObj = new Date(seleccion.fecha);
+            const diaSemana = fechaObj.getDay();
+            if (APP_CONFIG.horariosEspeciales && APP_CONFIG.horariosEspeciales[diaSemana]) {
+                inicio = APP_CONFIG.horariosEspeciales[diaSemana].inicio;
+                fin = APP_CONFIG.horariosEspeciales[diaSemana].fin;
+            }
+        }
+        // Generamos los rangos según la configuración global o especial
+        for (let h = inicio; h < fin; h++) {
             const horaStr = `${h.toString().padStart(2, '0')}:00`;
             const estaOcupado = horasBloqueadas.includes(horaStr);
             
