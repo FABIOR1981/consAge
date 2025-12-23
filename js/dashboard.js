@@ -134,7 +134,7 @@ const cargarBotonesConsultorios = () => {
     container.appendChild(grid);
 };
 
-// --- Dashboard y Navegación ---
+// --- Navegación ---
 async function renderDashboardButtons(user) {
     const btnsDiv = document.getElementById('dashboard-btns');
     if (!btnsDiv) return;
@@ -198,55 +198,7 @@ function mostrarSeccion(seccion) {
     }
 }
 
-// ESTA FUNCIÓN ES LA QUE GENERA LA TABLA ZEBRA
-async function mostrarMisReservasAdmin(emailFiltro, isAdmin) {
-    const container = document.getElementById('calendar-container');
-    container.innerHTML = '<p>Cargando reservas...</p>';
-    
-    try {
-        let url = `/.netlify/functions/reservar?all=${isAdmin ? '1' : '0'}`;
-        const resp = await fetch(url);
-        const data = await resp.json();
-        let reservas = data.userEvents || [];
-
-        container.innerHTML = '<h3>Mis Reservas Futuras</h3>';
-        
-        const tablaHTML = `
-            <div class="table-container-zebra">
-                <table class="table-zebra">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Fecha</th>
-                            <th>Hora Cons.</th>
-                            <th>Usuario</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${reservas.map((res, idx) => `
-                            <tr>
-                                <td>${idx + 1}</td>
-                                <td>${res.fecha}</td>
-                                <td>${res.hora}:00 (C${res.consultorio})</td>
-                                <td>${res.nombre || res.email}</td>
-                                <td><span class="badge ${res.estado.toLowerCase()}">${res.estado}</span></td>
-                                <td>
-                                    ${res.estado !== 'Cancelada' ? `<button class="btn-cancelar" onclick="cancelarReserva('${res.hora}', '${res.eventId}')">Cancelar</button>` : ''}
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        container.innerHTML += tablaHTML;
-    } catch (e) {
-        container.innerHTML = '<p>Error al cargar reservas.</p>';
-    }
-}
-
+// Inicialización
 const initDashboard = async () => {
     const user = netlifyIdentity.currentUser();
     if (!user) { window.location.href = "index.html"; return; }
