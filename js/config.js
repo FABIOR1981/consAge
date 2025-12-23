@@ -30,7 +30,7 @@ export const APP_CONFIG = {
     horarios: {
         inicio: 8, // 08:00
         fin: 21,    // 21:00
-        intervalo: 30 // minutos por turno
+        intervalo: 60 // minutos por turno
     },
     diasLaborales: [1, 2, 3, 4, 5], // Lunes a Viernes
     cancelacion: {
