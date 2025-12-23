@@ -1,13 +1,13 @@
-/* VARIABLES GLOBALES */
+/* css/comunes.css LIMPIO */
+
 :root {
     --primary: #2c3e50;
     --accent: #3498db;
     --radius: 8px;
     --bg-zebra: #f2f4f6;
-    --border: #ced4da;
 }
 
-/* --- FORMULARIO DE INFORME (Corregido y Limpio) --- */
+/* 1. Formulario arreglado (SIN ANIDAMIENTO) */
 .informe-form {
     display: flex;
     flex-wrap: wrap;
@@ -31,11 +31,10 @@
 .informe-form input, 
 .informe-form select {
     padding: 10px;
-    border: 1px solid var(--border);
+    border: 1px solid #ced4da;
     border-radius: 4px;
-    font-family: 'Segoe UI', sans-serif;
     min-width: 150px;
-    background-color: white; /* Corregido: antes tenía fondo gris */
+    background-color: white;
 }
 
 .informe-form button {
@@ -46,79 +45,57 @@
     border-radius: 4px;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.3s;
-    height: 42px; /* Alineado perfectamente con los inputs */
+    height: 42px; 
 }
 
-.informe-form button:hover {
-    background-color: var(--primary);
-}
-
-/* --- DASHBOARD: BOTONES HORIZONTALES --- */
+/* 2. Botones Horizontales */
 .menu-grid {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: wrap;
     gap: 12px;
     margin: 20px 0;
+    flex-wrap: wrap;
 }
 
 .btn-menu {
     padding: 12px 20px;
     border: none;
+    background-color: var(--primary);
+    color: white;
     border-radius: var(--radius);
-    font-weight: 600;
     cursor: pointer;
-    min-width: 140px;
-    transition: background 0.2s;
 }
 
-/* --- TABLA CON ESTILO ZEBRA --- */
+/* 3. ZEBRA (La parte crítica) */
 .table-main-container {
     width: 100%;
     overflow-x: auto;
     margin-top: 20px;
-    border-radius: var(--radius);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .custom-table {
     width: 100%;
     border-collapse: collapse !important;
     background: white;
-    font-size: 0.95rem;
+    font-family: sans-serif;
 }
 
-.custom-table thead th {
-    background-color: var(--primary) !important;
-    color: white !important;
-    padding: 15px;
+.custom-table th {
+    background-color: var(--primary);
+    color: white;
+    padding: 12px;
     text-align: left;
 }
 
 .custom-table td {
-    padding: 12px 15px;
+    padding: 12px;
     border-bottom: 1px solid #eee;
-    color: #444;
 }
 
-/* MOTOR ZEBRA: Aplicamos el fondo a la celda (td) para máxima prioridad */
+/* EL EFECTO ZEBRA */
 .custom-table tbody tr:nth-child(even) td {
     background-color: var(--bg-zebra) !important;
 }
-
 .custom-table tbody tr:nth-child(odd) td {
     background-color: #ffffff !important;
-}
-
-.custom-table tbody tr:hover td {
-    background-color: #e9ecef !important;
-}
-
-/* BADGES DE ESTADO */
-.status-badge {
-    padding: 4px 10px;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    font-weight: bold;
 }

@@ -2,17 +2,20 @@ import { APP_CONFIG } from './config.js';
 
 // Bandera de inicialización para renderInforme
 let __informeInitDone = false;
-// Mostrar reservas futuras del usuario logueado (o seleccionado si admin)
+
+// --- 1. RENDERIZAR MIS RESERVAS FUTURAS ---
 export async function renderMisReservasFuturas(container) {
     let esAdmin = false;
     let usuariosLista = [];
-    let usuarioFiltro = '';
     let comboHtml = '';
     const hoy = new Date();
     const fechaInicio = hoy.toISOString().split('T')[0];
-    const fechaFin = new Date(hoy.getTime() + 90*24*60*60*1000).toISOString().split('T')[0];
+    // 90 días a futuro
+    const fechaFin = new Date(hoy.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    
     const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
     if (!user) return;
+
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
         const js = await resp.json();
@@ -21,38 +24,63 @@ export async function renderMisReservasFuturas(container) {
             if (actual && actual.rol === 'admin') esAdmin = true;
             usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
         }
-    } catch {}
-    usuarioFiltro = user.email;
+    } catch (e) { console.error(e); }
+
+    let usuarioFiltro = user.email;
+
     if (esAdmin) {
         usuarioFiltro = '';
-        comboHtml = `<div style='margin-bottom:1em;'>
-            <label style="font-weight:500;">Usuario: <select id="combo-usuario-futuras"><option value="">Seleccione un usuario</option>${usuariosLista.map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`).join('')}</select></label>
+        comboHtml = `
+        <div style='margin-bottom:1.5em; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>
+            <label style="font-weight:600; color:#2c3e50;">Filtrar por Usuario: 
+                <select id="combo-usuario-futuras" style="padding: 8px; border: 1px solid #ced4da; border-radius: 4px; margin-left: 10px;">
+                    <option value="">Seleccione un usuario</option>
+                    ${usuariosLista.map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`).join('')}
+                </select>
+            </label>
         </div>`;
     }
-    container.innerHTML = `<div class="informe-container">
-        <h2 class="informe-titulo">${esAdmin ? 'Reservas Futuras' : 'Mis Reservas Futuras'}</h2>
+
+    // CAMBIO CRÍTICO: Usamos un DIV contenedor para los resultados, NO una TABLE vacía
+    container.innerHTML = `
+    <div class="informe-container">
+        <h2 class="informe-titulo" style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">${esAdmin ? 'Reservas Futuras (Admin)' : 'Mis Reservas Futuras'}</h2>
         ${comboHtml}
         <div id="total-horas-informe"></div>
-        <table id="tabla-informe">
-            <tr><td colspan="7">${esAdmin ? 'Seleccione un usuario para ver sus reservas futuras.' : 'Buscando reservas futuras...'}</td></tr>
-        </table>
+        
+        <div id="contenedor-resultados">
+            <p>${esAdmin ? 'Seleccione un usuario para ver sus reservas futuras.' : 'Buscando reservas futuras...'}</p>
+        </div>
     </div>`;
-    let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
+
+    const urlBase = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
+
     const cargarReservas = async (usuarioEmail) => {
-        let finalUrl = url;
+        const resultContainer = container.querySelector('#contenedor-resultados');
+        const totalDiv = container.querySelector('#total-horas-informe');
+        
+        resultContainer.innerHTML = '<p>Cargando datos...</p>';
+        
+        let finalUrl = urlBase;
         if (usuarioEmail) finalUrl += `&usuario=${encodeURIComponent(usuarioEmail)}`;
+
         try {
             const resp = await fetch(finalUrl);
             const data = await resp.json();
             let reservas = Array.isArray(data) ? data : (data.reservas || []);
+            
             // Filtrar solo reservas futuras
             const ahora = new Date();
             reservas = reservas.filter(r => r.start && new Date(r.start) > ahora);
-            renderReservasTable(reservas, container.querySelector('#tabla-informe'), container.querySelector('#total-horas-informe'));
+            
+            // Llamamos a la función que crea la tabla con las clases ZEBRA correctas
+            renderReservasTable(reservas, resultContainer, totalDiv, true); // true indica que es vista "Futuras"
+            
         } catch (err) {
-            container.querySelector('#tabla-informe').innerHTML = `<tr><td colspan=\"7\">Error: ${err.message}</td></tr>`;
+            resultContainer.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
         }
     };
+
     if (esAdmin) {
         const combo = container.querySelector('#combo-usuario-futuras');
         combo.addEventListener('change', (e) => {
@@ -60,42 +88,50 @@ export async function renderMisReservasFuturas(container) {
         });
         return;
     }
+
     // Si no es admin, cargar directamente
     cargarReservas(user.email);
 }
+
+// --- 2. RENDERIZAR INFORME GENERAL ---
 export async function renderInforme(container) {
     if (__informeInitDone) return;
     __informeInitDone = true;
-    // Renderizado inicial, luego se completa el combo de usuarios si es admin
+
+    // CAMBIO CRÍTICO: Usamos div id="contenedor-resultados" en lugar de table id="tabla-informe"
     container.innerHTML = `
     <div class="informe-container">
         <h2 class="informe-titulo">Informe de Reservas</h2>
+        
         <form id="form-informe" class="informe-form">
-            <label>Fecha inicio:
-                <input type="date" name="fechaInicio" required>
-            </label>
-            <label>Fecha fin:
-                <input type="date" name="fechaFin" required>
-            </label>
-            <label>Consultorio:
+            <label>Fecha inicio: <input type="date" name="fechaInicio" required></label>
+            <label>Fecha fin: <input type="date" name="fechaFin" required></label>
+            <label>Consultorio: 
                 <select name="consultorio" id="combo-consultorio">
                     <option value="">Todos</option>
                 </select>
             </label>
-            <div class="search-row" id="search-row-informe"></div>
-            <button type="submit">Buscar</button>
+            
+            <div class="search-row" id="search-row-informe" style="width: 100%; margin-top: 10px;"></div>
+            
+            <button type="submit" style="margin-top: 15px;">Buscar</button>
         </form>
+
         <div id="total-horas-informe"></div>
-        <table id="tabla-informe">
-            <tr><td colspan="5">Complete los filtros y presione Buscar</td></tr>
-        </table>
+        
+        <div id="contenedor-resultados">
+            <p>Complete los filtros y presione Buscar</p>
+        </div>
     </div>`;
+
     await renderComboUsuariosInforme(container);
     initInforme(container);
-// Renderiza el combo de usuarios con filtro solo para admin
+}
+
 async function renderComboUsuariosInforme(container) {
     const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
     if (!user) return;
+
     let esAdmin = false;
     let usuariosLista = [];
     try {
@@ -107,34 +143,41 @@ async function renderComboUsuariosInforme(container) {
             usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
         }
     } catch {}
+
     const searchRow = container.querySelector('#search-row-informe');
+
     if (!esAdmin || usuariosLista.length === 0) {
-        // Si no es admin, dejar el input de texto simple
         searchRow.innerHTML = `
-            <label for="input-busqueda" class="search-label">Búsqueda:</label>
-            <input type="text" name="busqueda" id="input-busqueda" class="search-input" placeholder="Ingrese nombre, apellido o email">
-            <span class="search-note">(usuario, nombre u apellido)</span>
-        `;
+            <label style="display:block; width:100%;">Búsqueda (Nombre/Email):
+                <input type="text" name="busqueda" placeholder="Opcional..." style="width:100%;">
+            </label>`;
         return;
     }
-    // Si es admin, usar combo con filtro
+
     searchRow.innerHTML = `
-        <label style="font-weight:500;">Buscar usuario: <input type="text" id="filtro-nombre-usuario-informe" placeholder="Ingrese parte del nombre..." autocomplete="off" style="margin-right:1em;"></label>
-        <label style="font-weight:500;">Usuario: <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select></label>
+        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end; width:100%;">
+            <label style="flex:1;">Filtrar lista: 
+                <input type="text" id="filtro-nombre-usuario-informe" placeholder="Escriba para buscar..." autocomplete="off">
+            </label>
+            <label style="flex:1;">Seleccionar Usuario: 
+                <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select>
+            </label>
+        </div>
     `;
+
     const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
     const combo = searchRow.querySelector('#combo-usuario-informe');
+
     function renderCombo(filtro) {
         const opciones = usuariosLista
-            .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())))
+            .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())) || u.email.includes(filtro.toLowerCase()))
             .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
         combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
     }
     renderCombo('');
-    inputFiltro.addEventListener('input', (e) => {
-        renderCombo(e.target.value);
-    });
-    // Sincronizar con el input oculto de búsqueda
+
+    inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
+
     combo.addEventListener('change', (e) => {
         let inputBusqueda = container.querySelector('input[name="busqueda"]');
         if (!inputBusqueda) {
@@ -146,16 +189,13 @@ async function renderComboUsuariosInforme(container) {
         inputBusqueda.value = e.target.value;
     });
 }
-}
 
 export async function initInforme(container) {
     const comboConsultorio = container.querySelector('#combo-consultorio');
     const form = container.querySelector('#form-informe');
-    const tabla = container.querySelector('#tabla-informe');
+    const resultContainer = container.querySelector('#contenedor-resultados');
     let totalHorasDiv = container.querySelector('#total-horas-informe');
 
-    // Poblar combo
-    comboConsultorio.innerHTML = '<option value="">-- Todos --</option>';
     if (APP_CONFIG && Array.isArray(APP_CONFIG.consultorios)) {
         APP_CONFIG.consultorios.forEach(c => {
             const opt = document.createElement('option');
@@ -165,21 +205,13 @@ export async function initInforme(container) {
         });
     }
 
-    if (!totalHorasDiv) {
-        totalHorasDiv = document.createElement('div');
-        totalHorasDiv.id = 'total-horas-informe';
-        totalHorasDiv.className = 'total-horas-informe';
-        tabla.parentNode.insertBefore(totalHorasDiv, tabla);
-    } else {
-        totalHorasDiv.classList.add('total-horas-informe');
-    }
-
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        tabla.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
-        const fechaInicio = form.elements['fechaInicio'] ? form.elements['fechaInicio'].value : '';
-        const fechaFin = form.elements['fechaFin'] ? form.elements['fechaFin'].value : '';
-        const consultorio = form.elements['consultorio'] ? form.elements['consultorio'].value : '';
+        resultContainer.innerHTML = '<p>Cargando informe...</p>';
+        
+        const fechaInicio = form.elements['fechaInicio'].value;
+        const fechaFin = form.elements['fechaFin'].value;
+        const consultorio = form.elements['consultorio'].value;
         const usuario = form.elements['busqueda'] ? form.elements['busqueda'].value : '';
 
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
@@ -189,35 +221,55 @@ export async function initInforme(container) {
         try {
             const resp = await fetch(url);
             const data = await resp.json();
-            if (!Array.isArray(data) && data && data.reservas) {
-                renderReservasTable(data.reservas, tabla, totalHorasDiv);
-                return;
-            }
-            if (!Array.isArray(data) || data.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="6">No hay resultados</td></tr>';
+            let lista = [];
+
+            if (Array.isArray(data)) lista = data;
+            else if (data && data.reservas) lista = data.reservas;
+
+            if (lista.length === 0) {
+                resultContainer.innerHTML = '<p>No se encontraron reservas en este período.</p>';
                 totalHorasDiv.innerText = '';
                 return;
             }
-            renderReservasTable(data, tabla, totalHorasDiv);
+            
+            // Renderizamos la tabla en el contenedor limpio
+            renderReservasTable(lista, resultContainer, totalHorasDiv, false);
+
         } catch (err) {
-            tabla.innerHTML = `<tr><td colspan="6">Error: ${err.message}</td></tr>`;
+            resultContainer.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
             totalHorasDiv.innerText = '';
         }
     });
 }
 
-function renderReservasTable(reservas, tabla, totalHorasDiv) {
+// --- 3. GENERADOR DE LA TABLA (EL CORAZÓN DEL ESTILO) ---
+function renderReservasTable(reservas, containerDestino, totalHorasDiv, esVistaFuturas) {
     let total = 0;
     let totalUsadas = 0;
     let totalCanceladas = 0;
-    // Detectar si es la vista de Reservas Futuras (no Mis Reservas Futuras)
-    const esReservasFuturas = tabla.closest('.informe-container') && tabla.closest('.informe-container').querySelector('h2')?.textContent?.includes('Reservas Futuras');
-    const esMisReservas = tabla.closest('.informe-container') && tabla.closest('.informe-container').querySelector('h2')?.textContent?.includes('Mis Reservas Futuras');
-    // Estructura moderna: tabla dentro de .table-container y clases modernas
-    const colAccion = (esMisReservas || esReservasFuturas) ? '<th></th>' : '';
-    let html = `<div class="table-container"><table class="table"><thead><tr><th>#</th><th>Fecha</th><th>Hora</th><th>Consultorio</th><th>Usuario</th><th>Estado</th>${colAccion}</tr></thead><tbody>`;
+
+    // Aquí usamos las clases EXACTAS de css/comunes.css
+    // table-main-container -> para el scroll y sombra
+    // custom-table -> para el estilo zebra
+    
+    let html = `
+    <div class="table-main-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Consultorio</th>
+                    <th>Usuario</th>
+                    <th>Estado</th>
+                    ${esVistaFuturas ? '<th>Acciones</th>' : ''}
+                </tr>
+            </thead>
+            <tbody>`;
+
     reservas.forEach((r, idx) => {
-        // Extraer fecha y hora desde r.start
+        // Parsear fechas
         let fecha = '';
         let hora = '';
         if (r.start) {
@@ -225,112 +277,141 @@ function renderReservasTable(reservas, tabla, totalHorasDiv) {
             fecha = d.toLocaleDateString('es-ES');
             hora = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
         }
-        // Extraer consultorio desde summary: "C2: ..."
+
+        // Parsear consultorio
         let consultorio = '';
         if (r.summary) {
             const match = r.summary.match(/^C(\d+):/);
-            if (match) consultorio = match[1];
+            if (match) consultorio = `C${match[1]}`;
         }
-        // Extraer usuario y email desde description
-        let usuario = '';
-        let email = '';
+
+        // Parsear usuario
+        let usuario = 'Desconocido';
         if (r.description) {
-            let m = r.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
-            if (m) {
-                usuario = m[1];
-                email = m[2];
-            } else {
-                m = r.description.match(/Reserva realizada por: ([^\n@]+@[\w.\-]+)/);
-                if (m) {
-                    usuario = m[1];
-                    email = m[1];
-                } else {
-                    m = r.description.match(/Reserva realizada por: ([^\n]+)/);
-                    if (m) usuario = m[1];
-                }
-            }
+             let m = r.description.match(/Reserva realizada por: (.+?) <([^>]+)>/);
+             if (m) usuario = m[1]; // Nombre
+             else {
+                 m = r.description.match(/Reserva realizada por: ([^\n]+)/);
+                 if (m) usuario = m[1];
+             }
         }
-        // Determinar estado
-        let estado = APP_CONFIG.estadosReserva.RESERVADA;
+
+        // Lógica de Estado
+        let estado = APP_CONFIG.estadosReserva.RESERVADA; // "Reservada"
         if (r.summary && r.summary.toLowerCase().includes('cancelada')) {
             estado = APP_CONFIG.estadosReserva.CANCELADA;
             totalCanceladas++;
-        } else {
-            // Si la fecha/hora de inicio ya pasó, es usada
-            if (r.start) {
-                const ahora = new Date();
-                const inicio = new Date(r.start);
-                if (inicio < ahora) {
-                    estado = APP_CONFIG.estadosReserva.USADA;
-                    totalUsadas++;
-                }
-            }
-        }
-        let btnCancelar = '';
-        if ((esMisReservas || esReservasFuturas) && estado === APP_CONFIG.estadosReserva.RESERVADA && r.start) {
+        } else if (r.start) {
             const ahora = new Date();
             const inicio = new Date(r.start);
-            const diffHoras = (inicio - ahora) / (1000 * 60 * 60);
-            if (diffHoras > 24) {
-                btnCancelar = `<button class="btn-cancelar-reserva" data-id="${r.id}" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:0.3em 1em;cursor:pointer;">Cancelar</button>`;
+            if (inicio < ahora) {
+                estado = APP_CONFIG.estadosReserva.USADA;
+                totalUsadas++;
             }
         }
-        // Badge de estado
-        let estadoClass = '';
-        if (estado === APP_CONFIG.estadosReserva.RESERVADA) estadoClass = 'reservada';
-        else if (estado === APP_CONFIG.estadosReserva.USADA) estadoClass = 'usada';
-        else if (estado === APP_CONFIG.estadosReserva.CANCELADA) estadoClass = 'cancelada';
-        const badgeEstado = `<span class="status ${estadoClass}">${estado}</span>`;
-        html += `<tr><td>${idx + 1}</td><td>${fecha}</td><td>${hora}</td><td>${consultorio}</td><td>${usuario}</td><td>${badgeEstado}</td>${(esMisReservas || esReservasFuturas) ? `<td>${btnCancelar}</td>` : ''}</tr>`;
+        
+        // Botón Cancelar (Solo si es futura y faltan > 24hs)
+        let acciones = '';
+        if (esVistaFuturas && estado === APP_CONFIG.estadosReserva.RESERVADA && r.start) {
+             const ahora = new Date();
+             const inicio = new Date(r.start);
+             const diffHoras = (inicio - ahora) / (1000 * 60 * 60);
+             // Permitir cancelar si falta más de 24hs (o ajusta según tu regla)
+             if (diffHoras > 24) {
+                 acciones = `<button class="btn-cancelar-reserva" data-id="${r.id}" 
+                 style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:0.8em;">
+                 Cancelar</button>`;
+             } else {
+                 acciones = '<span style="color:#999; font-size:0.8em;">Sin cx</span>';
+             }
+        }
+
+        // Badge Class para CSS
+        let badgeClass = 'reservada';
+        if (estado === APP_CONFIG.estadosReserva.USADA) badgeClass = 'usada';
+        if (estado === APP_CONFIG.estadosReserva.CANCELADA) badgeClass = 'cancelada';
+
+        html += `
+            <tr>
+                <td>${idx + 1}</td>
+                <td>${fecha}</td>
+                <td>${hora}</td>
+                <td>${consultorio}</td>
+                <td>${usuario}</td>
+                <td><span class="status-badge ${badgeClass}" style="padding:4px 8px; border-radius:12px; font-weight:bold; font-size:0.85em; display:inline-block;">${estado}</span></td>
+                ${esVistaFuturas ? `<td>${acciones}</td>` : ''}
+            </tr>`;
+        
         total++;
     });
-    html += '</tbody></table></div>';
-    tabla.innerHTML = html;
-    // Solo mostrar los contadores en el informe general, no en Reservas Futuras
-    if (!esReservasFuturas) {
-        totalHorasDiv.innerText = `Total de reservas: ${total} | Usadas: ${totalUsadas} | Canceladas: ${totalCanceladas}`;
-    } else {
-        totalHorasDiv.innerText = '';
+
+    html += `</tbody></table></div>`; // Cerramos div y table
+
+    // INYECCIÓN LIMPIA
+    containerDestino.innerHTML = html;
+
+    // Actualizar contadores
+    if (!esVistaFuturas && totalHorasDiv) {
+        totalHorasDiv.innerHTML = `<div style="padding:10px; background:#e8f4fd; border-radius:4px; margin-bottom:15px; color:#2c3e50;">
+            <strong>Resumen:</strong> Total: ${total} | Usadas: ${totalUsadas} | Canceladas: ${totalCanceladas}
+        </div>`;
+    } else if (totalHorasDiv) {
+        totalHorasDiv.innerHTML = '';
     }
 
-    // Handler para cancelar (tanto usuario como admin)
-    if (esMisReservas || esReservasFuturas) {
-        tabla.querySelectorAll('.btn-cancelar-reserva').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const id = btn.getAttribute('data-id');
-                if (!id) return;
-                if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
-                const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
-                // Si es admin, obtener el usuario seleccionado del combo
-                let email = user && user.email;
-                if (esReservasFuturas) {
-                    // Buscar el combo de usuario
-                    const combo = document.getElementById('combo-usuario-futuras');
-                    if (combo && combo.value) email = combo.value;
-                }
-                try {
-                    const resp = await fetch('/.netlify/functions/reservar', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ eventId: id, email })
-                    });
-                    const result = await resp.json();
-                    if (resp.ok) {
-                        alert('Reserva cancelada correctamente.');
-                        // Refrescar la lista
-                        const cont = tabla.closest('.informe-container').parentNode;
-                        if (cont && typeof window.renderMisReservasFuturas === 'function') {
-                            window.renderMisReservasFuturas(cont);
-                        } else {
-                            location.reload();
-                        }
-                    } else {
-                        alert('No se pudo cancelar: ' + (result.error || result.details || 'Error desconocido'));
-                    }
-                } catch (e) {
-                    alert('Error al cancelar: ' + e.message);
-                }
-            });
+    // Reactivar eventos de los botones generados
+    if (esVistaFuturas) {
+        containerDestino.querySelectorAll('.btn-cancelar-reserva').forEach(btn => {
+            btn.addEventListener('click', manejarCancelacion);
         });
+    }
+}
+
+// Función separada para manejar la cancelación
+async function manejarCancelacion(e) {
+    const btn = e.target;
+    const id = btn.getAttribute('data-id');
+    if (!id) return;
+    if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
+
+    const user = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
+    
+    // Intentar obtener el email del combo si es admin, o el propio
+    let email = user ? user.email : '';
+    const combo = document.getElementById('combo-usuario-futuras');
+    if (combo && combo.value) email = combo.value;
+
+    try {
+        btn.disabled = true;
+        btn.innerText = '...';
+        
+        const resp = await fetch('/.netlify/functions/reservar', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: id, email })
+        });
+        
+        if (resp.ok) {
+            alert('✅ Reserva cancelada.');
+            // Recargar simulando click en el botón o recargando la función
+            // Una forma simple es recargar la página o disparar el evento change del combo
+            if (combo) { 
+                combo.dispatchEvent(new Event('change')); 
+            } else {
+                // Si es usuario normal, recargamos el módulo llamando a render de nuevo
+                const contenedor = document.getElementById('mis-reservas-futuras-section'); // Asegúrate que este ID coincida con tu HTML principal
+                if(contenedor) renderMisReservasFuturas(contenedor);
+                else location.reload();
+            }
+        } else {
+            const err = await resp.json();
+            alert('❌ Error: ' + (err.error || 'No se pudo cancelar'));
+            btn.disabled = false;
+            btn.innerText = 'Cancelar';
+        }
+    } catch (error) {
+        alert('Error de conexión');
+        btn.disabled = false;
+        btn.innerText = 'Cancelar';
     }
 }
