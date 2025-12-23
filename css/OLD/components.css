@@ -1,0 +1,50 @@
+/* Contenedor para que la tabla no se rompa en celulares */
+.table-container {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid #e1e8ed;
+    margin: 20px 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.table thead th {
+    background-color: var(--primary-color);
+    color: white;
+    text-align: left;
+    padding: 15px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* EFECTO CEBRA: Esto crea los renglones que buscamos */
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9 !important; /* Gris muy suave */
+}
+
+/* Resaltar al pasar el ratón */
+.table tbody tr:hover {
+    background-color: #f1f7fe !important;
+}
+
+/* BADGES DE ESTADO */
+.status {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-block;
+    text-align: center;
+}
+.status.usada { background: #e8f5e9; color: var(--success-color); }
+.status.cancelada { background: #ffebee; color: var(--error-color); }
+.status.reservada { background: #e3f2fd; color: var(--accent-color); }

@@ -1,50 +1,48 @@
-/* Contenedor para que la tabla no se rompa en celulares */
 .table-container {
     overflow-x: auto;
     border-radius: var(--radius);
-    border: 1px solid #e1e8ed;
+    background: var(--white);
+    box-shadow: var(--shadow-md);
     margin: 20px 0;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    background: white;
 }
 
 .table thead th {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: #f8fafc; /* Gris muy claro */
+    color: var(--text-dark);
     text-align: left;
-    padding: 15px;
-    font-size: 0.85rem;
+    padding: 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .table tbody td {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-/* EFECTO CEBRA: Esto crea los renglones que buscamos */
 .table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Gris muy suave */
+    background-color: #f8fafc !important;
 }
 
-/* Resaltar al pasar el ratón */
 .table tbody tr:hover {
-    background-color: #f1f7fe !important;
+    background-color: #eff6ff !important; /* Azul muy suave */
 }
 
-/* BADGES DE ESTADO */
 .status {
-    padding: 5px 12px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: inline-block;
-    text-align: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
 }
-.status.usada { background: #e8f5e9; color: var(--success-color); }
-.status.cancelada { background: #ffebee; color: var(--error-color); }
-.status.reservada { background: #e3f2fd; color: var(--accent-color); }
+.status.usada { background: #dcfce7; color: #15803d; }
+.status.cancelada { background: #fee2e2; color: #b91c1c; }
+.status.reservada { background: #dbeafe; color: #1d4ed8; }

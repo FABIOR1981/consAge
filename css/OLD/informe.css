@@ -1,0 +1,110 @@
+/* VARIABLES */
+:root {
+    --primary: #2c3e50;
+    --accent: #3498db;
+    --radius: 8px;
+    --bg-zebra: #f2f4f6;
+}
+
+/* --- FORMULARIO DE INFORME (Corregido) --- */
+.informe-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background-color: #f8f9fa;
+    padding: 25px;
+    border-radius: var(--radius);
+    align-items: flex-end;
+    margin-bottom: 2rem;
+}
+
+.informe-form label {
+    display: block;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.informe-form input, 
+.informe-form select {
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    min-width: 150px;
+}
+
+.informe-form button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    height: 42px; /* Alineado con los inputs */
+}
+
+.informe-form button:hover {
+    background-color: var(--primary);
+}
+
+/* --- DASHBOARD: BOTONES HORIZONTALES --- */
+.menu-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.btn-menu {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 140px;
+}
+
+/* --- TABLA ZEBRA (Fuerza Máxima) --- */
+.table-main-container {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse !important;
+    background: white;
+}
+
+.custom-table thead th {
+    background-color: var(--primary) !important;
+    color: white !important;
+    padding: 15px;
+    text-align: left;
+}
+
+.custom-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* ESTILO ZEBRA: Pintamos la celda TD de la fila PAR */
+.custom-table tbody tr:nth-child(even) td {
+    background-color: var(--bg-zebra) !important;
+}
+
+/* Forzamos blanco en impares */
+.custom-table tbody tr:nth-child(odd) td {
+    background-color: #ffffff !important;
+}
+
+.custom-table tbody tr:hover td {
+    background-color: #e9ecef !important;
+}

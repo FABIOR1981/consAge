@@ -1,0 +1,13 @@
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+    --success-color: #27ae60;
+    --error-color: #e74c3c;
+    --bg-light: #f8f9fa;
+    --text-dark: #2d3436;
+    --white: #ffffff;
+    --font-main: 'Segoe UI', Roboto, sans-serif;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    --radius: 12px;
+    --transition: all 0.3s ease;
+}

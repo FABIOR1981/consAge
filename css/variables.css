@@ -1,13 +1,20 @@
 :root {
-    --primary-color: #2c3e50;
-    --accent-color: #3498db;
-    --success-color: #27ae60;
-    --error-color: #e74c3c;
-    --bg-light: #f8f9fa;
-    --text-dark: #2d3436;
+    /* Paleta Profesional 2025 */
+    --primary-color: #1e293b;
+    --accent-color: #3b82f6;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --bg-light: #f1f5f9;
+    --text-dark: #334155;
     --white: #ffffff;
-    --font-main: 'Segoe UI', Roboto, sans-serif;
-    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    
+    /* Tipografía y bordes */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
     --radius: 12px;
-    --transition: all 0.3s ease;
+    --radius-sm: 6px;
+    
+    /* Elevación (Sombras modernas) */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

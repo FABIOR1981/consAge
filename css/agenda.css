@@ -1,18 +1,28 @@
-/* agenda.css: Estilos específicos para la sección de agenda */
-.agenda-container {
-  margin-top: 1.5em;
+/* reservas.css */
+.reserva-card {
+    border: none;
+    border-radius: var(--radius);
+    background: var(--white);
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem;
+    transition: var(--transition);
 }
-.btn-consultorio {
-  background: var(--color-secundario);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5em 1.2em;
-  font-weight: bold;
-  cursor: pointer;
-  margin: 0.5em 0.5em 0 0;
-  transition: background 0.2s;
+
+.reserva-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
-.btn-consultorio:hover {
-  background: #1a233a;
+
+.reserva-card button.btn-cancelar {
+    background: #fff;
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.reserva-card button.btn-cancelar:hover {
+    background: var(--error-color);
+    color: #fff;
 }
