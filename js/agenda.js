@@ -13,7 +13,7 @@ export async function renderAgenda(container) {
 }
 
 async function cargarBotonesConsultorios(container) {
-    container.innerHTML = '<p style="margin-bottom:1.5em; font-weight:bold;">Paso 1: Seleccione un Consultorio</p>';
+    container.innerHTML = '<p style="margin-bottom:1.5em; font-weight:bold;">Paso 1: Elija un Consultorio</p>';
     
     const user = window.netlifyIdentity?.currentUser();
     let esAdmin = false;
@@ -22,13 +22,13 @@ async function cargarBotonesConsultorios(container) {
         const js = await resp.json();
         const actual = js.usuarios.find(u => u.email === user.email);
         if (actual && actual.rol === 'admin') esAdmin = true;
-    } catch (e) { console.error("Error rol:", e); }
+    } catch (e) { console.error("Error verificando rol:", e); }
 
     const grid = document.createElement('div');
     grid.className = 'consultorios-grid';
-    grid.style = "display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:20px;";
+    grid.style = "display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:15px;";
 
-    // Filtro: Consultorio 1 solo para Admin
+    // Filtro Consultorio 1 solo Admin
     const disponibles = (APP_CONFIG.consultorios || []).filter(num => num === 1 ? esAdmin : true);
 
     disponibles.forEach(num => {
@@ -75,15 +75,18 @@ async function cargarHorarios(targetContainer) {
         const url = `/.netlify/functions/informe_reservas?consultorio=${seleccion.consultorio}&fechaInicio=${seleccion.fecha}&fechaFin=${seleccion.fecha}`;
         const resp = await fetch(url);
         const data = await resp.json();
-        const ocupados = (data.reservas || []).map(r => {
-            const d = new Date(r.start);
-            return `${d.getHours().toString().padStart(2, '0')}:00`;
-        });
+        
+        const ocupados = (data.reservas || [])
+            .filter(r => !r.summary.startsWith('Cancelada'))
+            .map(r => {
+                const d = new Date(r.start);
+                return `${d.getHours().toString().padStart(2, '0')}:00`;
+            });
 
         const esSabado = new Date(seleccion.fecha + 'T00:00:00').getDay() === 6;
         const horaFinHoy = esSabado ? 15 : APP_CONFIG.horarios.fin;
 
-        let html = '<div class="table-main-container"><table class="custom-table" style="width:100%;"><tbody>';
+        let html = '<div class="table-main-container"><table class="custom-table" style="width:100%; font-size:1.2rem;"><tbody>';
         for (let h = APP_CONFIG.horarios.inicio; h < horaFinHoy; h++) {
             const horaStr = `${h.toString().padStart(2, '0')}:00`;
             const estaOcupado = ocupados.includes(horaStr);
@@ -91,16 +94,16 @@ async function cargarHorarios(targetContainer) {
                 <tr style="height: 75px;">
                     <td><strong>${horaStr} hs</strong></td>
                     <td><span class="status-badge ${estaOcupado ? 'cancelada' : 'usada'}">${estaOcupado ? 'Ocupado' : 'Libre'}</span></td>
-                    <td>${estaOcupado ? '-' : `<button class="btn btn-primary btn-confirmar" data-hora="${h}">Reservar</button>`}</td>
+                    <td>${estaOcupado ? '-' : `<button class="btn btn-primary btn-reservar-final" data-hora="${h}">Reservar</button>`}</td>
                 </tr>`;
         }
         html += '</tbody></table></div>';
         targetContainer.innerHTML = html;
 
-        targetContainer.querySelectorAll('.btn-confirmar').forEach(btn => {
+        targetContainer.querySelectorAll('.btn-reservar-final').forEach(btn => {
             btn.onclick = () => ejecutarReserva(btn.getAttribute('data-hora'), targetContainer);
         });
-    } catch (err) { targetContainer.innerHTML = "Error al conectar."; }
+    } catch (err) { targetContainer.innerHTML = "Error al conectar con el servidor."; }
 }
 
 async function ejecutarReserva(hora, targetContainer) {
@@ -108,6 +111,10 @@ async function ejecutarReserva(hora, targetContainer) {
     if(!confirm(`¿Confirmar reserva a las ${hora}:00 hs?`)) return;
 
     try {
+        const colorId = (APP_CONFIG.coloresConsultorios && APP_CONFIG.coloresConsultorios[seleccion.consultorio]) 
+                        ? APP_CONFIG.coloresConsultorios[seleccion.consultorio].toString() 
+                        : "1";
+
         const resp = await fetch('/.netlify/functions/reservar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -117,7 +124,7 @@ async function ejecutarReserva(hora, targetContainer) {
                 consultorio: seleccion.consultorio.toString(),
                 fecha: seleccion.fecha,
                 hora: parseInt(hora),
-                colorId: (APP_CONFIG.coloresConsultorios && APP_CONFIG.coloresConsultorios[seleccion.consultorio]) ? APP_CONFIG.coloresConsultorios[seleccion.consultorio].toString() : "1"
+                colorId: colorId
             })
         });
 
@@ -126,7 +133,9 @@ async function ejecutarReserva(hora, targetContainer) {
             cargarHorarios(targetContainer);
         } else {
             const d = await resp.json();
-            alert("❌ Error: " + (d.error || "No disponible"));
+            alert("❌ Error: " + (d.error || "No se pudo realizar la reserva"));
         }
-    } catch (e) { alert("Error de conexión"); }
+    } catch (e) { 
+        alert("Error de conexión al servidor"); 
+    }
 }
