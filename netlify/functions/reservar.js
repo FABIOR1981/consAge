@@ -1,39 +1,27 @@
 const { google } = require('googleapis');
 
 exports.handler = async (event) => {
-    // Solo permitir POST
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Método no permitido' };
-    }
+    if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Método no permitido' };
 
     try {
         const body = JSON.parse(event.body);
         const { email, nombre, consultorio, fecha, hora, colorId } = body;
 
-        // 1. VALIDACIÓN DE DATOS (Evita el error 500 por datos nulos)
+        // Validación de seguridad para evitar que la función se rompa por falta de datos
         if (!email || !consultorio || !fecha || hora === undefined) {
-            return { 
-                statusCode: 400, 
-                body: JSON.stringify({ error: 'Faltan datos requeridos (email, consultorio, fecha u hora)' }) 
-            };
+            return { statusCode: 400, body: JSON.stringify({ error: 'Datos incompletos' }) };
         }
 
-        // 2. VALIDACIÓN DE HORARIOS (Sábados y Domingos)
+        // --- VALIDACIÓN DE DÍAS (Sábados y Domingos) ---
         const fechaObj = new Date(fecha + 'T00:00:00');
-        const diaSemana = fechaObj.getDay(); // 0=Dom, 6=Sab
-
-        if (diaSemana === 0) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'No se atiende los domingos.' }) };
-        }
+        const diaSemana = fechaObj.getDay(); 
+        if (diaSemana === 0) return { statusCode: 400, body: JSON.stringify({ error: 'Domingos no permitidos' }) };
         if (diaSemana === 6 && (hora < 8 || hora >= 15)) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Sábados solo de 08:00 a 15:00 hs.' }) };
+            return { statusCode: 400, body: JSON.stringify({ error: 'Sábados solo de 8 a 15hs' }) };
         }
 
-        // 3. CONFIGURACIÓN DE GOOGLE CALENDAR
-        let privateKey = process.env.GOOGLE_PRIVATE_KEY;
-        if (!privateKey) throw new Error("Falta GOOGLE_PRIVATE_KEY en las variables de entorno");
-        
-        privateKey = privateKey.replace(/\\n/g, '\n');
+        // --- AUTH GOOGLE ---
+        let privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
         if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
             privateKey = privateKey.substring(1, privateKey.length - 1);
         }
@@ -49,7 +37,7 @@ exports.handler = async (event) => {
         const calendar = google.calendar({ version: 'v3', auth });
         const calendarId = process.env.CALENDAR_ID;
 
-        // 4. INSERTAR EVENTO
+        // --- CREAR EVENTO ---
         const startStr = `${fecha}T${hora.toString().padStart(2, '0')}:00:00`;
         const endStr = `${fecha}T${(parseInt(hora) + 1).toString().padStart(2, '0')}:00:00`;
 
@@ -57,23 +45,18 @@ exports.handler = async (event) => {
             calendarId,
             resource: {
                 summary: `Consultorio ${consultorio}: ${nombre}`,
-                description: `Reserva realizada por: ${nombre} (${email})`,
+                description: `Reserva: ${email}`,
                 start: { dateTime: new Date(startStr).toISOString(), timeZone: 'America/Montevideo' },
                 end: { dateTime: new Date(endStr).toISOString(), timeZone: 'America/Montevideo' },
-                colorId: (colorId || "1").toString()
+                // IMPORTANTE: colorId debe ser String y existir en Google Calendar (del 1 al 11)
+                colorId: colorId ? colorId.toString() : "1"
             }
         });
 
-        return { 
-            statusCode: 200, 
-            body: JSON.stringify({ message: 'Reserva confirmada' }) 
-        };
+        return { statusCode: 200, body: JSON.stringify({ message: 'OK' }) };
 
     } catch (error) {
-        console.error("Error en función reservar:", error);
-        return { 
-            statusCode: 500, 
-            body: JSON.stringify({ error: 'Error interno del servidor', details: error.message }) 
-        };
+        console.error("ERROR EN RESERVAR:", error.message);
+        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
