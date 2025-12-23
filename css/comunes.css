@@ -3,14 +3,22 @@
    display: flex !important;
    flex-direction: row !important;
    flex-wrap: wrap;
-   gap: 15px;
+   gap: 12px;
    margin: 20px 0;
    justify-content: flex-start;
 }
 .btn-menu {
-    flex: 0 1 auto;
-    min-width: 160px;
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
 }
+.btn-menu:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
 /* css/comunes.css - EL ADN DEL PROYECTO */
 :root {
     --primary: #2c3e50;
@@ -70,15 +78,16 @@ body {
 .table {
     width: 100%;
     border-collapse: collapse !important;
-    border-spacing: 0;
+    margin-top: 15px;
 }
 
 /* Encabezados con estilo moderno */
 .table thead th {
    background-color: #2c3e50 !important;
    color: #ffffff !important;
-   padding: 15px;
+   padding: 12px;
    text-align: left;
+   border-bottom: 2px solid #dee2e6;
    font-size: 0.85rem;
    text-transform: uppercase;
    border: none !important;
@@ -86,8 +95,8 @@ body {
 
 /* Filas con alineación y bordes sutiles */
 .table tbody td {
-   padding: 14px 15px;
-   border-bottom: 1px solid #f0f0f0;
+   padding: 12px;
+   border-bottom: 1px solid #eee;
    color: #333333;
    vertical-align: middle;
 }
@@ -95,7 +104,11 @@ body {
 /* --- EFECTO ZEBRA (FILAS PARES) --- */
 /* Usamos un color ligeramente más oscuro para que se note bien */
 .table tbody tr:nth-child(even) {
-    background-color: #f2f4f7 !important;
+    background-color: #f8f9fa !important;
+}
+
+.table tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
 }
 
 /* Resalte al pasar el mouse */
@@ -162,7 +175,7 @@ body {
 .table {
     width: 100%;
     border-collapse: collapse !important;
-    border-spacing: 0;
+    margin-top: 15px;
 }
 
 .table thead th {
@@ -170,11 +183,15 @@ body {
     color: white;
     padding: 12px;
     text-align: left;
+    border-bottom: 2px solid #dee2e6;
 }
 
-/* EFECTO ZEBRA VISIBLE */
 .table tbody tr:nth-child(even) {
-    background-color: #f2f4f7 !important;
+    background-color: #f8f9fa !important;
+}
+
+.table tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
 }
 
 .table tbody tr:hover {
