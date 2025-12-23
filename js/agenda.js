@@ -7,19 +7,40 @@ export async function renderAgenda(container) {
     cargarBotonesConsultorios(container.querySelector('#agenda-content'));
 }
 
-function cargarBotonesConsultorios(container) {
+async function cargarBotonesConsultorios(container) {
     container.innerHTML = '<p style="margin-bottom:1em;"><strong>Paso 1:</strong> Elija un Consultorio</p>';
+    
+    // 1. Obtener el usuario y su rol
+    const user = window.netlifyIdentity?.currentUser();
+    let esAdmin = false;
+
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+        }
+    } catch (e) { console.error("Error verificando rol:", e); }
+
     const grid = document.createElement('div');
     grid.className = 'consultorios-grid';
     grid.style = "display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:10px;";
 
-    (APP_CONFIG.consultorios || []).forEach(num => {
+    // 2. Filtrar consultorios: Si no es admin, quitamos el 1
+    const consultoriosDisponibles = APP_CONFIG.consultorios.filter(num => {
+        if (num === 1) return esAdmin; // Solo incluye el 1 si es admin
+        return true; // El resto siempre se incluye
+    });
+
+    consultoriosDisponibles.forEach(num => {
         const btn = document.createElement('button');
         btn.innerText = `Consultorio ${num}`;
         btn.className = 'btn btn-primary';
         btn.onclick = () => elegirFecha(num, container);
         grid.appendChild(btn);
     });
+    
     container.appendChild(grid);
 }
 
