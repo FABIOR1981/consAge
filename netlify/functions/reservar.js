@@ -61,7 +61,12 @@ exports.handler = async (event) => {
                 timeZone: 'America/Montevideo',
             });
             // Ignorar eventos que fueron marcados como 'Cancelada' (se mantienen para informes)
-            const ocupantes = (busySlots.data.items || []).filter(ev => !(ev.summary && ev.summary.startsWith('Cancelada')));
+            // Filtrar solo eventos del consultorio seleccionado (robusto a espacios y mayúsculas)
+            const regexConsultorio = new RegExp(`^C${consultorio}:\\s`, 'i');
+            const ocupantes = (busySlots.data.items || []).filter(ev => {
+                if (ev.summary && ev.summary.startsWith('Cancelada')) return false;
+                return ev.summary && regexConsultorio.test(ev.summary);
+            });
             if (ocupantes.length > 0) {
                 return { statusCode: 400, body: JSON.stringify({ error: 'El horario ya está ocupado.', ocupados: ocupantes.map(i => ({ id: i.id, summary: i.summary })) }) };
             }
