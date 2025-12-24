@@ -24,9 +24,9 @@
             </label>
             <div class="search-row">
                 <label for="input-usuario" class="search-label">Usuario:</label>
-                <input type="text" name="usuario" id="input-usuario" class="search-input" placeholder="Nombre o apellido" autocomplete="off">
-                <div id="autocomplete-lista-usuarios" class="autocomplete-lista"></div>
-                <span class="search-note">(escriba para filtrar usuarios por nombre)</span>
+                <input type="text" name="usuario" id="input-usuario" class="search-input" placeholder="Email o nombre" list="datalist-usuarios" autocomplete="off">
+                <datalist id="datalist-usuarios"></datalist>
+                <span class="search-note">(usuario, nombre u apellido)</span>
             </div>
             <button type="submit">Buscar</button>
         </form>
@@ -39,39 +39,13 @@
     </div>
     <script type="module" src="js/informe.js"></script>
         <script type="module">
-            import { cargarUsuariosParaAutocompleteAvanzado } from './js/autocomplete_usuarios_avanzado.js';
+            import { cargarUsuariosParaAutocomplete } from './js/autocomplete_usuarios.js';
             window.addEventListener('DOMContentLoaded', () => {
-                cargarUsuariosParaAutocompleteAvanzado('input-usuario', 'autocomplete-lista-usuarios');
+                cargarUsuariosParaAutocomplete('input-usuario', 'datalist-usuarios');
             });
         </script>
 <style>
-.search-row {
-    position: relative;
-}
-.autocomplete-lista {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    background: #fff;
-    border: 1px solid #ccc;
-    z-index: 1000;
-    max-height: 180px;
-    overflow-y: auto;
-    min-width: 180px;
-    width: 100%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.autocomplete-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.autocomplete-item:hover {
-    background: #e6f0fa;
-}
+</style>
 </style>
 </body>
 </html>
