@@ -160,54 +160,6 @@ async function renderComboUsuariosInforme(container) {
 
         inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
 
-    // Autocompletado avanzado tipo lista filtrable para ComboUsuario2
-    function renderListaAvanzada(filtro) {
-        listaAvanzada.innerHTML = '';
-        const val = filtro ? filtro.trim().toLowerCase() : '';
-        let filtrados = usuariosLista;
-        if (val) {
-            filtrados = usuariosLista.filter(u => u.nombre && u.nombre.toLowerCase().includes(val));
-        }
-        if (filtrados.length === 0) {
-            const item = document.createElement('div');
-            item.className = 'autocomplete-item';
-            item.textContent = 'Sin resultados';
-            item.style.color = '#888';
-            listaAvanzada.appendChild(item);
-        } else {
-            filtrados.forEach(u => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-item';
-                item.textContent = u.nombre;
-                item.addEventListener('mousedown', function(e) {
-                    inputAvanzado.value = u.nombre;
-                    listaAvanzada.innerHTML = '';
-                    listaAvanzada.style.display = 'none';
-                });
-                listaAvanzada.appendChild(item);
-            });
-        }
-        listaAvanzada.style.display = 'block';
-    }
-
-    // Mostrar lista completa al enfocar, y filtrar en tiempo real
-    inputAvanzado.addEventListener('focus', function() {
-        renderListaAvanzada('');
-    });
-    inputAvanzado.addEventListener('input', function() {
-        renderListaAvanzada(this.value);
-    });
-    inputAvanzado.addEventListener('blur', function() {
-        setTimeout(() => {
-            listaAvanzada.innerHTML = '';
-            listaAvanzada.style.display = 'none';
-        }, 150);
-    });
-    // Asegurar visibilidad y posición correcta
-    listaAvanzada.style.position = 'absolute';
-    listaAvanzada.style.zIndex = '1000';
-    listaAvanzada.style.width = '100%';
-
     combo.addEventListener('change', (e) => {
         let inputBusqueda = container.querySelector('input[name="busqueda"]');
         if (!inputBusqueda) {
