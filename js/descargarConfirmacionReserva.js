@@ -43,9 +43,19 @@ export function enviarWhatsAppConfirmacion({ nombre, fecha, hora, consultorio, e
                     `⏰ *Hora:* ${hora}%0A%0A` +
                     `¡Gracias por reservar!`;
 
-    // 3. Construir la URL
-    const url = `https://wa.me/${telefono}?text=${mensaje}`;
+    // 3. Detectar si es un dispositivo móvil
+    const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // 4. Abrir en una nueva pestaña
+    // 4. Elegir el enlace correcto
+    // En móviles usamos 'whatsapp://send' para forzar la App
+    // En PC usamos 'web.whatsapp.com' para el navegador
+    let url;
+    if (esMovil) {
+        url = `whatsapp://send?phone=${telefono}&text=${texto}`;
+    } else {
+        url = `https://web.whatsapp.com/send?phone=${telefono}&text=${texto}`;
+    }
+
+    // 5. Abrir el enlace
     window.open(url, '_blank');
 }
