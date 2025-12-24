@@ -36,7 +36,7 @@ export function enviarWhatsAppConfirmacion({ nombre, fecha, hora, consultorio, e
     // 2. Crear el mensaje usando Template Literals y saltos de línea (%0A)
     const mensaje = `*Consultorios de Maria*%0A%0A` +
                     `✅ *Reserva confirmada*%0A` +
-                    `👤 *Paciente:* ${nombre}%0A` +
+                    `👤 *Profesional:* ${nombre}%0A` +
                     `📧 *Email:* ${email || '-'}%0A` +
                     `🏥 *Consultorio:* ${consultorio}%0A` +
                     `📅 *Fecha:* ${fecha}%0A` +
