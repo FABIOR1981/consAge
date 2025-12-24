@@ -162,11 +162,44 @@ async function renderComboUsuariosInforme(container) {
             <label style="flex:1;">Seleccionar Usuario: 
                 <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select>
             </label>
+            <label style="flex:1;">Usuario (Avanzado):
+                <input type="text" id="combo-usuario2" class="search-input" placeholder="Buscar usuario por nombre o apellido" autocomplete="off">
+                <div id="autocomplete-lista-usuario2" class="autocomplete-lista"></div>
+                <span class="search-note">(autocompletado avanzado por nombre/apellido)</span>
+            </label>
         </div>
+        <style>
+        .autocomplete-lista {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            background: #fff;
+            border: 1px solid #ccc;
+            z-index: 1000;
+            max-height: 180px;
+            overflow-y: auto;
+            min-width: 180px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .autocomplete-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .autocomplete-item:hover {
+            background: #e6f0fa;
+        }
+        </style>
     `;
 
     const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
     const combo = searchRow.querySelector('#combo-usuario-informe');
+    const inputAvanzado = searchRow.querySelector('#combo-usuario2');
+    const listaAvanzada = searchRow.querySelector('#autocomplete-lista-usuario2');
 
     function renderCombo(filtro) {
         const opciones = usuariosLista
@@ -177,6 +210,32 @@ async function renderComboUsuariosInforme(container) {
     renderCombo('');
 
     inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
+
+    // Autocompletado avanzado para ComboUsuario2
+    inputAvanzado.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        listaAvanzada.innerHTML = '';
+        if (!val) { listaAvanzada.style.display = 'none'; return; }
+        const filtrados = usuariosLista.filter(u => u.nombre && u.nombre.toLowerCase().includes(val));
+        filtrados.forEach(u => {
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.textContent = u.nombre;
+            item.addEventListener('mousedown', function(e) {
+                inputAvanzado.value = u.nombre;
+                listaAvanzada.innerHTML = '';
+                listaAvanzada.style.display = 'none';
+            });
+            listaAvanzada.appendChild(item);
+        });
+        listaAvanzada.style.display = filtrados.length ? 'block' : 'none';
+    });
+    inputAvanzado.addEventListener('blur', function() {
+        setTimeout(() => {
+            listaAvanzada.innerHTML = '';
+            listaAvanzada.style.display = 'none';
+        }, 150);
+    });
 
     combo.addEventListener('change', (e) => {
         let inputBusqueda = container.querySelector('input[name="busqueda"]');
