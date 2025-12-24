@@ -23,6 +23,29 @@ export async function descargarConfirmacionReserva({ nombre, fecha, hora, consul
     doc.text(`Consultorio: ${consultorio}`, 20, 55);
     doc.text(`Fecha: ${fecha}`, 20, 65);
     doc.text(`Hora: ${hora}`, 20, 75);
-    doc.text('Gracias por reservar. Ante cualquier duda, comuníquese con recepción.', 20, 90);
+    doc.text('Gracias por reservar. Ante cualquier duda, comuníquese al 091001334.', 20, 90);
     doc.save(`confirmacion_reserva_${nombre}_${fecha}_${hora}.pdf`);
+}
+
+export function enviarWhatsAppConfirmacion({ nombre, fecha, hora, consultorio, email }) {
+    // 1. Definir el número de teléfono (destino)
+    // Si es para el cliente, deberías tener su número en los parámetros.
+    // Si es para el consultorio, pon el número fijo aquí.
+    const telefono = "59891001334"; // Formato internacional sin el "+"
+
+    // 2. Crear el mensaje usando Template Literals y saltos de línea (%0A)
+    const mensaje = `*Consultorios de Maria*%0A%0A` +
+                    `✅ *Reserva confirmada*%0A` +
+                    `👤 *Paciente:* ${nombre}%0A` +
+                    `📧 *Email:* ${email || '-'}%0A` +
+                    `🏥 *Consultorio:* ${consultorio}%0A` +
+                    `📅 *Fecha:* ${fecha}%0A` +
+                    `⏰ *Hora:* ${hora}%0A%0A` +
+                    `¡Gracias por reservar!`;
+
+    // 3. Construir la URL
+    const url = `https://wa.me/${telefono}?text=${mensaje}`;
+
+    // 4. Abrir en una nueva pestaña
+    window.open(url, '_blank');
 }
