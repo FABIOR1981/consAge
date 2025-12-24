@@ -2,7 +2,7 @@
 @import url('components.css');
 @import url('informe.css');
 
-/* Reset base y tipografía */
+/* Reset base */
 body {
     font-family: var(--font-main);
     background-color: var(--bg-light);

@@ -1,6 +1,4 @@
-/* ----------------------------------------- */
-/* Reservas - Estilos de tarjetas y botones  */
-/* ----------------------------------------- */
+/* reservas.css */
 .reserva-card {
     border: none;
     border-radius: var(--radius);
@@ -22,7 +20,6 @@
     border-radius: var(--radius-sm);
     padding: 8px 16px;
     font-size: 0.9rem;
-    transition: var(--transition);
 }
 
 .reserva-card button.btn-cancelar:hover {
