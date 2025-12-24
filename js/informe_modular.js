@@ -211,24 +211,41 @@ async function renderComboUsuariosInforme(container) {
 
     inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
 
-    // Autocompletado avanzado para ComboUsuario2
-    inputAvanzado.addEventListener('input', function() {
-        const val = this.value.trim().toLowerCase();
+    // Autocompletado avanzado tipo lista filtrable para ComboUsuario2
+    function renderListaAvanzada(filtro) {
         listaAvanzada.innerHTML = '';
-        if (!val) { listaAvanzada.style.display = 'none'; return; }
-        const filtrados = usuariosLista.filter(u => u.nombre && u.nombre.toLowerCase().includes(val));
-        filtrados.forEach(u => {
+        const val = filtro ? filtro.trim().toLowerCase() : '';
+        let filtrados = usuariosLista;
+        if (val) {
+            filtrados = usuariosLista.filter(u => u.nombre && u.nombre.toLowerCase().includes(val));
+        }
+        if (filtrados.length === 0) {
             const item = document.createElement('div');
             item.className = 'autocomplete-item';
-            item.textContent = u.nombre;
-            item.addEventListener('mousedown', function(e) {
-                inputAvanzado.value = u.nombre;
-                listaAvanzada.innerHTML = '';
-                listaAvanzada.style.display = 'none';
-            });
+            item.textContent = 'Sin resultados';
+            item.style.color = '#888';
             listaAvanzada.appendChild(item);
-        });
-        listaAvanzada.style.display = filtrados.length ? 'block' : 'none';
+        } else {
+            filtrados.forEach(u => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = u.nombre;
+                item.addEventListener('mousedown', function(e) {
+                    inputAvanzado.value = u.nombre;
+                    listaAvanzada.innerHTML = '';
+                    listaAvanzada.style.display = 'none';
+                });
+                listaAvanzada.appendChild(item);
+            });
+        }
+        listaAvanzada.style.display = 'block';
+    }
+
+    inputAvanzado.addEventListener('input', function() {
+        renderListaAvanzada(this.value);
+    });
+    inputAvanzado.addEventListener('focus', function() {
+        renderListaAvanzada(this.value);
     });
     inputAvanzado.addEventListener('blur', function() {
         setTimeout(() => {
