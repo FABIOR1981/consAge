@@ -136,29 +136,37 @@ async function renderComboUsuariosInforme(container) {
     let usuariosLista = [];
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
-        searchRow.innerHTML = `
-            <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end; width:100%;">
-                <label style="flex:1;">Filtrar lista: 
-                    <input type="text" id="filtro-nombre-usuario-informe" placeholder="Escriba para buscar..." autocomplete="off">
-                </label>
-                <label style="flex:1;">Seleccionar Usuario: 
-                    <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select>
-                </label>
-            </div>
-        `;
-
-        const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
-        const combo = searchRow.querySelector('#combo-usuario-informe');
-
-        function renderCombo(filtro) {
-            const opciones = usuariosLista
-                .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())) || u.email.includes(filtro.toLowerCase()))
-                .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
-            combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
+        if (resp.ok) {
+            const js = await resp.json();
+            if (Array.isArray(js.usuarios)) {
+                usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+            }
         }
-        renderCombo('');
+    } catch {}
 
-        inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
+    searchRow.innerHTML = `
+        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end; width:100%;">
+            <label style="flex:1;">Filtrar lista: 
+                <input type="text" id="filtro-nombre-usuario-informe" placeholder="Escriba para buscar..." autocomplete="off">
+            </label>
+            <label style="flex:1;">Seleccionar Usuario: 
+                <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select>
+            </label>
+        </div>
+    `;
+
+    const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
+    const combo = searchRow.querySelector('#combo-usuario-informe');
+
+    function renderCombo(filtro) {
+        const opciones = usuariosLista
+            .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())) || u.email.includes(filtro.toLowerCase()))
+            .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
+        combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
+    }
+    renderCombo('');
+
+    inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
 
     combo.addEventListener('change', (e) => {
         let inputBusqueda = container.querySelector('input[name="busqueda"]');
