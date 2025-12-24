@@ -23,9 +23,10 @@
                 </select>
             </label>
             <div class="search-row">
-                <label for="input-busqueda" class="search-label">Búsqueda:</label>
-                <input type="text" name="busqueda" id="input-busqueda" class="search-input" placeholder="Ingrese nombre, apellido o email">
-                <span class="search-note">(usuario, nombre u apellido)</span>
+                <label for="input-usuario" class="search-label">Usuario:</label>
+                <input type="text" name="usuario" id="input-usuario" class="search-input" placeholder="Email o nombre" list="datalist-usuarios" autocomplete="off">
+                <datalist id="datalist-usuarios"></datalist>
+                <span class="search-note">(escriba para filtrar usuarios)</span>
             </div>
             <button type="submit">Buscar</button>
         </form>
@@ -37,6 +38,12 @@
             </div>
     </div>
     <script type="module" src="js/informe.js"></script>
+        <script type="module">
+            import { cargarUsuariosParaAutocomplete } from './js/autocomplete_usuarios.js';
+            window.addEventListener('DOMContentLoaded', () => {
+                cargarUsuariosParaAutocomplete('input-usuario', 'datalist-usuarios');
+            });
+        </script>
 </body>
 </html>
 <!-- Última revisión: formulario de búsqueda con un solo input y radio buttons alineados. -->

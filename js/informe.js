@@ -9,6 +9,7 @@ export async function initInforme() {
     const form = document.getElementById('form-informe');
     const tabla = document.getElementById('tabla-informe');
     let totalHorasDiv = document.getElementById('total-horas-informe');
+    const inputUsuario = document.getElementById('input-usuario');
 
     if (!comboConsultorio || !form || !tabla) {
         return false;
@@ -43,7 +44,7 @@ export async function initInforme() {
         const fechaInicio = form.elements['fechaInicio'] ? form.elements['fechaInicio'].value : '';
         const fechaFin = form.elements['fechaFin'] ? form.elements['fechaFin'].value : '';
         const consultorio = form.elements['consultorio'] ? form.elements['consultorio'].value : '';
-        // ...existing code...
+        const usuario = inputUsuario ? inputUsuario.value.split(' ')[0] : '';
 
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
         if (consultorio) url += `&consultorio=${encodeURIComponent(consultorio)}`;
