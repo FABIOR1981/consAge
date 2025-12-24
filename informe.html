@@ -11,6 +11,12 @@
     <div class="informe-container">
         <h2 class="informe-titulo">Informe de Reservas</h2>
         <form id="form-informe" class="informe-form">
+                        <div class="search-row">
+                            <label for="combo-usuario2" class="search-label">Usuario (Avanzado):</label>
+                            <input type="text" id="combo-usuario2" class="search-input" placeholder="Buscar usuario por nombre o apellido" autocomplete="off">
+                            <div id="autocomplete-lista-usuario2" class="autocomplete-lista"></div>
+                            <span class="search-note">(autocompletado avanzado por nombre/apellido)</span>
+                        </div>
             <label>Fecha inicio:
                 <input type="date" name="fechaInicio" required>
             </label>
@@ -38,6 +44,48 @@
             </div>
     </div>
     <script type="module" src="js/informe.js"></script>
+                <script type="module">
+                    // Autocompletado avanzado para ComboUsuario2
+                    let usuariosCache2 = [];
+                    async function cargarUsuariosCombo2() {
+                        if (!usuariosCache2.length) {
+                            const resp = await fetch('/data/usuarios.json');
+                            const data = await resp.json();
+                            if (Array.isArray(data)) usuariosCache2 = data;
+                        }
+                    }
+                    function filtrarYMostrarCombo2() {
+                        const input = document.getElementById('combo-usuario2');
+                        const lista = document.getElementById('autocomplete-lista-usuario2');
+                        const val = input.value.trim().toLowerCase();
+                        lista.innerHTML = '';
+                        if (!val) { lista.style.display = 'none'; return; }
+                        const filtrados = usuariosCache2.filter(u => u.nombre && u.nombre.toLowerCase().includes(val));
+                        filtrados.forEach(u => {
+                            const item = document.createElement('div');
+                            item.className = 'autocomplete-item';
+                            item.textContent = u.nombre;
+                            item.addEventListener('mousedown', function(e) {
+                                input.value = u.nombre;
+                                lista.innerHTML = '';
+                                lista.style.display = 'none';
+                            });
+                            lista.appendChild(item);
+                        });
+                        lista.style.display = filtrados.length ? 'block' : 'none';
+                    }
+                    window.addEventListener('DOMContentLoaded', async () => {
+                        await cargarUsuariosCombo2();
+                        const input = document.getElementById('combo-usuario2');
+                        input.addEventListener('input', filtrarYMostrarCombo2);
+                        input.addEventListener('blur', function() {
+                            setTimeout(() => {
+                                document.getElementById('autocomplete-lista-usuario2').innerHTML = '';
+                                document.getElementById('autocomplete-lista-usuario2').style.display = 'none';
+                            }, 150);
+                        });
+                    });
+                </script>
         <script type="module">
             import { cargarUsuariosParaAutocomplete } from './js/autocomplete_usuarios.js';
             window.addEventListener('DOMContentLoaded', () => {
@@ -45,6 +93,33 @@
             });
         </script>
 <style>
+.search-row {
+    position: relative;
+}
+.autocomplete-lista {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background: #fff;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    max-height: 180px;
+    overflow-y: auto;
+    min-width: 180px;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.autocomplete-item:hover {
+    background: #e6f0fa;
+}
 </style>
 </style>
 </body>
