@@ -51,9 +51,9 @@ export function enviarWhatsAppConfirmacion({ nombre, fecha, hora, consultorio, e
     // En PC usamos 'web.whatsapp.com' para el navegador
     let url;
     if (esMovil) {
-        url = `whatsapp://send?phone=${telefono}&text=${texto}`;
+        url = `whatsapp://send?phone=${telefono}&text=${mensaje}`;
     } else {
-        url = `https://web.whatsapp.com/send?phone=${telefono}&text=${texto}`;
+        url = `https://web.whatsapp.com/send?phone=${telefono}&text=${mensaje}`;
     }
 
     // 5. Abrir el enlace
