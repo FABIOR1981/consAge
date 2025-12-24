@@ -107,12 +107,17 @@ async function cargarHorarios(targetContainer) {
         const data = await resp.json();
         const reservasExistentes = data.reservas || [];
         
-        // Mapeamos las horas que ya tienen una reserva
-        const horasBloqueadas = reservasExistentes.map(res => {
-            const fechaRes = new Date(res.start);
-            const hh = fechaRes.getHours().toString().padStart(2, '0');
-            const mm = (fechaRes.getMinutes() || 0).toString().padStart(2, '0');
-            return `${hh}:${mm}`;
+        // Filtrar reservas activas (no canceladas)
+        const reservasActivas = reservasExistentes.filter(res => {
+            if (!res.summary) return true;
+            return !res.summary.toLowerCase().includes('cancelada');
+        });
+
+        // Mapeamos los rangos ocupados como objetos {inicio, fin}
+        const rangosOcupados = reservasActivas.map(res => {
+            const inicio = new Date(res.start).getTime();
+            const fin = new Date(res.end).getTime();
+            return { inicio, fin };
         });
 
         let html = `
@@ -170,8 +175,24 @@ async function cargarHorarios(targetContainer) {
             const hh = Math.floor(mins / 60);
             const mm = mins % 60;
             const horaStr = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}`;
-            const estaOcupado = horasBloqueadas.includes(horaStr);
-            
+            // Calcular inicio y fin de la franja a comparar
+            const fechaBase = seleccion.fecha;
+            let fechaObj;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(fechaBase)) {
+                const [y, m, d] = fechaBase.split('-').map(Number);
+                fechaObj = new Date(y, m - 1, d, hh, mm, 0, 0);
+            } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(fechaBase)) {
+                const [d, m, y] = fechaBase.split('/').map(Number);
+                fechaObj = new Date(y, m - 1, d, hh, mm, 0, 0);
+            } else {
+                fechaObj = new Date(fechaBase);
+                fechaObj.setHours(hh, mm, 0, 0);
+            }
+            const inicioFranja = fechaObj.getTime();
+            const finFranja = inicioFranja + intervalo * 60 * 1000;
+            // Verificar solapamiento con algún rango ocupado
+            const estaOcupado = rangosOcupados.some(r => (inicioFranja < r.fin && finFranja > r.inicio));
+
             html += `
                 <tr style="height: 80px; font-size: 1.25rem; border-bottom: 1px solid #eee;">
                     <td style="padding-left: 20px;"><strong>${horaStr} hs</strong></td>
