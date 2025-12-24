@@ -256,6 +256,16 @@ async function ejecutarReserva(hora, targetContainer) {
 
         if (resp.ok) {
             alert("✅ Turno agendado correctamente. Se ha enviado un correo de confirmación.");
+                // Integrar PDF de confirmación
+                import('./descargarConfirmacionReserva.js').then(mod => {
+                    mod.descargarConfirmacionReserva({
+                        nombre: user.user_metadata?.full_name || user.email,
+                        fecha: seleccion.fecha,
+                        hora: `${hh.toString().padStart(2, '0')}:00`,
+                        consultorio: seleccion.consultorio,
+                        email: user.email
+                    });
+                });
             cargarHorarios(targetContainer); // Actualizar la tabla para mostrar el nuevo estado
         } else {
             const dataError = await resp.json();
