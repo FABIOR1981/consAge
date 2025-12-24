@@ -136,80 +136,29 @@ async function renderComboUsuariosInforme(container) {
     let usuariosLista = [];
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
-        const js = await resp.json();
-        if (Array.isArray(js.usuarios)) {
-            const actual = js.usuarios.find(u => u.email === user.email);
-            if (actual && actual.rol === 'admin') esAdmin = true;
-            usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-        }
-    } catch {}
-
-    const searchRow = container.querySelector('#search-row-informe');
-
-    if (!esAdmin || usuariosLista.length === 0) {
         searchRow.innerHTML = `
-            <label style="display:block; width:100%;">Búsqueda (Nombre/Email):
-                <input type="text" name="busqueda" placeholder="Opcional..." style="width:100%;">
-            </label>`;
-        return;
-    }
+            <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end; width:100%;">
+                <label style="flex:1;">Filtrar lista: 
+                    <input type="text" id="filtro-nombre-usuario-informe" placeholder="Escriba para buscar..." autocomplete="off">
+                </label>
+                <label style="flex:1;">Seleccionar Usuario: 
+                    <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select>
+                </label>
+            </div>
+        `;
 
-    searchRow.innerHTML = `
-        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end; width:100%;">
-            <label style="flex:1;">Filtrar lista: 
-                <input type="text" id="filtro-nombre-usuario-informe" placeholder="Escriba para buscar..." autocomplete="off">
-            </label>
-            <label style="flex:1;">Seleccionar Usuario: 
-                <select id="combo-usuario-informe"><option value="">Seleccione un usuario</option></select>
-            </label>
-            <label style="flex:1;">Usuario (Avanzado):
-                <input type="text" id="combo-usuario2" class="search-input" placeholder="Buscar usuario por nombre o apellido" autocomplete="off">
-                <div id="autocomplete-lista-usuario2" class="autocomplete-lista"></div>
-                <span class="search-note">(autocompletado avanzado por nombre/apellido)</span>
-            </label>
-        </div>
-        <style>
-        .autocomplete-lista {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 100%;
-            background: #fff;
-            border: 1px solid #ccc;
-            z-index: 1000;
-            max-height: 180px;
-            overflow-y: auto;
-            min-width: 180px;
-            width: 100%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
+        const combo = searchRow.querySelector('#combo-usuario-informe');
+
+        function renderCombo(filtro) {
+            const opciones = usuariosLista
+                .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())) || u.email.includes(filtro.toLowerCase()))
+                .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
+            combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
         }
-        .autocomplete-item {
-            padding: 8px 12px;
-            cursor: pointer;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .autocomplete-item:hover {
-            background: #e6f0fa;
-        }
-        </style>
-    `;
+        renderCombo('');
 
-    const inputFiltro = searchRow.querySelector('#filtro-nombre-usuario-informe');
-    const combo = searchRow.querySelector('#combo-usuario-informe');
-    const inputAvanzado = searchRow.querySelector('#combo-usuario2');
-    const listaAvanzada = searchRow.querySelector('#autocomplete-lista-usuario2');
-
-    function renderCombo(filtro) {
-        const opciones = usuariosLista
-            .filter(u => !filtro || (u.nombre && u.nombre.toLowerCase().includes(filtro.toLowerCase())) || u.email.includes(filtro.toLowerCase()))
-            .map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`);
-        combo.innerHTML = '<option value="">Seleccione un usuario</option>' + opciones.join('');
-    }
-    renderCombo('');
-
-    inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
+        inputFiltro.addEventListener('input', (e) => renderCombo(e.target.value));
 
     // Autocompletado avanzado tipo lista filtrable para ComboUsuario2
     function renderListaAvanzada(filtro) {
