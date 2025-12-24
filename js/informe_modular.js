@@ -136,13 +136,23 @@ async function renderComboUsuariosInforme(container) {
     let usuariosLista = [];
     try {
         const resp = await fetch('/.netlify/functions/listar_usuarios');
-        if (resp.ok) {
-            const js = await resp.json();
-            if (Array.isArray(js.usuarios)) {
-                usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-            }
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+            usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
         }
     } catch {}
+
+    const searchRow = container.querySelector('#search-row-informe');
+
+    if (!esAdmin || usuariosLista.length === 0) {
+        searchRow.innerHTML = `
+            <label style="display:block; width:100%;">Búsqueda (Nombre/Email):
+                <input type="text" name="busqueda" placeholder="Opcional..." style="width:100%;">
+            </label>`;
+        return;
+    }
 
     searchRow.innerHTML = `
         <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:flex-end; width:100%;">
