@@ -256,20 +256,19 @@ async function ejecutarReserva(hora, targetContainer) {
 
         if (resp.ok) {
             alert("✅ Turno agendado correctamente. Se ha enviado un correo de confirmación.");
-                // Descargar PDF y luego abrir WhatsApp
-                const datosReserva = {
-                    nombre: user.user_metadata?.full_name || user.email,
-                    fecha: seleccion.fecha,
-                    hora: `${hh.toString().padStart(2, '0')}:00`,
-                    consultorio: seleccion.consultorio,
-                    email: user.email
-                };
-                async function finalizarReserva(datosReserva) {
-                    const mod = await import('./descargarConfirmacionReserva.js');
-                    await mod.descargarConfirmacionReserva(datosReserva);
-                    mod.enviarWhatsAppConfirmacion(datosReserva);
-                }
-                finalizarReserva(datosReserva);
+            // Descargar PDF y luego abrir WhatsApp (sin declarar función aparte)
+            const datosReserva = {
+                nombre: user.user_metadata?.full_name || user.email,
+                fecha: seleccion.fecha,
+                hora: `${hh.toString().padStart(2, '0')}:00`,
+                consultorio: seleccion.consultorio,
+                email: user.email
+            };
+            (async () => {
+                const mod = await import('./descargarConfirmacionReserva.js');
+                await mod.descargarConfirmacionReserva(datosReserva);
+                mod.enviarWhatsAppConfirmacion(datosReserva);
+            })();
             cargarHorarios(targetContainer); // Actualizar la tabla para mostrar el nuevo estado
         } else {
             const dataError = await resp.json();
