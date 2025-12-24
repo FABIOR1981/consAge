@@ -24,9 +24,9 @@
             </label>
             <div class="search-row">
                 <label for="input-usuario" class="search-label">Usuario:</label>
-                <input type="text" name="usuario" id="input-usuario" class="search-input" placeholder="Email o nombre" list="datalist-usuarios" autocomplete="off">
-                <datalist id="datalist-usuarios"></datalist>
-                <span class="search-note">(escriba para filtrar usuarios)</span>
+                <input type="text" name="usuario" id="input-usuario" class="search-input" placeholder="Nombre o apellido" autocomplete="off">
+                <div id="autocomplete-lista-usuarios" class="autocomplete-lista"></div>
+                <span class="search-note">(escriba para filtrar usuarios por nombre)</span>
             </div>
             <button type="submit">Buscar</button>
         </form>
@@ -39,11 +39,30 @@
     </div>
     <script type="module" src="js/informe.js"></script>
         <script type="module">
-            import { cargarUsuariosParaAutocomplete } from './js/autocomplete_usuarios.js';
+            import { cargarUsuariosParaAutocompleteAvanzado } from './js/autocomplete_usuarios_avanzado.js';
             window.addEventListener('DOMContentLoaded', () => {
-                cargarUsuariosParaAutocomplete('input-usuario', 'datalist-usuarios');
+                cargarUsuariosParaAutocompleteAvanzado('input-usuario', 'autocomplete-lista-usuarios');
             });
         </script>
+<style>
+.autocomplete-lista {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    max-height: 180px;
+    overflow-y: auto;
+    width: 250px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.autocomplete-item:hover {
+    background: #e6f0fa;
+}
+</style>
 </body>
 </html>
 <!-- Última revisión: formulario de búsqueda con un solo input y radio buttons alineados. -->

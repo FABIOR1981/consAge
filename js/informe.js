@@ -44,7 +44,7 @@ export async function initInforme() {
         const fechaInicio = form.elements['fechaInicio'] ? form.elements['fechaInicio'].value : '';
         const fechaFin = form.elements['fechaFin'] ? form.elements['fechaFin'].value : '';
         const consultorio = form.elements['consultorio'] ? form.elements['consultorio'].value : '';
-        const usuario = inputUsuario ? inputUsuario.value.split(' ')[0] : '';
+        const usuario = inputUsuario ? inputUsuario.value.trim() : '';
 
         let url = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
         if (consultorio) url += `&consultorio=${encodeURIComponent(consultorio)}`;
@@ -68,9 +68,9 @@ export async function initInforme() {
             });
             tabla.innerHTML = rows;
             totalHorasDiv.classList.add('total-horas-informe');
-            totalHorasDiv.innerHTML = `<div class="total-main">Total de filas: <strong>${data.length}</strong></div>`;
+            totalHorasDiv.innerHTML = `<div class=\"total-main\">Total de filas: <strong>${data.length}</strong></div>`;
         } catch (err) {
-            tabla.innerHTML = `<tr><td colspan="6">Error al obtener datos: ${err.message}</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan=\"6\">Error al obtener datos: ${err.message}</td></tr>`;
             totalHorasDiv.innerText = '';
         }
     });
