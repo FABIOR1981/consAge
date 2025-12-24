@@ -45,19 +45,29 @@
             });
         </script>
 <style>
+.search-row {
+    position: relative;
+}
 .autocomplete-lista {
     position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
     background: #fff;
     border: 1px solid #ccc;
     z-index: 1000;
     max-height: 180px;
     overflow-y: auto;
-    width: 250px;
+    min-width: 180px;
+    width: 100%;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .autocomplete-item {
     padding: 8px 12px;
     cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .autocomplete-item:hover {
     background: #e6f0fa;
