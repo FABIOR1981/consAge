@@ -241,10 +241,11 @@ async function renderComboUsuariosInforme(container) {
         listaAvanzada.style.display = 'block';
     }
 
-    inputAvanzado.addEventListener('input', function() {
-        renderListaAvanzada(this.value);
-    });
+    // Mostrar lista completa al enfocar, y filtrar en tiempo real
     inputAvanzado.addEventListener('focus', function() {
+        renderListaAvanzada('');
+    });
+    inputAvanzado.addEventListener('input', function() {
         renderListaAvanzada(this.value);
     });
     inputAvanzado.addEventListener('blur', function() {
@@ -253,6 +254,10 @@ async function renderComboUsuariosInforme(container) {
             listaAvanzada.style.display = 'none';
         }, 150);
     });
+    // Asegurar visibilidad y posición correcta
+    listaAvanzada.style.position = 'absolute';
+    listaAvanzada.style.zIndex = '1000';
+    listaAvanzada.style.width = '100%';
 
     combo.addEventListener('change', (e) => {
         let inputBusqueda = container.querySelector('input[name="busqueda"]');
