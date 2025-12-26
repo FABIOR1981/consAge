@@ -11,7 +11,8 @@ function mostrarSeccion(seccion) {
         'agenda-section', 
         'reservas-section', 
         'informe-section', 
-        'admin-section'
+        'admin-section',
+        'abmusu-section'
     ];
 
     // 2. Ocultar todas las secciones para limpiar la pantalla
@@ -54,6 +55,21 @@ function mostrarSeccion(seccion) {
             renderInforme(cont);
         }
     }
+    else if (seccion === 'abmusu') {
+        const sec = document.getElementById('abmusu-section');
+        const cont = document.getElementById('abmusu-container');
+        if (sec && cont) {
+            sec.style.display = 'block';
+            // Cargar el módulo de ABM USUARIOS (puedes reemplazar esto por tu propio renderizador)
+            import('./abmusu.js').then(mod => {
+                if (mod.renderAbmUsu) {
+                    mod.renderAbmUsu(cont);
+                } else {
+                    cont.innerHTML = '<p>ABM de usuarios disponible.</p>';
+                }
+            });
+        }
+    }
 }
 
 /**
@@ -77,12 +93,15 @@ const initDashboard = async () => {
     const btnAgenda = document.getElementById('btn-agenda');
     const btnReservas = document.getElementById('btn-reservas');
     const btnInforme = document.getElementById('btn-informe');
+
+    const btnAbmUsu = document.getElementById('btn-abmusu');
     const btnLogout = document.getElementById('logout-btn');
 
     if (btnAgenda) btnAgenda.onclick = () => mostrarSeccion('agenda');
     if (btnReservas) btnReservas.onclick = () => mostrarSeccion('mis-reservas-futuras');
     if (btnInforme) btnInforme.onclick = () => mostrarSeccion('informe');
-    
+    if (btnAbmUsu) btnAbmUsu.onclick = () => mostrarSeccion('abmusu');
+
     if (btnLogout) {
         btnLogout.onclick = () => {
             window.netlifyIdentity.logout();
@@ -91,6 +110,21 @@ const initDashboard = async () => {
 
     // Por defecto, al entrar, mostramos la sección de Agenda
     mostrarSeccion('agenda');
+
+    // Mostrar u ocultar el botón ABM USU solo para admin
+    try {
+        const email = user.email;
+        const resp = await fetch('data/usuarios.json');
+        const usuarios = await resp.json();
+        const usuario = usuarios.find(u => u.email === email);
+        if (usuario && usuario.rol === 'admin') {
+            if (btnAbmUsu) btnAbmUsu.style.display = '';
+        } else {
+            if (btnAbmUsu) btnAbmUsu.style.display = 'none';
+        }
+    } catch (e) {
+        if (btnAbmUsu) btnAbmUsu.style.display = 'none';
+    }
 };
 
 // --- Manejo de eventos de Netlify Identity ---
