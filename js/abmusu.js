@@ -54,12 +54,35 @@ export function renderAbmUsu(container) {
         });
     }
 
-    function guardarUsuarios() {
-        fetch('data/usuarios.json', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(usuarios, null, 2)
-        });
+    async function guardarUsuarios() {
+        // Llama a la función serverless para persistir en GitHub
+        let msgDiv = container.querySelector('#abmusu-msg');
+        if (!msgDiv) {
+            msgDiv = document.createElement('div');
+            msgDiv.id = 'abmusu-msg';
+            msgDiv.style.margin = '1em 0';
+            container.prepend(msgDiv);
+        }
+        msgDiv.textContent = 'Guardando usuarios...';
+        msgDiv.style.color = '#333';
+        try {
+            const resp = await fetch('/.netlify/functions/update-usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: usuarios })
+            });
+            const result = await resp.json();
+            if (resp.ok && result.success) {
+                msgDiv.textContent = 'Usuarios guardados correctamente. Commit: ' + result.commit;
+                msgDiv.style.color = 'green';
+            } else {
+                msgDiv.textContent = 'Error al guardar: ' + (result.error || resp.statusText) + (result.details ? ' - ' + result.details : '');
+                msgDiv.style.color = 'red';
+            }
+        } catch (e) {
+            msgDiv.textContent = 'Error de red o servidor: ' + e.message;
+            msgDiv.style.color = 'red';
+        }
     }
 
     container.querySelector('#usuario-form').onsubmit = function(e) {

@@ -87,7 +87,7 @@ function cargarEstiloAbmUsu() {
     if (!document.getElementById('abmusu-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'css/abmusu.css';
+        link.href = 'css/2_abmusu.css';
         link.id = 'abmusu-css';
         document.head.appendChild(link);
     }
