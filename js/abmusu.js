@@ -54,17 +54,35 @@ export function renderAbmUsu(container) {
         });
     }
 
+    function mostrarPopup(mensaje, tipo = 'info', tiempo = 3000) {
+        let popup = document.getElementById('abmusu-popup');
+        if (popup) popup.remove();
+        popup = document.createElement('div');
+        popup.id = 'abmusu-popup';
+        popup.style.position = 'fixed';
+        popup.style.top = '30%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.background = '#fff';
+        popup.style.border = '2px solid ' + (tipo === 'success' ? 'green' : tipo === 'error' ? 'red' : '#333');
+        popup.style.color = tipo === 'success' ? 'green' : tipo === 'error' ? 'red' : '#333';
+        popup.style.padding = '2em 2em 1em 2em';
+        popup.style.zIndex = 9999;
+        popup.style.boxShadow = '0 2px 16px #0005';
+        popup.style.fontSize = '1.1em';
+        popup.innerHTML = `<div style="margin-bottom:1em;">${mensaje}</div><button id="cerrar-popup" style="padding:0.5em 1em;">Cerrar</button>`;
+        document.body.appendChild(popup);
+        // Cierre automático
+        const timeout = setTimeout(() => { popup.remove(); }, tiempo);
+        // Cierre manual
+        popup.querySelector('#cerrar-popup').onclick = () => {
+            clearTimeout(timeout);
+            popup.remove();
+        };
+    }
+
     async function guardarUsuarios() {
-        // Llama a la función serverless para persistir en GitHub
-        let msgDiv = container.querySelector('#abmusu-msg');
-        if (!msgDiv) {
-            msgDiv = document.createElement('div');
-            msgDiv.id = 'abmusu-msg';
-            msgDiv.style.margin = '1em 0';
-            container.prepend(msgDiv);
-        }
-        msgDiv.textContent = 'Guardando usuarios...';
-        msgDiv.style.color = '#333';
+        mostrarPopup('Guardando usuarios...', 'info', 2000);
         try {
             const resp = await fetch('/.netlify/functions/update-usuarios', {
                 method: 'POST',
@@ -73,15 +91,12 @@ export function renderAbmUsu(container) {
             });
             const result = await resp.json();
             if (resp.ok && result.success) {
-                msgDiv.textContent = 'Usuarios guardados correctamente. Commit: ' + result.commit;
-                msgDiv.style.color = 'green';
+                mostrarPopup('Usuarios guardados correctamente.<br>Commit: ' + result.commit, 'success', 3500);
             } else {
-                msgDiv.textContent = 'Error al guardar: ' + (result.error || resp.statusText) + (result.details ? ' - ' + result.details : '');
-                msgDiv.style.color = 'red';
+                mostrarPopup('Error al guardar: ' + (result.error || resp.statusText) + (result.details ? ' - ' + result.details : ''), 'error', 6000);
             }
         } catch (e) {
-            msgDiv.textContent = 'Error de red o servidor: ' + e.message;
-            msgDiv.style.color = 'red';
+            mostrarPopup('Error de red o servidor: ' + e.message, 'error', 6000);
         }
     }
 
