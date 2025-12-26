@@ -3,6 +3,7 @@ import { APP_CONFIG } from './config.js';
 export function renderAbmUsu(container) {
     // Generar las opciones del combo de tipo de documento
     const opcionesTipDocu = APP_CONFIG.tiposDocumento.map(t => `<option value="${t}">${t}</option>`).join("");
+    const opcionesRol = APP_CONFIG.roles.map(r => `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join("");
     container.innerHTML = `
         <h2>ABM de Usuarios</h2>
         <form id="usuario-form" class="abmusu-form" autocomplete="off" style="margin-bottom:1.5em;">
@@ -15,10 +16,13 @@ export function renderAbmUsu(container) {
                     <label>Nombre:<br><input type="text" id="nombre" required></label>
                 </div>
                 <div style="flex:1 1 120px; min-width:120px;">
-                    <label>Rol:<br><select id="rol"><option value="admin">Admin</option><option value="usuario">Usuario</option></select></label>
+                    <label>Rol:<br><select id="rol">${opcionesRol}</select></label>
                 </div>
                 <div style="flex:1 1 120px; min-width:120px;">
                     <label>Contraseña:<br><input type="password" id="contrasena" autocomplete="new-password"></label>
+                </div>
+                <div style="flex:1 1 100px; min-width:100px; align-self:center;">
+                    <label>Activo:<br><input type="checkbox" id="activo" checked></label>
                 </div>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:1.2em; align-items:flex-end; margin-top:1em;">
@@ -136,7 +140,7 @@ export function renderAbmUsu(container) {
             tipdocu: container.querySelector('#tipdocu').value,
             documento: container.querySelector('#documento').value,
             telefono: container.querySelector('#telefono').value,
-            activo: true
+            activo: container.querySelector('#activo').checked
         };
         if (idx === '') {
             usuarios.push(nuevoUsuario);
@@ -166,6 +170,7 @@ export function renderAbmUsu(container) {
             container.querySelector('#tipdocu').value = u.tipdocu || APP_CONFIG.tiposDocumento[0];
             container.querySelector('#documento').value = u.documento || '';
             container.querySelector('#telefono').value = u.telefono || '';
+            container.querySelector('#activo').checked = !!u.activo;
         }
         if (e.target.dataset.baja) {
             const idx = e.target.dataset.baja;
