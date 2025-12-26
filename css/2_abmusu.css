@@ -1,74 +1,166 @@
-/* 2_abmusu.css - Estilos para ABM de Usuarios */
-
-#abmusu-section {
+/* --- ABM USU: Estilo moderno tipo card --- */
+.abmusu-section {
+  padding: 2.5rem 1rem;
+  background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+  max-width: 1000px;
+  margin: 2.5rem auto;
+}
+.abmusu-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2a3b4c;
+  margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px #e0eafc;
+}
+.abmusu-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px #0002;
-  padding: 2em;
-  margin: 2em auto;
-  max-width: 900px;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+  align-items: flex-end;
 }
-
-#abmusu-section h2 {
-  font-size: 2em;
-  margin-bottom: 1em;
-  color: #2a3a4a;
+.abmusu-form input, .abmusu-form select {
+  flex: 1 1 180px;
+  padding: 0.85rem 1.1rem;
+  border: 1.5px solid #b2bec3;
+  border-radius: 7px;
+  font-size: 1.05rem;
+  background: #f5f7fa;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(44,62,80,0.04);
 }
-
-#abmusu-section form label {
-  display: block;
-  margin-bottom: 0.5em;
-  font-weight: 500;
+.abmusu-form input:focus, .abmusu-form select:focus {
+  border-color: #4f8cff;
+  outline: none;
+  box-shadow: 0 0 0 2px #b3d8fd;
 }
-
-#abmusu-section input,
-#abmusu-section select {
-  margin-left: 0.5em;
-  padding: 0.3em 0.6em;
-  border-radius: 4px;
-  border: 1px solid #bbb;
-  font-size: 1em;
-}
-
-#abmusu-section button {
-  margin-top: 0.7em;
-  margin-right: 0.5em;
-  padding: 0.5em 1.2em;
-  border-radius: 4px;
-  border: none;
-  background: #2a3a4a;
+.abmusu-form button {
+  padding: 0.85rem 2.2rem;
+  background: linear-gradient(90deg, #4f8cff 0%, #38b6ff 100%);
   color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.13);
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  margin-left: 0.5rem;
+}
+.abmusu-form button:hover {
+  background: linear-gradient(90deg, #38b6ff 0%, #4f8cff 100%);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(79,140,255,0.18);
+}
+.abmusu-list {
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 2rem;
+}
+.abmusu-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.13);
+  padding: 1.7rem 1.3rem 1.3rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  position: relative;
+  transition: box-shadow 0.2s, transform 0.1s;
+  border: 1.5px solid #e0eafc;
+}
+.abmusu-card:hover {
+  box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+  transform: translateY(-4px) scale(1.015);
+  border-color: #b3d8fd;
+}
+.abmusu-card .abmusu-card-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #2a3b4c;
+  margin-bottom: 0.2rem;
+}
+.abmusu-card .abmusu-card-info {
+  font-size: 1.01rem;
+  color: #4a5a6a;
+  margin-bottom: 0.1rem;
+}
+.abmusu-card .abmusu-card-actions {
+  margin-top: 0.8rem;
+  display: flex;
+  gap: 0.8rem;
+}
+.abmusu-card button {
+  padding: 0.55rem 1.3rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.01rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(44,62,80,0.08);
 }
-
-#abmusu-section button:hover {
-  background: #1a2533;
+.abmusu-card .edit-btn {
+  background: #f7b731;
+  color: #fff;
 }
-
-#abmusu-section table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1.5em;
-  font-size: 1em;
+.abmusu-card .edit-btn:hover {
+  background: #f5a623;
+  box-shadow: 0 2px 8px rgba(247,183,49,0.18);
 }
-
-#abmusu-section th, #abmusu-section td {
-  border: 1px solid #ccc;
-  padding: 0.5em;
-  text-align: left;
+.abmusu-card .delete-btn {
+  background: #eb3b5a;
+  color: #fff;
 }
-
-#abmusu-section th {
-  background: #f0f0f0;
-  color: #2a3a4a;
+.abmusu-card .delete-btn:hover {
+  background: #c0392b;
+  box-shadow: 0 2px 8px rgba(235,59,90,0.18);
 }
-
-#abmusu-section tr:nth-child(even) {
-  background: #f9f9f9;
+.abmusu-card .save-btn {
+  background: #20bf6b;
+  color: #fff;
 }
-
-#abmusu-popup {
-  font-family: inherit;
+.abmusu-card .save-btn:hover {
+  background: #11998e;
+  box-shadow: 0 2px 8px rgba(32,191,107,0.18);
 }
+.abmusu-card .cancel-btn {
+  background: #b2bec3;
+  color: #fff;
+}
+.abmusu-card .cancel-btn:hover {
+  background: #636e72;
+  box-shadow: 0 2px 8px rgba(178,190,195,0.18);
+}
+.abmusu-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44,62,80,0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.abmusu-popup-content {
+  background: #fff;
+  padding: 2.2rem 2.7rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 32px rgba(44,62,80,0.20);
+  font-size: 1.13rem;
+  color: #2a3b4c;
+  text-align: center;
+  min-width: 270px;
+}
+/* --- Fin estilo moderno ABM USU --- */
