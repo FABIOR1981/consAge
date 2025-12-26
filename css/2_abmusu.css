@@ -1,179 +1,159 @@
 /* =========================================
-   ABM USUARIOS - ESTILOS ESPECÍFICOS
-   (Sobrescribe estilos base solo en esta sección)
+   ABM USUARIOS - DISEÑO PROFESIONAL
    ========================================= */
 
-/* 1. CONTENEDOR PRINCIPAL: Limpieza y Sombra */
+/* 1. CONTENEDOR PRINCIPAL (La "Tarjeta" blanca) */
 .abmusu-section {
     background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 12px; /* Redondeo moderno */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    max-width: 1000px; /* Ancho controlado */
-    margin: 2rem auto; /* Centrado */
-    border: 1px solid #e2e8f0; /* Borde sutil */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    max-width: 1000px;
+    margin: 20px auto;
+    border: 1px solid #e1e8ed;
 }
 
-/* Título */
-.abmusu-title {
+/* Título de la sección */
+.abmusu-title, .abmusu-section h2 {
+    color: #2c3e50;
     font-size: 1.8rem;
-    font-weight: 700;
-    color: #1e293b; /* Gris oscuro elegante */
-    margin-bottom: 2rem;
-    border-left: 5px solid #3b82f6; /* Acento azul a la izquierda */
+    margin-bottom: 25px;
+    border-left: 5px solid #3498db;
     padding-left: 15px;
 }
 
-/* 2. FORMULARIO: LA SOLUCIÓN GRID (El cambio más importante) */
+/* 2. EL FORMULARIO (GRID DINÁMICO) */
+/* Usamos !important en algunos casos para ganar a los estilos inline del JS */
 .abmusu-form {
-    display: grid;
-    /* Esto crea columnas automáticas de mínimo 220px. 
-       Se adapta solo: 3 columnas en PC, 1 en móvil */
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-    gap: 24px; /* Espacio uniforme entre campos */
-    margin-bottom: 3rem;
-    align-items: end; /* Alinea los inputs y botones abajo */
+    display: grid !important; 
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 20px !important;
+    max-width: 100% !important; /* Ignora el max-width: 600px del JS */
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 40px;
 }
 
-/* Estilo de los Inputs y Selects dentro del ABM */
+/* Estilo de los grupos (Labels + Inputs) */
+.abmusu-form div {
+    display: flex;
+    flex-direction: column;
+}
+
+.abmusu-form label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* Estilo de Inputs y Selects */
 .abmusu-form input, 
 .abmusu-form select {
-    width: 100%;
+    width: 100% !important; /* Ignora el max-width manual del JS */
+    max-width: 100% !important;
     padding: 10px 12px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    background-color: #f8fafc;
     font-size: 0.95rem;
-    color: #334155;
-    transition: all 0.2s ease;
-    box-sizing: border-box; /* Evita que el padding rompa el ancho */
+    background-color: white;
+    transition: all 0.2s;
+    box-sizing: border-box;
 }
 
-/* Efecto Focus (Cuando haces clic para escribir) */
-.abmusu-form input:focus, 
-.abmusu-form select:focus {
+.abmusu-form input:focus {
+    border-color: #3498db;
     outline: none;
-    border-color: #3b82f6;
-    background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Resplandor azul */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-/* Etiquetas (Labels) */
-.abmusu-form label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* Checkbox (Activo) - Ajuste especial */
-.abmusu-form input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin: 0;
-    cursor: pointer;
-    accent-color: #3b82f6;
-}
-
-/* 3. BOTONES DEL FORMULARIO */
-/* Forzamos a los botones a tener su propio espacio */
-.abmusu-buttons-container {
-    grid-column: 1 / -1; /* Ocupa todo el ancho disponible */
-    display: flex;
-    justify-content: flex-end; /* Alineados a la derecha */
+/* 3. BOTONES (Guardar y Cancelar) */
+/* El contenedor de botones al final */
+.abmusu-form > div:last-child {
+    grid-column: 1 / -1; /* Ocupa todo el ancho */
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center;
     gap: 15px;
     margin-top: 10px;
     padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #e2e8f0;
 }
 
-/* Botón Guardar (Primario) */
-.abmusu-btn-save {
-    background-color: #3b82f6;
+#guardar-btn {
+    background: #3498db;
     color: white;
-    padding: 10px 24px;
-    border-radius: 6px;
+    padding: 12px 30px;
     border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.abmusu-btn-save:hover { background-color: #2563eb; }
-
-/* Botón Cancelar (Secundario - Estilo "Ghost") */
-.abmusu-btn-cancel {
-    background-color: transparent;
-    color: #64748b;
-    padding: 10px 24px;
     border-radius: 6px;
-    border: 1px solid #cbd5e1;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
-}
-.abmusu-btn-cancel:hover {
-    background-color: #f1f5f9;
-    color: #ef4444; /* Rojo al pasar el mouse */
-    border-color: #ef4444;
+    transition: background 0.3s;
 }
 
-/* 4. SOBRESCRIBIR LA TABLA (Sin tocar 1_comunes) */
-/* Usamos selectores específicos dentro de .abmusu-section */
+#guardar-btn:hover { background: #2980b9; }
 
-.abmusu-section .table-main-container {
-    box-shadow: none; /* Quitamos sombras viejas si las hubiera */
+#cancelar-btn {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 12px 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-.abmusu-section table {
+#cancelar-btn:hover { background: #e2e8f0; }
+
+/* 4. LA TABLA (Basada en tu captura de F12) */
+#usuarios-table {
     width: 100%;
-    border-collapse: separate; /* Permite bordes redondeados */
-    border-spacing: 0;
-    border: 1px solid #e2e8f0;
+    border-collapse: collapse;
+    margin-top: 20px;
     border-radius: 8px;
     overflow: hidden;
-}
-
-/* Cabecera de tabla moderna */
-.abmusu-section thead th {
-    background-color: #f1f5f9 !important; /* Gris muy claro */
-    color: #475569 !important;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    padding: 16px;
-    border-bottom: 2px solid #e2e8f0;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
-
-/* Celdas con más aire */
-.abmusu-section tbody td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
-    vertical-align: middle;
-}
-
-/* Acciones en la tabla (Botones pequeños) */
-.abmusu-section td button {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    border-radius: 4px;
     border: 1px solid #e2e8f0;
-    background: white;
-    cursor: pointer;
-    margin-right: 4px;
-    transition: background 0.2s;
 }
 
-.abmusu-section td button:hover {
+#usuarios-table thead th {
+    background-color: #2c3e50;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+#usuarios-table tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+/* Efecto cebra para la tabla */
+#usuarios-table tbody tr:nth-child(even) {
     background-color: #f8fafc;
-    border-color: #cbd5e1;
 }
 
-/* Ajuste específico para la columna de acciones para que no se rompa */
-.abmusu-section td:last-child {
-    white-space: nowrap;
+/* Botones dentro de la tabla */
+#usuarios-table button {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    border: 1px solid #cbd5e1;
+    background: white;
+}
+
+#usuarios-table button[data-edit]:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+#usuarios-table button[data-baja]:hover {
+    background: #fee2e2;
+    border-color: #ef4444;
 }
