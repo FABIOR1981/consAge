@@ -6,39 +6,37 @@ export function renderAbmUsu(container) {
     const opcionesRol = APP_CONFIG.roles.map(r => `<option value="${r}">${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join("");
     container.innerHTML = `
         <h2>ABM de Usuarios</h2>
-        <form id="usuario-form" class="abmusu-form" autocomplete="off" style="margin-bottom:1.5em;">
+        <form id="usuario-form" class="abmusu-form" autocomplete="off" style="margin-bottom:1.5em; max-width:600px; margin-left:auto; margin-right:auto;">
             <input type="hidden" id="usuario-index">
-            <div style="display:flex; flex-wrap:wrap; gap:1.2em; align-items:flex-end;">
-                <div style="flex:1 1 220px; min-width:200px;">
-                    <label>Email:<br><input type="email" id="email" required autocomplete="username"></label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.2em;">
+                <div>
+                    <label>Email:<br><input type="email" id="email" required autocomplete="username" style="width:100%;max-width:260px;"></label>
                 </div>
-                <div style="flex:1 1 180px; min-width:160px;">
-                    <label>Nombre:<br><input type="text" id="nombre" required></label>
+                <div>
+                    <label>Nombre:<br><input type="text" id="nombre" required style="width:100%;max-width:220px;"></label>
                 </div>
-                <div style="flex:1 1 120px; min-width:120px;">
-                    <label>Rol:<br><select id="rol">${opcionesRol}</select></label>
+                <div>
+                    <label>Rol:<br><select id="rol" style="width:100%;max-width:160px;">${opcionesRol}</select></label>
                 </div>
-                <div style="flex:1 1 120px; min-width:120px;">
-                    <label>Contraseña:<br><input type="password" id="contrasena" autocomplete="new-password"></label>
-                </div>
-                <div style="flex:1 1 100px; min-width:100px; align-self:center;">
+                <div>
                     <label>Activo:<br><input type="checkbox" id="activo" checked></label>
                 </div>
+                <div>
+                    <label>Tipo Docu:<br><select id="tipdocu" style="width:100%;max-width:120px;">${opcionesTipDocu}</select></label>
+                </div>
+                <div>
+                    <label>Documento:<br><input type="text" id="documento" style="width:100%;max-width:120px;"></label>
+                </div>
+                <div>
+                    <label>Teléfono:<br><input type="text" id="telefono" style="width:100%;max-width:120px;"></label>
+                </div>
+                <div>
+                    <label>Contraseña:<br><input type="password" id="contrasena" autocomplete="new-password" style="width:100%;max-width:160px;"></label>
+                </div>
             </div>
-            <div style="display:flex; flex-wrap:wrap; gap:1.2em; align-items:flex-end; margin-top:1em;">
-                <div style="flex:1 1 120px; min-width:120px;">
-                    <label>Tipo Docu:<br><select id="tipdocu">${opcionesTipDocu}</select></label>
-                </div>
-                <div style="flex:1 1 140px; min-width:120px;">
-                    <label>Documento:<br><input type="text" id="documento"></label>
-                </div>
-                <div style="flex:1 1 140px; min-width:120px;">
-                    <label>Teléfono:<br><input type="text" id="telefono"></label>
-                </div>
-                <div style="flex:0 0 auto; align-self:center;">
-                    <button type="submit" id="guardar-btn">Guardar</button>
-                    <button type="button" id="cancelar-btn">Cancelar</button>
-                </div>
+            <div style="margin-top:1.5em; text-align:center;">
+                <button type="submit" id="guardar-btn">Guardar</button>
+                <button type="button" id="cancelar-btn">Cancelar</button>
             </div>
         </form>
         <table id="usuarios-table" border="1" style="width:100%;">
