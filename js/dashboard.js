@@ -19,7 +19,7 @@ function cargarEstiloAgenda() {
     if (!document.getElementById('agenda-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'css/agenda.css';
+        link.href = 'css/2_agenda.css';
         link.id = 'agenda-css';
         document.head.appendChild(link);
     }
@@ -41,7 +41,7 @@ function cargarEstiloReservas() {
     if (!document.getElementById('reservas-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'css/reservas.css';
+        link.href = 'css/2_reservas.css';
         link.id = 'reservas-css';
         document.head.appendChild(link);
     }
@@ -65,7 +65,7 @@ function cargarEstiloInforme() {
     if (!document.getElementById('informe-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = 'css/informe.css';
+        link.href = 'css/2_informe.css';
         link.id = 'informe-css';
         document.head.appendChild(link);
     }
