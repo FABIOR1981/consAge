@@ -3,12 +3,18 @@
     "email": "fabior1981@gmail.com",
     "nombre": "Fabio Roberto",
     "rol": "admin",
-    "activo": true
+    "activo": true,
+    "tipdocu": "CI",
+    "documento": "30856946",
+    "telefono": ""
   },
   {
     "email": "jorgeroberto1956@gmail.com",
     "nombre": "Jorge Roberto",
     "rol": "usuario",
-    "activo": true
+    "activo": true,
+    "tipdocu": "CI",
+    "documento": "13869158",
+    "telefono": ""
   }
 ]

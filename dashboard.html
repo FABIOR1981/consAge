@@ -22,6 +22,7 @@
                     <button class="btn btn-primary" id="btn-agenda">Agenda</button>
                     <button class="btn btn-primary" id="btn-reservas">Reservas Futuras</button>
                     <button class="btn btn-primary" id="btn-informe">Informe</button>
+                    <button class="btn btn-primary" id="btn-abmusu" style="display:none;">ABM USU</button>
                 </div>
             </div>
 
@@ -47,5 +48,22 @@
     </div>
 
     <script type="module" src="js/dashboard.js"></script>
+    <script>
+    // Mostrar botón ABM USU solo para admin
+    document.addEventListener('DOMContentLoaded', function() {
+        const email = localStorage.getItem('user-email');
+        fetch('data/usuarios.json')
+            .then(r => r.json())
+            .then(usuarios => {
+                const usuario = usuarios.find(u => u.email === email);
+                if (usuario && usuario.rol === 'admin') {
+                    document.getElementById('btn-abmusu').style.display = '';
+                }
+            });
+        document.getElementById('btn-abmusu').onclick = function() {
+            window.location.href = 'abmusu.html';
+        };
+    });
+    </script>
 </body>
 </html>
