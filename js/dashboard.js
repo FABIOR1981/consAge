@@ -27,27 +27,65 @@ function mostrarSeccion(seccion) {
         welcome.innerText = "Panel de Gestión";
     }
 
-    // 4. Lógica para activar la sección seleccionada
-    if (seccion === 'agenda') {
+    // ================= ZONA DE SECCIONES =================
+
+    // --- Sección Agenda ---
+    function cargarEstiloAgenda() {
+        if (!document.getElementById('agenda-css')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/agenda.css';
+            link.id = 'agenda-css';
+            document.head.appendChild(link);
+        }
+    }
+
+    function mostrarAgenda() {
+        cargarEstiloAgenda();
         const sec = document.getElementById('agenda-section');
         const cont = document.getElementById('agenda-container');
         if (sec && cont) {
             sec.style.display = 'block';
             renderAgenda(cont);
         }
-    } 
-    else if (seccion === 'mis-reservas-futuras') {
+    }
+
+    // --- Sección Reservas Futuras ---
+    function cargarEstiloReservas() {
+        if (!document.getElementById('reservas-css')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/reservas.css';
+            link.id = 'reservas-css';
+            document.head.appendChild(link);
+        }
+    }
+
+    function mostrarReservas() {
+        cargarEstiloReservas();
         const sec = document.getElementById('reservas-section');
         const cont = document.getElementById('reservas-container');
         if (sec && cont) {
             sec.style.display = 'block';
-            // Cargamos dinámicamente la función desde el módulo de informes
             import('./informe_modular.js').then(mod => {
                 mod.renderMisReservasFuturas(cont);
             });
         }
-    } 
-    else if (seccion === 'informe') {
+    }
+
+    // --- Sección Informe ---
+    function cargarEstiloInforme() {
+        if (!document.getElementById('informe-css')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/informe.css';
+            link.id = 'informe-css';
+            document.head.appendChild(link);
+        }
+    }
+
+    function mostrarInforme() {
+        cargarEstiloInforme();
         const sec = document.getElementById('informe-section');
         const cont = document.getElementById('informe-container');
         if (sec && cont) {
@@ -55,12 +93,24 @@ function mostrarSeccion(seccion) {
             renderInforme(cont);
         }
     }
-    else if (seccion === 'abmusu') {
+
+    // --- Sección ABM USU ---
+    function cargarEstiloAbmUsu() {
+        if (!document.getElementById('abmusu-css')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/abmusu.css';
+            link.id = 'abmusu-css';
+            document.head.appendChild(link);
+        }
+    }
+
+    function mostrarAbmUsu() {
+        cargarEstiloAbmUsu();
         const sec = document.getElementById('abmusu-section');
         const cont = document.getElementById('abmusu-container');
         if (sec && cont) {
             sec.style.display = 'block';
-            // Cargar el módulo de ABM USUARIOS (puedes reemplazar esto por tu propio renderizador)
             import('./abmusu.js').then(mod => {
                 if (mod.renderAbmUsu) {
                     mod.renderAbmUsu(cont);
@@ -69,6 +119,36 @@ function mostrarSeccion(seccion) {
                 }
             });
         }
+    }
+
+    // --- Controlador de Secciones ---
+    function mostrarSeccion(seccion) {
+        // 1. IDs de las secciones definidos en dashboard.html
+        const seccionesIds = [
+            'agenda-section', 
+            'reservas-section', 
+            'informe-section', 
+            'admin-section',
+            'abmusu-section'
+        ];
+
+        // 2. Ocultar todas las secciones para limpiar la pantalla
+        seccionesIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        // 3. Actualizar el título principal (quitar el "Cargando...")
+        const welcome = document.getElementById('welcome-msg');
+        if (welcome) {
+            welcome.innerText = "Panel de Gestión";
+        }
+
+        // 4. Mostrar la sección correspondiente
+        if (seccion === 'agenda') mostrarAgenda();
+        else if (seccion === 'mis-reservas-futuras') mostrarReservas();
+        else if (seccion === 'informe') mostrarInforme();
+        else if (seccion === 'abmusu') mostrarAbmUsu();
     }
 }
 
