@@ -1,166 +1,179 @@
-/* --- ABM USU: Estilo moderno tipo card --- */
+/* =========================================
+   ABM USUARIOS - ESTILOS ESPECÍFICOS
+   (Sobrescribe estilos base solo en esta sección)
+   ========================================= */
+
+/* 1. CONTENEDOR PRINCIPAL: Limpieza y Sombra */
 .abmusu-section {
-  padding: 2.5rem 1rem;
-  background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(44,62,80,0.10);
-  max-width: 1000px;
-  margin: 2.5rem auto;
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px; /* Redondeo moderno */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-width: 1000px; /* Ancho controlado */
+    margin: 2rem auto; /* Centrado */
+    border: 1px solid #e2e8f0; /* Borde sutil */
 }
+
+/* Título */
 .abmusu-title {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #2a3b4c;
-  margin-bottom: 2rem;
-  text-align: center;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 8px #e0eafc;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e293b; /* Gris oscuro elegante */
+    margin-bottom: 2rem;
+    border-left: 5px solid #3b82f6; /* Acento azul a la izquierda */
+    padding-left: 15px;
 }
+
+/* 2. FORMULARIO: LA SOLUCIÓN GRID (El cambio más importante) */
 .abmusu-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem;
-  margin-bottom: 2.5rem;
-  background: #fff;
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(44,62,80,0.10);
-  align-items: flex-end;
+    display: grid;
+    /* Esto crea columnas automáticas de mínimo 220px. 
+       Se adapta solo: 3 columnas en PC, 1 en móvil */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+    gap: 24px; /* Espacio uniforme entre campos */
+    margin-bottom: 3rem;
+    align-items: end; /* Alinea los inputs y botones abajo */
 }
-.abmusu-form input, .abmusu-form select {
-  flex: 1 1 180px;
-  padding: 0.85rem 1.1rem;
-  border: 1.5px solid #b2bec3;
-  border-radius: 7px;
-  font-size: 1.05rem;
-  background: #f5f7fa;
-  transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 2px rgba(44,62,80,0.04);
+
+/* Estilo de los Inputs y Selects dentro del ABM */
+.abmusu-form input, 
+.abmusu-form select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    font-size: 0.95rem;
+    color: #334155;
+    transition: all 0.2s ease;
+    box-sizing: border-box; /* Evita que el padding rompa el ancho */
 }
-.abmusu-form input:focus, .abmusu-form select:focus {
-  border-color: #4f8cff;
-  outline: none;
-  box-shadow: 0 0 0 2px #b3d8fd;
+
+/* Efecto Focus (Cuando haces clic para escribir) */
+.abmusu-form input:focus, 
+.abmusu-form select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Resplandor azul */
 }
-.abmusu-form button {
-  padding: 0.85rem 2.2rem;
-  background: linear-gradient(90deg, #4f8cff 0%, #38b6ff 100%);
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  font-size: 1.08rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(79,140,255,0.13);
-  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-  margin-left: 0.5rem;
+
+/* Etiquetas (Labels) */
+.abmusu-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
-.abmusu-form button:hover {
-  background: linear-gradient(90deg, #38b6ff 0%, #4f8cff 100%);
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 4px 16px rgba(79,140,255,0.18);
+
+/* Checkbox (Activo) - Ajuste especial */
+.abmusu-form input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #3b82f6;
 }
-.abmusu-list {
-  margin-top: 2.5rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 2rem;
+
+/* 3. BOTONES DEL FORMULARIO */
+/* Forzamos a los botones a tener su propio espacio */
+.abmusu-buttons-container {
+    grid-column: 1 / -1; /* Ocupa todo el ancho disponible */
+    display: flex;
+    justify-content: flex-end; /* Alineados a la derecha */
+    gap: 15px;
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
 }
-.abmusu-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(44,62,80,0.13);
-  padding: 1.7rem 1.3rem 1.3rem 1.3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  position: relative;
-  transition: box-shadow 0.2s, transform 0.1s;
-  border: 1.5px solid #e0eafc;
+
+/* Botón Guardar (Primario) */
+.abmusu-btn-save {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
 }
-.abmusu-card:hover {
-  box-shadow: 0 8px 32px rgba(44,62,80,0.18);
-  transform: translateY(-4px) scale(1.015);
-  border-color: #b3d8fd;
+.abmusu-btn-save:hover { background-color: #2563eb; }
+
+/* Botón Cancelar (Secundario - Estilo "Ghost") */
+.abmusu-btn-cancel {
+    background-color: transparent;
+    color: #64748b;
+    padding: 10px 24px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
 }
-.abmusu-card .abmusu-card-title {
-  font-size: 1.18rem;
-  font-weight: 700;
-  color: #2a3b4c;
-  margin-bottom: 0.2rem;
+.abmusu-btn-cancel:hover {
+    background-color: #f1f5f9;
+    color: #ef4444; /* Rojo al pasar el mouse */
+    border-color: #ef4444;
 }
-.abmusu-card .abmusu-card-info {
-  font-size: 1.01rem;
-  color: #4a5a6a;
-  margin-bottom: 0.1rem;
+
+/* 4. SOBRESCRIBIR LA TABLA (Sin tocar 1_comunes) */
+/* Usamos selectores específicos dentro de .abmusu-section */
+
+.abmusu-section .table-main-container {
+    box-shadow: none; /* Quitamos sombras viejas si las hubiera */
 }
-.abmusu-card .abmusu-card-actions {
-  margin-top: 0.8rem;
-  display: flex;
-  gap: 0.8rem;
+
+.abmusu-section table {
+    width: 100%;
+    border-collapse: separate; /* Permite bordes redondeados */
+    border-spacing: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
 }
-.abmusu-card button {
-  padding: 0.55rem 1.3rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.01rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+
+/* Cabecera de tabla moderna */
+.abmusu-section thead th {
+    background-color: #f1f5f9 !important; /* Gris muy claro */
+    color: #475569 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    padding: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
-.abmusu-card .edit-btn {
-  background: #f7b731;
-  color: #fff;
+
+/* Celdas con más aire */
+.abmusu-section tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
 }
-.abmusu-card .edit-btn:hover {
-  background: #f5a623;
-  box-shadow: 0 2px 8px rgba(247,183,49,0.18);
+
+/* Acciones en la tabla (Botones pequeños) */
+.abmusu-section td button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
+    margin-right: 4px;
+    transition: background 0.2s;
 }
-.abmusu-card .delete-btn {
-  background: #eb3b5a;
-  color: #fff;
+
+.abmusu-section td button:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
 }
-.abmusu-card .delete-btn:hover {
-  background: #c0392b;
-  box-shadow: 0 2px 8px rgba(235,59,90,0.18);
+
+/* Ajuste específico para la columna de acciones para que no se rompa */
+.abmusu-section td:last-child {
+    white-space: nowrap;
 }
-.abmusu-card .save-btn {
-  background: #20bf6b;
-  color: #fff;
-}
-.abmusu-card .save-btn:hover {
-  background: #11998e;
-  box-shadow: 0 2px 8px rgba(32,191,107,0.18);
-}
-.abmusu-card .cancel-btn {
-  background: #b2bec3;
-  color: #fff;
-}
-.abmusu-card .cancel-btn:hover {
-  background: #636e72;
-  box-shadow: 0 2px 8px rgba(178,190,195,0.18);
-}
-.abmusu-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(44,62,80,0.13);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.abmusu-popup-content {
-  background: #fff;
-  padding: 2.2rem 2.7rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 32px rgba(44,62,80,0.20);
-  font-size: 1.13rem;
-  color: #2a3b4c;
-  text-align: center;
-  min-width: 270px;
-}
-/* --- Fin estilo moderno ABM USU --- */
