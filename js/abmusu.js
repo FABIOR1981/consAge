@@ -13,6 +13,9 @@ export function renderAbmUsu(container) {
                     <label>Email:<br><input type="email" id="email" required autocomplete="username" style="width:100%;max-width:260px;"></label>
                 </div>
                 <div>
+                    <label>Confirmar Email:<br><input type="email" id="email2" required autocomplete="username" style="width:100%;max-width:260px;"></label>
+                </div>
+                <div>
                     <label>Nombre:<br><input type="text" id="nombre" required style="width:100%;max-width:220px;"></label>
                 </div>
                 <div>
@@ -32,6 +35,9 @@ export function renderAbmUsu(container) {
                 </div>
                 <div>
                     <label>Contraseña:<br><input type="password" id="contrasena" autocomplete="new-password" style="width:100%;max-width:160px;"></label>
+                </div>
+                <div>
+                    <label>Confirmar Contraseña:<br><input type="password" id="contrasena2" autocomplete="new-password" style="width:100%;max-width:160px;"></label>
                 </div>
             </div>
             <div style="margin-top:1.5em; text-align:center;">
@@ -127,14 +133,34 @@ export function renderAbmUsu(container) {
         }
     }
 
-    container.querySelector('#usuario-form').onsubmit = function(e) {
+    container.querySelector('#usuario-form').onsubmit = async function(e) {
         e.preventDefault();
         const idx = container.querySelector('#usuario-index').value;
+        const email = container.querySelector('#email').value.trim();
+        const email2 = container.querySelector('#email2').value.trim();
+        const contrasena = container.querySelector('#contrasena').value;
+        const contrasena2 = container.querySelector('#contrasena2').value;
+        if (email !== email2) {
+            mostrarPopup('Los emails no coinciden.', 'error', 4000);
+            return;
+        }
+        if (contrasena !== contrasena2) {
+            mostrarPopup('Las contraseñas no coinciden.', 'error', 4000);
+            return;
+        }
+        // Cifrado de contraseña (hash simple, ejemplo)
+        async function hashPassword(pw) {
+            const enc = new TextEncoder();
+            const data = enc.encode(pw);
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        const hashContrasena = contrasena ? await hashPassword(contrasena) : '';
         const nuevoUsuario = {
-            email: container.querySelector('#email').value,
+            email,
             nombre: container.querySelector('#nombre').value,
             rol: container.querySelector('#rol').value,
-            contrasena: container.querySelector('#contrasena').value,
+            contrasena: hashContrasena,
             tipdocu: container.querySelector('#tipdocu').value,
             documento: container.querySelector('#documento').value,
             telefono: container.querySelector('#telefono').value,
@@ -162,9 +188,11 @@ export function renderAbmUsu(container) {
             const u = usuarios[idx];
             container.querySelector('#usuario-index').value = idx;
             container.querySelector('#email').value = u.email;
+            container.querySelector('#email2').value = u.email;
             container.querySelector('#nombre').value = u.nombre;
             container.querySelector('#rol').value = u.rol;
-            container.querySelector('#contrasena').value = u.contrasena || '';
+            container.querySelector('#contrasena').value = '';
+            container.querySelector('#contrasena2').value = '';
             container.querySelector('#tipdocu').value = u.tipdocu || APP_CONFIG.tiposDocumento[0];
             container.querySelector('#documento').value = u.documento || '';
             container.querySelector('#telefono').value = u.telefono || '';
