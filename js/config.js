@@ -1,4 +1,5 @@
 export const APP_CONFIG = {
+    tiposDocumento: ["CI", "DNI", "Otros"],
     nombreProyecto: "Agenda de Consultorios",
     consultorios: [1, 2, 3, 4, 5],
     // Asignamos un colorId de Google a cada consultorio

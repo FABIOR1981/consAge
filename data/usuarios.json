@@ -6,7 +6,8 @@
     "activo": true,
     "tipdocu": "CI",
     "documento": "30856946",
-    "telefono": ""
+    "telefono": "",
+    "contrasena": ""
   },
   {
     "email": "jorgeroberto1956@gmail.com",
@@ -15,7 +16,8 @@
     "activo": true,
     "tipdocu": "CI",
     "documento": "13869158",
-    "telefono": ""
+    "telefono": "",
+    "contrasena": ""
   },
   {
     "email": "Licritamorales@gmail.com",
@@ -24,6 +26,7 @@
     "tipdocu": "CI",
     "documento": "62366202",
     "telefono": "",
+    "contrasena": "",
     "activo": true
   }
 ]

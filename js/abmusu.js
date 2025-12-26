@@ -1,5 +1,8 @@
 // Renderizador simple para ABM USUARIOS
+import { APP_CONFIG } from './config.js';
 export function renderAbmUsu(container) {
+    // Generar las opciones del combo de tipo de documento
+    const opcionesTipDocu = APP_CONFIG.tiposDocumento.map(t => `<option value="${t}">${t}</option>`).join("");
     container.innerHTML = `
         <h2>ABM de Usuarios</h2>
         <form id="usuario-form" style="margin-bottom:1em;">
@@ -7,7 +10,7 @@ export function renderAbmUsu(container) {
             <label>Email: <input type="email" id="email" required></label>
             <label>Nombre: <input type="text" id="nombre" required></label>
             <label>Rol: <select id="rol"><option value="admin">Admin</option><option value="usuario">Usuario</option></select></label>
-            <label>Tipo Docu: <input type="text" id="tipdocu"></label>
+            <label>Tipo Docu: <select id="tipdocu">${opcionesTipDocu}</select></label>
             <label>Documento: <input type="text" id="documento"></label>
             <label>Teléfono: <input type="text" id="telefono"></label>
             <button type="submit" id="guardar-btn">Guardar</button>
@@ -136,7 +139,7 @@ export function renderAbmUsu(container) {
             container.querySelector('#email').value = u.email;
             container.querySelector('#nombre').value = u.nombre;
             container.querySelector('#rol').value = u.rol;
-            container.querySelector('#tipdocu').value = u.tipdocu || '';
+            container.querySelector('#tipdocu').value = u.tipdocu || APP_CONFIG.tiposDocumento[0];
             container.querySelector('#documento').value = u.documento || '';
             container.querySelector('#telefono').value = u.telefono || '';
         }
