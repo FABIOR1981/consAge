@@ -5,21 +5,42 @@ export function renderAbmUsu(container) {
     const opcionesTipDocu = APP_CONFIG.tiposDocumento.map(t => `<option value="${t}">${t}</option>`).join("");
     container.innerHTML = `
         <h2>ABM de Usuarios</h2>
-        <form id="usuario-form" style="margin-bottom:1em;">
+        <form id="usuario-form" class="abmusu-form" autocomplete="off" style="margin-bottom:1.5em;">
             <input type="hidden" id="usuario-index">
-            <label>Email: <input type="email" id="email" required></label>
-            <label>Nombre: <input type="text" id="nombre" required></label>
-            <label>Rol: <select id="rol"><option value="admin">Admin</option><option value="usuario">Usuario</option></select></label>
-            <label>Tipo Docu: <select id="tipdocu">${opcionesTipDocu}</select></label>
-            <label>Documento: <input type="text" id="documento"></label>
-            <label>Teléfono: <input type="text" id="telefono"></label>
-            <button type="submit" id="guardar-btn">Guardar</button>
-            <button type="button" id="cancelar-btn">Cancelar</button>
+            <div style="display:flex; flex-wrap:wrap; gap:1.2em; align-items:flex-end;">
+                <div style="flex:1 1 220px; min-width:200px;">
+                    <label>Email:<br><input type="email" id="email" required autocomplete="username"></label>
+                </div>
+                <div style="flex:1 1 180px; min-width:160px;">
+                    <label>Nombre:<br><input type="text" id="nombre" required></label>
+                </div>
+                <div style="flex:1 1 120px; min-width:120px;">
+                    <label>Rol:<br><select id="rol"><option value="admin">Admin</option><option value="usuario">Usuario</option></select></label>
+                </div>
+                <div style="flex:1 1 120px; min-width:120px;">
+                    <label>Contraseña:<br><input type="password" id="contrasena" autocomplete="new-password"></label>
+                </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:1.2em; align-items:flex-end; margin-top:1em;">
+                <div style="flex:1 1 120px; min-width:120px;">
+                    <label>Tipo Docu:<br><select id="tipdocu">${opcionesTipDocu}</select></label>
+                </div>
+                <div style="flex:1 1 140px; min-width:120px;">
+                    <label>Documento:<br><input type="text" id="documento"></label>
+                </div>
+                <div style="flex:1 1 140px; min-width:120px;">
+                    <label>Teléfono:<br><input type="text" id="telefono"></label>
+                </div>
+                <div style="flex:0 0 auto; align-self:center;">
+                    <button type="submit" id="guardar-btn">Guardar</button>
+                    <button type="button" id="cancelar-btn">Cancelar</button>
+                </div>
+            </div>
         </form>
         <table id="usuarios-table" border="1" style="width:100%;">
             <thead>
                 <tr>
-                    <th>Email</th><th>Nombre</th><th>Rol</th><th>Tipo Docu</th><th>Documento</th><th>Teléfono</th><th>Activo</th><th>Acciones</th>
+                    <th>Email</th><th>Nombre</th><th>Rol</th><th>Contraseña</th><th>Tipo Docu</th><th>Documento</th><th>Teléfono</th><th>Activo</th><th>Acciones</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -44,6 +65,7 @@ export function renderAbmUsu(container) {
                 <td>${u.email}</td>
                 <td>${u.nombre}</td>
                 <td>${u.rol}</td>
+                <td>${u.contrasena ? '••••••' : ''}</td>
                 <td>${u.tipdocu || ''}</td>
                 <td>${u.documento || ''}</td>
                 <td>${u.telefono || ''}</td>
@@ -110,6 +132,7 @@ export function renderAbmUsu(container) {
             email: container.querySelector('#email').value,
             nombre: container.querySelector('#nombre').value,
             rol: container.querySelector('#rol').value,
+            contrasena: container.querySelector('#contrasena').value,
             tipdocu: container.querySelector('#tipdocu').value,
             documento: container.querySelector('#documento').value,
             telefono: container.querySelector('#telefono').value,
@@ -139,6 +162,7 @@ export function renderAbmUsu(container) {
             container.querySelector('#email').value = u.email;
             container.querySelector('#nombre').value = u.nombre;
             container.querySelector('#rol').value = u.rol;
+            container.querySelector('#contrasena').value = u.contrasena || '';
             container.querySelector('#tipdocu').value = u.tipdocu || APP_CONFIG.tiposDocumento[0];
             container.querySelector('#documento').value = u.documento || '';
             container.querySelector('#telefono').value = u.telefono || '';
