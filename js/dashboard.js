@@ -4,8 +4,18 @@ import { renderInforme } from './informe_modular.js';
 
 // ================= ZONA DE SECCIONES =================
 
+// --- Utilidad para limpiar CSS de sección ---
+function limpiarCssSeccion() {
+    const ids = ['agenda-css', 'reservas-css', 'informe-css', 'abmusu-css'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
+}
+
 // --- Sección Agenda ---
 function cargarEstiloAgenda() {
+    limpiarCssSeccion();
     if (!document.getElementById('agenda-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -27,6 +37,7 @@ function mostrarAgenda() {
 
 // --- Sección Reservas Futuras ---
 function cargarEstiloReservas() {
+    limpiarCssSeccion();
     if (!document.getElementById('reservas-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -50,6 +61,7 @@ function mostrarReservas() {
 
 // --- Sección Informe ---
 function cargarEstiloInforme() {
+    limpiarCssSeccion();
     if (!document.getElementById('informe-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -71,6 +83,7 @@ function mostrarInforme() {
 
 // --- Sección ABM USU ---
 function cargarEstiloAbmUsu() {
+    limpiarCssSeccion();
     if (!document.getElementById('abmusu-css')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
