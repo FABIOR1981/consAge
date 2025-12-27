@@ -132,7 +132,10 @@ export async function renderInforme(container) {
 }
 
 async function renderComboUsuariosInforme(container) {
-    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+    let user = null;
+    try {
+        user = JSON.parse(localStorage.getItem('usuarioActual')) || JSON.parse(sessionStorage.getItem('usuarioActual'));
+    } catch {}
     if (!user) return;
 
     let esAdmin = false;
