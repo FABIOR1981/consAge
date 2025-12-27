@@ -10,24 +10,19 @@ export async function renderMisReservasFuturas(container) {
     let comboHtml = '';
     const hoy = new Date();
     const fechaInicio = hoy.toISOString().split('T')[0];
-    // 90 días a futuro
     const fechaFin = new Date(hoy.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    
-    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+    const user = JSON.parse(localStorage.getItem('usuario_logueado'));
     if (!user) return;
-
     try {
-        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const resp = await fetch('data/usuarios.json');
         const js = await resp.json();
-        if (Array.isArray(js.usuarios)) {
-            const actual = js.usuarios.find(u => u.email === user.email);
+        if (Array.isArray(js)) {
+            const actual = js.find(u => (u.email && user.email && u.email === user.email) || (u.documento && user.documento && u.documento === user.documento));
             if (actual && actual.rol === 'admin') esAdmin = true;
-            usuariosLista = js.usuarios.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+            usuariosLista = js.slice().sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
         }
     } catch (e) { console.error(e); }
-
-    let usuarioFiltro = user.email;
-
+    let usuarioFiltro = user.email || user.documento;
     if (esAdmin) {
         usuarioFiltro = '';
         comboHtml = `
@@ -35,7 +30,7 @@ export async function renderMisReservasFuturas(container) {
             <label style="font-weight:600; color:#2c3e50;">Filtrar por Usuario: 
                 <select id="combo-usuario-futuras" style="padding: 8px; border: 1px solid #ced4da; border-radius: 4px; margin-left: 10px;">
                     <option value="">Seleccione un usuario</option>
-                    ${usuariosLista.map(u => `<option value="${u.email}">${u.nombre || u.email}</option>`).join('')}
+                    ${usuariosLista.map(u => `<option value="${u.email || u.documento}">${u.nombre || u.email || u.documento}</option>`).join('')}
                 </select>
             </label>
         </div>`;
@@ -53,32 +48,16 @@ export async function renderMisReservasFuturas(container) {
         </div>
     </div>`;
 
-    const urlBase = `/.netlify/functions/informe_reservas?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`;
-
-    const cargarReservas = async (usuarioEmail) => {
+    // Aquí deberías implementar la carga de reservas desde un archivo local o variable, ya que no hay backend
+    const cargarReservas = async (usuarioFiltro) => {
         const resultContainer = container.querySelector('#contenedor-resultados');
         const totalDiv = container.querySelector('#total-horas-informe');
-        
         resultContainer.innerHTML = '<p>Cargando datos...</p>';
-        
-        let finalUrl = urlBase;
-        if (usuarioEmail) finalUrl += `&usuario=${encodeURIComponent(usuarioEmail)}`;
-
-        try {
-            const resp = await fetch(finalUrl);
-            const data = await resp.json();
-            let reservas = Array.isArray(data) ? data : (data.reservas || []);
-            
-            // Filtrar solo reservas futuras
-            const ahora = new Date();
-            reservas = reservas.filter(r => r.start && new Date(r.start) > ahora);
-            
-            // Llamamos a la función que crea la tabla con las clases ZEBRA correctas
-            renderReservasTable(reservas, resultContainer, totalDiv, true); // true indica que es vista "Futuras"
-            
-        } catch (err) {
-            resultContainer.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
-        }
+        // Simulación: no hay reservas locales, solo muestra mensaje
+        setTimeout(() => {
+            resultContainer.innerHTML = '<p>No hay reservas futuras disponibles en modo local.</p>';
+            totalDiv.innerHTML = '';
+        }, 500);
     };
 
     if (esAdmin) {
