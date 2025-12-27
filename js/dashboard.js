@@ -178,10 +178,16 @@ const initDashboard = async () => {
 
     // Mostrar u ocultar el botón ABM USU solo para admin
     try {
-        const email = user.email;
         const resp = await fetch('data/usuarios.json');
         const usuarios = await resp.json();
-        const usuario = usuarios.find(u => u.email === email);
+        // Buscar por email o documento
+        let usuario = null;
+        if (user.email) {
+            usuario = usuarios.find(u => u.email === user.email);
+        }
+        if (!usuario && user.documento) {
+            usuario = usuarios.find(u => u.documento === user.documento);
+        }
         if (usuario && usuario.rol === 'admin') {
             if (btnAbmUsu) btnAbmUsu.style.display = '';
         } else {
