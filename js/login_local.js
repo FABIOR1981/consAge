@@ -16,15 +16,8 @@ async function login() {
         const response = await fetch('data/usuarios.json');
         if (!response.ok) throw new Error('No se pudo cargar la base de usuarios.');
         const usuarios = await response.json();
-        const hashPassword = async (pw) => {
-            if (!pw) return '';
-            const enc = new TextEncoder();
-            const data = enc.encode(pw);
-            const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        };
-        const hashed = await hashPassword(contrasena);
-        const user = usuarios.find(u => u.documento === documento && u.contrasena === hashed);
+        // Comparar contraseña en texto plano (sin hash)
+        const user = usuarios.find(u => u.documento === documento && u.contrasena === contrasena);
         if (user) {
             // Guardar usuario autenticado en localStorage (sin contraseña)
             const { contrasena, ...userSinPass } = user;
