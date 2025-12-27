@@ -222,7 +222,10 @@ async function cargarHorarios(targetContainer) {
  * Finalizar la reserva enviando los datos al backend
  */
 async function ejecutarReserva(hora, targetContainer) {
-    const user = window.netlifyIdentity.currentUser();
+    let user = null;
+    try {
+        user = JSON.parse(localStorage.getItem('usuarioActual')) || JSON.parse(sessionStorage.getItem('usuarioActual'));
+    } catch {}
     const texto = `¿Confirmar reserva del Consultorio ${seleccion.consultorio} para el día ${seleccion.fecha} a las ${hora} hs?`;
     
     if (!confirm(texto)) return;
@@ -240,7 +243,7 @@ async function ejecutarReserva(hora, targetContainer) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: user.email,
-                nombre: user.user_metadata?.full_name || user.email,
+                nombre: user.nombre || user.email,
                 consultorio: seleccion.consultorio,
                 fecha: seleccion.fecha,
                 hora: hh,
@@ -252,7 +255,7 @@ async function ejecutarReserva(hora, targetContainer) {
             alert("✅ Turno agendado correctamente. Se ha enviado un correo de confirmación.");
             // Descargar PDF y luego abrir WhatsApp (sin declarar función aparte)
             const datosReserva = {
-                nombre: user.user_metadata?.full_name || user.email,
+                nombre: user.nombre || user.email,
                 fecha: seleccion.fecha,
                 hora: `${hh.toString().padStart(2, '0')}:00`,
                 consultorio: seleccion.consultorio,
