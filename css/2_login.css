@@ -1,0 +1,59 @@
+/* 2_login.css - Estilos para pantalla de login */
+body {
+    background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.login-container {
+    background: #fff;
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    min-width: 320px;
+    max-width: 350px;
+    width: 100%;
+    text-align: center;
+}
+.login-container h2 {
+    margin-bottom: 1.5rem;
+    color: #2a5298;
+    font-weight: 600;
+}
+.login-container input {
+    display: block;
+    width: 100%;
+    margin-bottom: 1.2rem;
+    padding: 0.7rem;
+    border: 1px solid #b6c6e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #f7fafd;
+    transition: border 0.2s;
+}
+.login-container input:focus {
+    border: 1.5px solid #2a5298;
+    outline: none;
+}
+.login-container button {
+    width: 100%;
+    padding: 0.7rem;
+    background: #2a5298;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.login-container button:hover {
+    background: #1e3c72;
+}
+.error {
+    color: #d32f2f;
+    margin-bottom: 1rem;
+    font-size: 0.98rem;
+}
