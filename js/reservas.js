@@ -5,8 +5,11 @@
 export async function renderReservas(container) {
   // Limpiar contenedor
   container.innerHTML = '';
-  // Obtener usuario actual
-  const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+  // Obtener usuario actual desde localStorage/sessionStorage
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem('usuarioActual')) || JSON.parse(sessionStorage.getItem('usuarioActual'));
+  } catch {}
   if (!user) return;
   // Consultar al backend el rol real del usuario
   let esAdmin = false;
