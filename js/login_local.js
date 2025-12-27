@@ -26,7 +26,9 @@ async function login() {
         const hashed = await hashPassword(contrasena);
         const user = usuarios.find(u => u.documento === documento && u.contrasena === hashed);
         if (user) {
-            // Redirigir o mostrar mensaje de éxito
+            // Guardar usuario autenticado en localStorage (sin contraseña)
+            const { contrasena, ...userSinPass } = user;
+            localStorage.setItem('usuarioActual', JSON.stringify(userSinPass));
             window.location.href = 'dashboard.html';
         } else {
             errorDiv.textContent = 'Documento o contraseña incorrectos.';

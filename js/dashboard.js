@@ -143,15 +143,13 @@ function mostrarSeccion(seccion) {
  * Configuración inicial del Dashboard al cargar la página
  */
 const initDashboard = async () => {
-    // Verificar si el usuario está autenticado mediante Netlify Identity
-    const user = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
-    
+    // Verificar si el usuario está autenticado mediante localStorage
+    const user = JSON.parse(localStorage.getItem('usuarioActual'));
     if (!user) {
         console.warn("Usuario no autenticado, redirigiendo al login...");
         window.location.href = "index.html";
         return;
     }
-
     // Mostrar el email del usuario en la barra de navegación
     const emailEl = document.getElementById('user-email');
     if (emailEl) emailEl.innerText = user.email;
@@ -171,7 +169,8 @@ const initDashboard = async () => {
 
     if (btnLogout) {
         btnLogout.onclick = () => {
-            window.netlifyIdentity.logout();
+            localStorage.removeItem('usuarioActual');
+            window.location.href = 'index.html';
         };
     }
 

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultorios - Modo Mantenimiento</title>
+    <link rel="stylesheet" href="css/comunes.css">
+    <!-- <link rel="stylesheet" href="css/informe.css"> Solo en informe.html -->
+    <!-- Eliminada la importación de informe_modular.css para evitar conflictos de estilos -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestión de Consultorios</h1>
+            <div class="status-badge">Modo Mantenimiento</div>
+        </header>
+
+        <main>
+            <p>Estamos configurando el sistema de agenda para los consultorios.</p>
+            <p>Si eres personal autorizado, inicia sesión para acceder al panel.</p>
+            
+            <div data-netlify-identity-button class="login-btn"></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Sistema de Consultorios</p>
+        </footer>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>
