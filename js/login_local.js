@@ -24,8 +24,10 @@ async function login() {
             try {
                 localStorage.setItem('usuarioActual', JSON.stringify(userSinPass));
                 sessionStorage.setItem('usuarioActual', JSON.stringify(userSinPass)); // Fallback
+                console.log('[LOGIN] Guardado usuarioActual:', userSinPass);
                 // Verificar inmediatamente si se guardó correctamente
                 const testUser = localStorage.getItem('usuarioActual');
+                console.log('[LOGIN] Leído de localStorage:', testUser);
                 if (!testUser) {
                     errorDiv.textContent = 'No se pudo guardar el usuario en localStorage.';
                     return;

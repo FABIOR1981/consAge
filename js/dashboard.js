@@ -146,8 +146,12 @@ const initDashboard = async () => {
     // Verificar si el usuario está autenticado mediante localStorage/sessionStorage
     let user = null;
     try {
-        user = JSON.parse(localStorage.getItem('usuarioActual')) || JSON.parse(sessionStorage.getItem('usuarioActual'));
-    } catch {}
+        const local = localStorage.getItem('usuarioActual');
+        const session = sessionStorage.getItem('usuarioActual');
+        console.log('[DASHBOARD] localStorage:', local);
+        console.log('[DASHBOARD] sessionStorage:', session);
+        user = local ? JSON.parse(local) : (session ? JSON.parse(session) : null);
+    } catch (e) { console.log('[DASHBOARD] Error leyendo usuario:', e); }
     if (!user) {
         console.warn("Usuario no autenticado, redirigiendo al login...");
         window.location.href = "index.html";
