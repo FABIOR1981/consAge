@@ -143,15 +143,18 @@ function mostrarSeccion(seccion) {
  * Configuración inicial del Dashboard al cargar la página
  */
 const initDashboard = async () => {
-    // Verificar si el usuario está autenticado localmente (por ejemplo, en localStorage)
-    const user = JSON.parse(localStorage.getItem('usuario_logueado'));
+    // Verificar si el usuario está autenticado mediante Netlify Identity
+    const user = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
+    
     if (!user) {
-        window.location.href = "index2.html";
+        console.warn("Usuario no autenticado, redirigiendo al login...");
+        window.location.href = "index.html";
         return;
     }
-    // Mostrar el email o documento del usuario en la barra de navegación
+
+    // Mostrar el email del usuario en la barra de navegación
     const emailEl = document.getElementById('user-email');
-    if (emailEl) emailEl.innerText = user.email || user.documento;
+    if (emailEl) emailEl.innerText = user.email;
 
     // Configurar los eventos de los botones del menú
     const btnAgenda = document.getElementById('btn-agenda');
@@ -168,8 +171,7 @@ const initDashboard = async () => {
 
     if (btnLogout) {
         btnLogout.onclick = () => {
-            localStorage.removeItem('usuario_logueado');
-            window.location.href = "index2.html";
+            window.netlifyIdentity.logout();
         };
     }
 
@@ -178,16 +180,10 @@ const initDashboard = async () => {
 
     // Mostrar u ocultar el botón ABM USU solo para admin
     try {
+        const email = user.email;
         const resp = await fetch('data/usuarios.json');
         const usuarios = await resp.json();
-        // Buscar por email o documento
-        let usuario = null;
-        if (user.email) {
-            usuario = usuarios.find(u => u.email === user.email);
-        }
-        if (!usuario && user.documento) {
-            usuario = usuarios.find(u => u.documento === user.documento);
-        }
+        const usuario = usuarios.find(u => u.email === email);
         if (usuario && usuario.rol === 'admin') {
             if (btnAbmUsu) btnAbmUsu.style.display = '';
         } else {
@@ -198,4 +194,23 @@ const initDashboard = async () => {
     }
 };
 
-// --- Eliminado manejo de Netlify Identity ---
+// --- Manejo de eventos de Netlify Identity ---
+if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", user => {
+        if (user) {
+            initDashboard();
+        } else {
+            window.location.href = "index.html";
+        }
+    });
+
+    window.netlifyIdentity.on("login", user => {
+        initDashboard();
+    });
+
+    window.netlifyIdentity.on("logout", () => {
+        window.location.href = "index.html";
+    });
+} else {
+    console.error("Netlify Identity no detectado. Verifica el script en el HTML.");
+}

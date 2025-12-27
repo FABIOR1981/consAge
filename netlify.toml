@@ -1,3 +1,0 @@
-[build]
-  # Carpeta donde se encuentran las funciones serverless
-  functions = "netlify/functions"

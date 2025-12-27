@@ -142,24 +142,23 @@ export function renderAbmUsu(container) {
     }
 
     // Guardar en Netlify/Backend
-        // Guardar en Netlify/Backend
-        async function guardarUsuariosBackend() {
-            try {
-                const resp = await fetch('/.netlify/functions/update-usuarios', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: usuarios })
-                });
-                const result = await resp.json();
-                if (resp.ok && result.success) {
-                    mostrarPopup('Cambios guardados con éxito', 'success');
-                } else {
-                    mostrarPopup('Error al guardar: ' + result.error, 'error');
-                }
-            } catch (e) {
-                mostrarPopup('Error de conexión', 'error');
+    async function guardarUsuariosBackend() {
+        try {
+            const resp = await fetch('/.netlify/functions/update-usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: usuarios })
+            });
+            const result = await resp.json();
+            if (resp.ok && result.success) {
+                mostrarPopup('Cambios guardados con éxito', 'success');
+            } else {
+                mostrarPopup('Error al guardar: ' + result.error, 'error');
             }
+        } catch (e) {
+            mostrarPopup('Error de conexión', 'error');
         }
+    }
 
     // Manejo del Formulario
     container.querySelector('#usuario-form').onsubmit = async function(e) {

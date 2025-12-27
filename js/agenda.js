@@ -21,12 +21,17 @@ async function cargarBotonesConsultorios(container) {
     container.innerHTML = '<p style="margin-bottom:1.5em; font-weight: 500; font-size: 1.3rem;">Paso 1: Seleccione un Consultorio</p>';
     
     // Verificación de ROL: El Consultorio 1 es exclusivo para Administradores
+    const user = window.netlifyIdentity?.currentUser();
     let esAdmin = false;
     try {
-        const user = JSON.parse(localStorage.getItem('usuario_logueado'));
-        if (user && user.rol === 'admin') esAdmin = true;
-    } catch (e) {
-        console.error("Error al verificar permisos de administrador:", e);
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+        }
+    } catch (e) { 
+        console.error("Error al verificar permisos de administrador:", e); 
     }
 
     const grid = document.createElement('div');
