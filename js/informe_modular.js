@@ -13,7 +13,10 @@ export async function renderMisReservasFuturas(container) {
     // 90 días a futuro
     const fechaFin = new Date(hoy.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
+    let user = null;
+    try {
+        user = JSON.parse(localStorage.getItem('usuarioActual')) || JSON.parse(sessionStorage.getItem('usuarioActual'));
+    } catch {}
     if (!user) return;
 
     try {
