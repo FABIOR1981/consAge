@@ -201,23 +201,6 @@ const initDashboard = async () => {
     }
 };
 
-// --- Manejo de eventos de Netlify Identity ---
-if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {
-        if (user) {
-            initDashboard();
-        } else {
-            window.location.href = "index.html";
-        }
-    });
 
-    window.netlifyIdentity.on("login", user => {
-        initDashboard();
-    });
-
-    window.netlifyIdentity.on("logout", () => {
-        window.location.href = "index.html";
-    });
-} else {
-    console.error("Netlify Identity no detectado. Verifica el script en el HTML.");
-}
+// Inicializar dashboard directamente con login local
+initDashboard();
