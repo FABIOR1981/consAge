@@ -21,8 +21,22 @@ async function login() {
         if (user) {
             // Guardar usuario autenticado en localStorage (sin contraseña)
             const { contrasena, ...userSinPass } = user;
-            localStorage.setItem('usuarioActual', JSON.stringify(userSinPass));
-            window.location.href = 'dashboard.html';
+            try {
+                localStorage.setItem('usuarioActual', JSON.stringify(userSinPass));
+                sessionStorage.setItem('usuarioActual', JSON.stringify(userSinPass)); // Fallback
+                // Verificar inmediatamente si se guardó correctamente
+                const testUser = localStorage.getItem('usuarioActual');
+                if (!testUser) {
+                    errorDiv.textContent = 'No se pudo guardar el usuario en localStorage.';
+                    return;
+                }
+                // Pequeño delay para asegurar persistencia antes de redirigir
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 100);
+            } catch (e) {
+                errorDiv.textContent = 'Error guardando usuario en localStorage.';
+            }
         } else {
             errorDiv.textContent = 'Documento o contraseña incorrectos.';
         }
