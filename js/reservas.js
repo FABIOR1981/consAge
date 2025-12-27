@@ -5,12 +5,19 @@
 export async function renderReservas(container) {
   // Limpiar contenedor
   container.innerHTML = '';
-  // Obtener usuario actual desde localStorage
-  const user = JSON.parse(localStorage.getItem('usuarioActual'));
+  // Obtener usuario actual
+  const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
   if (!user) return;
-  // Consultar el rol del usuario
+  // Consultar al backend el rol real del usuario
   let esAdmin = false;
-  if (user.rol === 'admin') esAdmin = true;
+  try {
+    const resp = await fetch('/.netlify/functions/listar_usuarios');
+    const js = await resp.json();
+    if (Array.isArray(js.usuarios)) {
+      const actual = js.usuarios.find(u => u.email === user.email);
+      if (actual && actual.rol === 'admin') esAdmin = true;
+    }
+  } catch {}
   // Título
   const titulo = document.createElement('h3');
   titulo.textContent = esAdmin ? 'Reservas realizadas' : 'Mis Reservas';
@@ -57,7 +64,7 @@ export async function renderReservas(container) {
     }
   } else {
     // Usuario normal: solo puede ver sus propias reservas
-    mostrarReservasDeUsuario(container, { email: user.email, nombre: user.nombre || user.email }, false, null);
+    mostrarReservasDeUsuario(container, { email: user.email, nombre: user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : '' }, false, null);
   }
 }
 

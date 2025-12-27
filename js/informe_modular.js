@@ -13,7 +13,7 @@ export async function renderMisReservasFuturas(container) {
     // 90 días a futuro
     const fechaFin = new Date(hoy.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    const user = JSON.parse(localStorage.getItem('usuarioActual'));
+    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
     if (!user) return;
 
     try {
@@ -129,7 +129,7 @@ export async function renderInforme(container) {
 }
 
 async function renderComboUsuariosInforme(container) {
-    const user = JSON.parse(localStorage.getItem('usuarioActual'));
+    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser ? window.netlifyIdentity.currentUser() : null;
     if (!user) return;
 
     let esAdmin = false;
@@ -374,7 +374,8 @@ async function manejarCancelacion(e) {
     if (!id) return;
     if (!confirm('¿Seguro que deseas cancelar esta reserva?')) return;
 
-    const user = JSON.parse(localStorage.getItem('usuarioActual'));
+    const user = window.netlifyIdentity ? window.netlifyIdentity.currentUser() : null;
+    
     // Intentar obtener el email del combo si es admin, o el propio
     let email = user ? user.email : '';
     const combo = document.getElementById('combo-usuario-futuras');

@@ -21,9 +21,18 @@ async function cargarBotonesConsultorios(container) {
     container.innerHTML = '<p style="margin-bottom:1.5em; font-weight: 500; font-size: 1.3rem;">Paso 1: Seleccione un Consultorio</p>';
     
     // Verificación de ROL: El Consultorio 1 es exclusivo para Administradores
-    const user = JSON.parse(localStorage.getItem('usuarioActual'));
+    const user = window.netlifyIdentity?.currentUser();
     let esAdmin = false;
-    if (user && user.rol === 'admin') esAdmin = true;
+    try {
+        const resp = await fetch('/.netlify/functions/listar_usuarios');
+        const js = await resp.json();
+        if (Array.isArray(js.usuarios)) {
+            const actual = js.usuarios.find(u => u.email === user.email);
+            if (actual && actual.rol === 'admin') esAdmin = true;
+        }
+    } catch (e) { 
+        console.error("Error al verificar permisos de administrador:", e); 
+    }
 
     const grid = document.createElement('div');
     grid.className = 'consultorios-grid';
@@ -219,7 +228,7 @@ async function cargarHorarios(targetContainer) {
  * Finalizar la reserva enviando los datos al backend
  */
 async function ejecutarReserva(hora, targetContainer) {
-    const user = JSON.parse(localStorage.getItem('usuarioActual'));
+    const user = window.netlifyIdentity.currentUser();
     const texto = `¿Confirmar reserva del Consultorio ${seleccion.consultorio} para el día ${seleccion.fecha} a las ${hora} hs?`;
     
     if (!confirm(texto)) return;
@@ -237,7 +246,7 @@ async function ejecutarReserva(hora, targetContainer) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: user.email,
-                nombre: user.nombre || user.email,
+                nombre: user.user_metadata?.full_name || user.email,
                 consultorio: seleccion.consultorio,
                 fecha: seleccion.fecha,
                 hora: hh,
@@ -249,7 +258,7 @@ async function ejecutarReserva(hora, targetContainer) {
             alert("✅ Turno agendado correctamente. Se ha enviado un correo de confirmación.");
             // Descargar PDF y luego abrir WhatsApp (sin declarar función aparte)
             const datosReserva = {
-                nombre: user.nombre || user.email,
+                nombre: user.user_metadata?.full_name || user.email,
                 fecha: seleccion.fecha,
                 hora: `${hh.toString().padStart(2, '0')}:00`,
                 consultorio: seleccion.consultorio,
